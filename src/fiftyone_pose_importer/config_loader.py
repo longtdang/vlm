@@ -14,6 +14,8 @@ def load_config(config_path: str) -> ResolvedConfig:
     cfg_path = Path(config_path).resolve()
     if not cfg_path.exists():
         raise ConfigLoadError(f"Config file does not exist: {cfg_path}")
+    if cfg_path.suffix.lower() not in {".yaml", ".yml"}:
+        raise ConfigLoadError("Config must be a YAML file (.yaml or .yml)")
 
     with cfg_path.open("r", encoding="utf-8") as f:
         raw = yaml.safe_load(f) or {}
@@ -31,4 +33,3 @@ def load_config(config_path: str) -> ResolvedConfig:
         raise ConfigLoadError(f"Invalid datumaro_json path: {resolved.datumaro_json}")
 
     return resolved
-

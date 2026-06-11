@@ -76,12 +76,14 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
     items: list[dict[str, Any]] = data["items"]
 
     image_index, duplicate_keys = build_image_index(cfg.image_dir)
-    matches, unmatched_keys = build_matches(image_index, items)
+    matches, unmatched_keys, duplicate_annotation_keys, unmatched_image_keys = build_matches(image_index, items)
     malformed: list[str] = []
 
     report = PreflightReport(
         duplicate_image_keys=sorted(set(duplicate_keys)),
+        duplicate_annotation_keys=sorted(set(duplicate_annotation_keys)),
         unmatched_annotation_keys=sorted(set(unmatched_keys)),
+        unmatched_image_keys=sorted(set(unmatched_image_keys)),
         malformed_annotations=malformed,
     )
 
@@ -99,11 +101,6 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         summary_path = write_summary(cfg.config_path, summary)
         summary["summary_path"] = str(summary_path)
         return False, summary
-
-    dataset = fo.Dataset(cfg.dataset_name)
-    skeleton = _build_skeleton_from_datumaro(data, cfg.label_field)
-    if skeleton is not None:
-        dataset.default_skeleton = skeleton
 
     samples: list[fo.Sample] = []
     for image_path, item in matches:
@@ -134,12 +131,19 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
     if malformed:
         summary["preflight"] = PreflightReport(
             duplicate_image_keys=sorted(set(duplicate_keys)),
+            duplicate_annotation_keys=sorted(set(duplicate_annotation_keys)),
             unmatched_annotation_keys=sorted(set(unmatched_keys)),
+            unmatched_image_keys=sorted(set(unmatched_image_keys)),
             malformed_annotations=sorted(set(malformed)),
         ).to_dict()
         summary_path = write_summary(cfg.config_path, summary)
         summary["summary_path"] = str(summary_path)
         return False, summary
+
+    dataset = fo.Dataset(cfg.dataset_name)
+    skeleton = _build_skeleton_from_datumaro(data, cfg.label_field)
+    if skeleton is not None:
+        dataset.default_skeleton = skeleton
 
     dataset.add_samples(samples)
     dataset.save()
