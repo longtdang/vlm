@@ -43,16 +43,24 @@ def _build_skeleton_from_datumaro(data: dict[str, Any], label_field: str) -> fo.
     if not points_categories:
         return None
 
-    first = None
-    if isinstance(points_categories, list) and points_categories:
-        first = points_categories[0]
-    elif isinstance(points_categories, dict):
-        first = next(iter(points_categories.values()), None)
-    if not first:
+    skeleton_spec: dict[str, Any] | None = None
+    if isinstance(points_categories, dict):
+        if "labels" in points_categories or "joints" in points_categories:
+            skeleton_spec = points_categories
+        else:
+            candidate = next(iter(points_categories.values()), None)
+            if isinstance(candidate, dict):
+                skeleton_spec = candidate
+            elif isinstance(candidate, list) and candidate and isinstance(candidate[0], dict):
+                skeleton_spec = candidate[0]
+    elif isinstance(points_categories, list) and points_categories and isinstance(points_categories[0], dict):
+        skeleton_spec = points_categories[0]
+
+    if not skeleton_spec:
         return None
 
-    labels = first.get("labels") or []
-    joints = first.get("joints") or []
+    labels = skeleton_spec.get("labels") or []
+    joints = skeleton_spec.get("joints") or []
     edges: list[list[int]] = []
     for joint in joints:
         if isinstance(joint, list) and len(joint) == 2:
@@ -143,4 +151,3 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         fo.launch_app(dataset)
 
     return True, summary
-
