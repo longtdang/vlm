@@ -50,7 +50,7 @@
 - Integration tests for preflight fail/commit behavior and summary output.
 - Gate: no dataset writes occur when preflight reports fatal issues.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 - None blocking for planning; scope and behavior are sufficiently locked for Phase 1 planning.
 
