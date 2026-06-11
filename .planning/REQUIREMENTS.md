@@ -58,27 +58,27 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONF-01 | Phase TBD | Pending |
-| CONF-02 | Phase TBD | Pending |
-| CONF-03 | Phase TBD | Pending |
-| CONF-04 | Phase TBD | Pending |
-| ING-01 | Phase TBD | Pending |
-| ING-02 | Phase TBD | Pending |
-| ING-03 | Phase TBD | Pending |
-| POSE-01 | Phase TBD | Pending |
-| POSE-02 | Phase TBD | Pending |
-| POSE-03 | Phase TBD | Pending |
-| VIS-01 | Phase TBD | Pending |
-| VIS-02 | Phase TBD | Pending |
-| VIS-03 | Phase TBD | Pending |
-| OUT-01 | Phase TBD | Pending |
-| OUT-02 | Phase TBD | Pending |
-| OUT-03 | Phase TBD | Pending |
+| CONF-01 | Phase 1 | Pending |
+| CONF-02 | Phase 1 | Pending |
+| CONF-03 | Phase 1 | Pending |
+| CONF-04 | Phase 1 | Pending |
+| ING-01 | Phase 1 | Pending |
+| ING-02 | Phase 1 | Pending |
+| ING-03 | Phase 1 | Pending |
+| POSE-01 | Phase 2 | Pending |
+| POSE-02 | Phase 2 | Pending |
+| POSE-03 | Phase 2 | Pending |
+| VIS-01 | Phase 3 | Pending |
+| VIS-02 | Phase 3 | Pending |
+| VIS-03 | Phase 3 | Pending |
+| OUT-01 | Phase 4 | Pending |
+| OUT-02 | Phase 4 | Pending |
+| OUT-03 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16
+- Unmapped: 0 ✅
 
 ---
 *Requirements defined: 2026-06-11*  
