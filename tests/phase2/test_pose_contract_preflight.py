@@ -1,4 +1,8 @@
-from fiftyone_pose_importer.pose_contract import SchemaContractError, extract_canonical_skeleton_contract
+from fiftyone_pose_importer.pose_contract import (
+    SchemaContractError,
+    extract_canonical_skeleton_contract,
+    extract_skeleton_contract_bundle,
+)
 from fiftyone_pose_importer.preflight import PreflightReport
 
 
@@ -51,3 +55,21 @@ def test_preflight_schema_mismatch_aggregation_counts() -> None:
     assert data["ok"] is False
     assert data["schema_mismatch_counts"]["point_count_mismatch"] == 2
     assert data["schema_mismatch_counts"]["invalid_annotation"] == 1
+
+
+def test_extract_skeleton_contract_bundle_from_points_items() -> None:
+    data = {
+        "categories": {
+            "points": {
+                "items": [
+                    {"label_id": 10, "labels": ["a", "b"], "joints": [[1, 2]]},
+                    {"label_id": 11, "labels": ["x", "y", "z"], "joints": [[1, 2], [2, 3]]},
+                ]
+            }
+        }
+    }
+    bundle = extract_skeleton_contract_bundle(data)
+    assert bundle.default is None
+    assert sorted(bundle.by_label_id.keys()) == [10, 11]
+    assert bundle.by_label_id[10].edges == [[0, 1]]
+    assert bundle.by_label_id[11].edges == [[0, 1], [1, 2]]

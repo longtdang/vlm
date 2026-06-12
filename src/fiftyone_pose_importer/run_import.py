@@ -10,21 +10,37 @@ from .config_loader import load_config
 from .datumaro_reader import load_datumaro
 from .image_index import build_image_index
 from .matching import build_matches
-from .pose_contract import SchemaContractError, SkeletonContract, extract_canonical_skeleton_contract
+from .pose_contract import (
+    SchemaContractError,
+    SkeletonContract,
+    SkeletonContractBundle,
+    extract_skeleton_contract_bundle,
+)
 from .preflight import PreflightReport
 from .summary import write_summary
 
 
 def _extract_points_and_visibility(annotation: dict[str, Any]) -> tuple[list[list[float]], list[int], list[int], bool]:
+    ann_type = annotation.get("type")
     raw_points = annotation.get("points") or []
     source_visibility = annotation.get("visibility")
-    visibility_defaulted = source_visibility is None
-    visibility = list(source_visibility) if source_visibility is not None else []
-    if len(raw_points) % 2 != 0:
-        raise ValueError("Invalid points payload (must be x,y pairs)")
-    points = [[raw_points[i], raw_points[i + 1]] for i in range(0, len(raw_points), 2)]
-    if not visibility:
-        visibility = [2] * len(points)
+
+    if ann_type == "skeleton":
+        if len(raw_points) % 3 != 0:
+            raise ValueError("Invalid skeleton points payload (must be x,y,v triplets)")
+        points = [[raw_points[i], raw_points[i + 1]] for i in range(0, len(raw_points), 3)]
+        source_visibility = [int(raw_points[i + 2]) for i in range(0, len(raw_points), 3)]
+        visibility_defaulted = False
+        visibility = list(source_visibility)
+    else:
+        visibility_defaulted = source_visibility is None
+        visibility = list(source_visibility) if source_visibility is not None else []
+        if len(raw_points) % 2 != 0:
+            raise ValueError("Invalid points payload (must be x,y pairs)")
+        points = [[raw_points[i], raw_points[i + 1]] for i in range(0, len(raw_points), 2)]
+        if not visibility:
+            visibility = [2] * len(points)
+
     if len(visibility) != len(points):
         raise ValueError("Visibility length does not match points length")
     if any(vis not in (0, 1, 2) for vis in visibility):
@@ -43,7 +59,7 @@ def _normalize_points(points: list[list[float]], width: float, height: float, vi
 
 
 def _ordered_point_annotations(item: dict[str, Any]) -> list[dict[str, Any]]:
-    points_annotations = [ann for ann in (item.get("annotations") or []) if ann.get("type") == "points"]
+    points_annotations = [ann for ann in (item.get("annotations") or []) if ann.get("type") in ("points", "skeleton")]
     if any("id" in ann for ann in points_annotations):
         return sorted(points_annotations, key=lambda ann: str(ann.get("id", "")))
     return points_annotations
@@ -73,6 +89,19 @@ def _to_fo_skeleton(contract: SkeletonContract) -> fo.KeypointSkeleton:
     return fo.KeypointSkeleton(labels=contract.labels, edges=contract.edges)
 
 
+def _resolve_contract(bundle: SkeletonContractBundle, annotation: dict[str, Any]) -> SkeletonContract:
+    if bundle.by_label_id:
+        label_id = annotation.get("label_id")
+        if not isinstance(label_id, int):
+            raise SchemaContractError("missing_skeleton_label", "Missing label_id for multi-skeleton annotation")
+        contract = bundle.by_label_id.get(label_id)
+        if contract is None:
+            raise SchemaContractError("unknown_skeleton_label", f"No skeleton contract found for label_id={label_id}")
+        return contract
+    assert bundle.default is not None
+    return bundle.default
+
+
 def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[str, Any]]:
     cfg = load_config(config_path)
     data = load_datumaro(cfg.datumaro_json)
@@ -91,9 +120,9 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         schema_mismatches={},
     )
 
-    contract: SkeletonContract | None = None
+    contract_bundle: SkeletonContractBundle | None = None
     try:
-        contract = extract_canonical_skeleton_contract(data)
+        contract_bundle = extract_skeleton_contract_bundle(data)
     except SchemaContractError as exc:
         report.add_schema_mismatch(exc.category, "global")
 
@@ -143,8 +172,10 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         return False, summary
 
     samples: list[fo.Sample] = []
-    assert contract is not None
-    label_count = len(contract.labels)
+    assert contract_bundle is not None
+    canonical_contract = contract_bundle.default
+    if canonical_contract is None and len(contract_bundle.by_label_id) == 1:
+        canonical_contract = next(iter(contract_bundle.by_label_id.values()))
     for image_path, item in matches:
         image_meta = (item.get("image") or {}).get("size") or []
         width = float(image_meta[1]) if len(image_meta) >= 2 else None
@@ -156,6 +187,8 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         sample_id = str(item.get("id", "unknown"))
         for ann in _ordered_point_annotations(item):
             try:
+                contract = _resolve_contract(contract_bundle, ann)
+                label_count = len(contract.labels)
                 points, visibility, source_visibility, visibility_defaulted = _extract_points_and_visibility(ann)
                 if width is None or height is None or width <= 0 or height <= 0:
                     raise SchemaContractError("missing_image_size", "Missing valid image size metadata")
@@ -165,6 +198,8 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
                 kp["visibility"] = visibility
                 kp["source_visibility"] = source_visibility
                 kp["visibility_defaulted"] = visibility_defaulted
+                kp["skeleton_labels"] = contract.labels
+                kp["skeleton_edges"] = contract.edges
                 summary["label_counts"]["keypoint_annotations"] += 1
                 summary["label_counts"]["keypoint_positions_total"] += len(visibility)
                 summary["visibility"]["absent"] += visibility.count(0)
@@ -199,7 +234,8 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         return False, summary
 
     dataset = fo.Dataset(cfg.dataset_name)
-    dataset.default_skeleton = _to_fo_skeleton(contract)
+    if canonical_contract is not None:
+        dataset.default_skeleton = _to_fo_skeleton(canonical_contract)
 
     dataset.add_samples(samples)
     dataset.save()

@@ -271,3 +271,60 @@ def test_visibility_summary_counts_and_defaults() -> None:
         "visible": 4,
         "defaulted_annotations": 1,
     }
+
+
+def test_multi_skeleton_dataset_imports_without_global_ambiguity_failure() -> None:
+    module = _load_run_import_module()
+    item = {
+        "id": "sample-7",
+        "image": {"size": [100, 100]},
+        "annotations": [
+            {
+                "type": "skeleton",
+                "label_id": 10,
+                # x, y, visibility triplets
+                "points": [10, 10, 2, 20, 20, 1],
+            },
+            {
+                "type": "skeleton",
+                "label_id": 11,
+                "points": [30, 30, 2, 40, 40, 2, 50, 50, 0],
+            },
+        ],
+    }
+    data = {
+        "categories": {
+            "points": {
+                "items": [
+                    {"label_id": 10, "labels": ["p1", "p2"], "joints": [[1, 2]]},
+                    {"label_id": 11, "labels": ["q1", "q2", "q3"], "joints": [[1, 2], [2, 3]]},
+                ]
+            }
+        },
+        "items": [item],
+    }
+
+    module.load_config = lambda _: SimpleNamespace(
+        datumaro_json=Path("datumaro.json"),
+        image_dir=Path("images"),
+        dataset_name="ds",
+        label_field="ground_truth",
+        config_path=Path("config.yaml"),
+    )
+    module.load_datumaro = lambda _: data
+    module.build_image_index = lambda _: ({}, [])
+    module.build_matches = lambda _a, _b: ([(Path("img7.jpg"), item)], [], [], [])
+    module.write_summary = lambda _config, _summary: Path("summary.json")
+
+    ok, summary = module.run_import("config.yaml")
+    assert ok is True
+    assert summary["written_samples"] == 1
+    assert summary["preflight"]["ok"] is True
+    dataset = sys.modules["fiftyone"].Dataset.last_created
+    # No single global default skeleton when multiple label-specific contracts exist.
+    assert dataset.default_skeleton is None
+    keypoints = dataset.samples[0]["ground_truth"].keypoints
+    assert len(keypoints) == 2
+    assert keypoints[0]["visibility"] == [2, 1]
+    assert keypoints[1]["visibility"] == [2, 2, 0]
+    assert keypoints[1]["skeleton_edges"] == [[0, 1], [1, 2]]
