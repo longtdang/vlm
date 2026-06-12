@@ -1,14 +1,14 @@
 ---
-status: complete
+status: partial
 phase: 03-visibility-fidelity
 source: 03-01-SUMMARY.md, 03-02-SUMMARY.md
 started: 2026-06-12T04:05:00Z
-updated: 2026-06-12T04:15:00Z
+updated: 2026-06-12T04:55:00Z
 ---
 
 ## Current Test
 
-[testing complete]
+[testing paused — 1 items outstanding]
 
 ## Tests
 
@@ -18,9 +18,9 @@ result: pass
 
 ### 2. Hidden vs visible remain distinguishable
 expected: visibility `1` and `2` remain distinct in imported keypoint metadata and mapped coordinates.
-result: issue
-reported: "python -m src/fiftyone_pose_importer.cli failed with ModuleNotFoundError; running with PYTHONPTH typo then PYTHONPATH command returned preflight ambiguous_skeleton and wrote 0 samples."
-severity: major
+result: blocked
+blocked_by: prior-phase
+reason: "Current input data/config fails preflight with `ambiguous_skeleton`, so no samples are written for visibility inspection."
 
 ### 3. Source visibility metadata is preserved
 expected: source visibility values are retained and missing visibility is marked as default-applied.
@@ -34,25 +34,9 @@ result: pass
 
 total: 4
 passed: 3
-issues: 1
+issues: 0
 pending: 0
 skipped: 0
-blocked: 0
+blocked: 1
 
 ## Gaps
-
-- truth: "Hidden and visible keypoints remain distinguishable after import."
-  status: failed
-  reason: "User reported: python -m src/fiftyone_pose_importer.cli failed with ModuleNotFoundError; then run returned preflight ambiguous_skeleton and wrote 0 samples."
-  severity: major
-  test: 2
-  root_cause: "Verification attempted with an invalid module invocation plus a config whose source skeleton is ambiguous, so no samples were written for manual visibility inspection."
-  artifacts:
-    - path: "README.md"
-      issue: "Does not include direct PYTHONPATH module invocation fallback/troubleshooting guidance."
-    - path: "config.yaml"
-      issue: "Current local config may point to ambiguous skeleton source, causing preflight stop."
-  missing:
-    - "Document known-good verification command and troubleshooting path for module execution."
-    - "Provide a known-good visibility verification config or fixture recommendation for manual UAT."
-  debug_session: ".planning/phases/03-visibility-fidelity/03-UAT.md"
