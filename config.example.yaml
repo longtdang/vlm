@@ -1,6 +1,8 @@
 # Local filesystem paths only. Relative paths are resolved from this file's directory.
+# For manual verification:
+#   cp config.example.yaml local.verify.yaml
+#   then edit local.verify.yaml paths before running the importer.
 image_dir: ./data/images
 datumaro_json: ./data/annotations/datumaro.json
 dataset_name: cvat_pose_dataset
 label_field: ground_truth
-
