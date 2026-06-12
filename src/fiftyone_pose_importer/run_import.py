@@ -10,6 +10,7 @@ from .config_loader import load_config
 from .datumaro_reader import load_datumaro
 from .image_index import build_image_index
 from .matching import build_matches
+from .pose_contract import SchemaContractError, SkeletonContract, extract_canonical_skeleton_contract
 from .preflight import PreflightReport
 from .summary import write_summary
 
@@ -24,6 +25,8 @@ def _extract_points_and_visibility(annotation: dict[str, Any]) -> tuple[list[lis
         visibility = [2] * len(points)
     if len(visibility) != len(points):
         raise ValueError("Visibility length does not match points length")
+    if any(vis not in (0, 1, 2) for vis in visibility):
+        raise ValueError("Visibility values must be one of 0, 1, or 2")
     return points, visibility
 
 
@@ -37,37 +40,35 @@ def _normalize_points(points: list[list[float]], width: float, height: float, vi
     return normalized
 
 
-def _build_skeleton_from_datumaro(data: dict[str, Any], label_field: str) -> fo.KeypointSkeleton | None:
-    categories = data.get("categories") or {}
-    points_categories = categories.get("points")
-    if not points_categories:
-        return None
+def _ordered_point_annotations(item: dict[str, Any]) -> list[dict[str, Any]]:
+    points_annotations = [ann for ann in (item.get("annotations") or []) if ann.get("type") == "points"]
+    if any("id" in ann for ann in points_annotations):
+        return sorted(points_annotations, key=lambda ann: str(ann.get("id", "")))
+    return points_annotations
 
-    skeleton_spec: dict[str, Any] | None = None
-    if isinstance(points_categories, dict):
-        if "labels" in points_categories or "joints" in points_categories:
-            skeleton_spec = points_categories
-        else:
-            candidate = next(iter(points_categories.values()), None)
-            if isinstance(candidate, dict):
-                skeleton_spec = candidate
-            elif isinstance(candidate, list) and candidate and isinstance(candidate[0], dict):
-                skeleton_spec = candidate[0]
-    elif isinstance(points_categories, list) and points_categories and isinstance(points_categories[0], dict):
-        skeleton_spec = points_categories[0]
 
-    if not skeleton_spec:
-        return None
+def _align_points_to_contract(
+    points: list[list[float]],
+    visibility: list[int],
+    label_count: int,
+    sample_id: str,
+) -> tuple[list[list[float]], list[int]]:
+    if len(points) > label_count:
+        raise SchemaContractError(
+            "point_count_mismatch",
+            f"Sample {sample_id}: points count {len(points)} exceeds skeleton label count {label_count}",
+        )
 
-    labels = skeleton_spec.get("labels") or []
-    joints = skeleton_spec.get("joints") or []
-    edges: list[list[int]] = []
-    for joint in joints:
-        if isinstance(joint, list) and len(joint) == 2:
-            edges.append([int(joint[0]), int(joint[1])])
-    if not labels:
-        return None
-    return fo.KeypointSkeleton(labels=labels, edges=edges)
+    if len(points) < label_count:
+        missing = label_count - len(points)
+        points = points + [[math.nan, math.nan] for _ in range(missing)]
+        visibility = visibility + [0 for _ in range(missing)]
+
+    return points, visibility
+
+
+def _to_fo_skeleton(contract: SkeletonContract) -> fo.KeypointSkeleton:
+    return fo.KeypointSkeleton(labels=contract.labels, edges=contract.edges)
 
 
 def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[str, Any]]:
@@ -85,7 +86,14 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         unmatched_annotation_keys=sorted(set(unmatched_keys)),
         unmatched_image_keys=sorted(set(unmatched_image_keys)),
         malformed_annotations=malformed,
+        schema_mismatches={},
     )
+
+    contract: SkeletonContract | None = None
+    try:
+        contract = extract_canonical_skeleton_contract(data)
+    except SchemaContractError as exc:
+        report.add_schema_mismatch(exc.category, "global")
 
     summary: dict[str, Any] = {
         "dataset_name": cfg.dataset_name,
@@ -103,6 +111,8 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         return False, summary
 
     samples: list[fo.Sample] = []
+    assert contract is not None
+    label_count = len(contract.labels)
     for image_path, item in matches:
         image_meta = (item.get("image") or {}).get("size") or []
         width = float(image_meta[1]) if len(image_meta) >= 2 else None
@@ -111,39 +121,40 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         sample = fo.Sample(filepath=str(image_path))
         keypoints: list[fo.Keypoint] = []
 
-        for ann in item.get("annotations") or []:
-            if ann.get("type") != "points":
-                continue
+        sample_id = str(item.get("id", "unknown"))
+        for ann in _ordered_point_annotations(item):
             try:
                 points, visibility = _extract_points_and_visibility(ann)
                 if width is None or height is None or width <= 0 or height <= 0:
-                    raise ValueError("Missing valid image size metadata")
+                    raise SchemaContractError("missing_image_size", "Missing valid image size metadata")
+                points, visibility = _align_points_to_contract(points, visibility, label_count, sample_id)
                 norm = _normalize_points(points, width, height, visibility)
                 kp = fo.Keypoint(points=norm)
                 kp["visibility"] = visibility
                 keypoints.append(kp)
-            except Exception:
-                malformed.append(str(item.get("id", "unknown")))
+            except SchemaContractError as exc:
+                report.add_schema_mismatch(exc.category, sample_id)
+            except ValueError:
+                report.add_schema_mismatch("invalid_annotation", sample_id)
 
         sample[cfg.label_field] = fo.Keypoints(keypoints=keypoints)
         samples.append(sample)
 
-    if malformed:
+    if report.has_errors():
         summary["preflight"] = PreflightReport(
             duplicate_image_keys=sorted(set(duplicate_keys)),
             duplicate_annotation_keys=sorted(set(duplicate_annotation_keys)),
             unmatched_annotation_keys=sorted(set(unmatched_keys)),
             unmatched_image_keys=sorted(set(unmatched_image_keys)),
             malformed_annotations=sorted(set(malformed)),
+            schema_mismatches=report.schema_mismatches,
         ).to_dict()
         summary_path = write_summary(cfg.config_path, summary)
         summary["summary_path"] = str(summary_path)
         return False, summary
 
     dataset = fo.Dataset(cfg.dataset_name)
-    skeleton = _build_skeleton_from_datumaro(data, cfg.label_field)
-    if skeleton is not None:
-        dataset.default_skeleton = skeleton
+    dataset.default_skeleton = _to_fo_skeleton(contract)
 
     dataset.add_samples(samples)
     dataset.save()
