@@ -46,7 +46,13 @@ blocked: 0
   reason: "User reported: python -m src/fiftyone_pose_importer.cli failed with ModuleNotFoundError; then run returned preflight ambiguous_skeleton and wrote 0 samples."
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Verification attempted with an invalid module invocation plus a config whose source skeleton is ambiguous, so no samples were written for manual visibility inspection."
+  artifacts:
+    - path: "README.md"
+      issue: "Does not include direct PYTHONPATH module invocation fallback/troubleshooting guidance."
+    - path: "config.yaml"
+      issue: "Current local config may point to ambiguous skeleton source, causing preflight stop."
+  missing:
+    - "Document known-good verification command and troubleshooting path for module execution."
+    - "Provide a known-good visibility verification config or fixture recommendation for manual UAT."
+  debug_session: ".planning/phases/03-visibility-fidelity/03-UAT.md"
