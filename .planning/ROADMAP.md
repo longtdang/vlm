@@ -52,7 +52,7 @@ Deliver a config-driven local importer that loads images and Datumaro JSON into 
 2. User can distinguish hidden vs visible keypoints after import.
 3. User can inspect preserved source visibility metadata.
 
-**Plans**: TBD
+**Plans**: `03-01-PLAN.md`, `03-02-PLAN.md`
 
 ### Phase 4: FiftyOne Viewing and Run Reporting
 
@@ -73,5 +73,5 @@ Deliver a config-driven local importer that loads images and Datumaro JSON into 
 |-------|----------------|--------|-----------|
 | 1. Configured Ingestion Foundation | 0/TBD | Not started | - |
 | 2. Pose Contract Mapping | 2/2 | Complete   | 2026-06-12 |
-| 3. Visibility Fidelity | 0/TBD | Not started | - |
+| 3. Visibility Fidelity | 2/2 | Planned | - |
 | 4. FiftyOne Viewing and Run Reporting | 0/TBD | Not started | - |
