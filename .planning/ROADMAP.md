@@ -64,7 +64,7 @@ Deliver a config-driven local importer that loads images and Datumaro JSON into 
 1. User can open imported dataset in FiftyOne and view connected skeleton rendering.
 2. User receives run summary including sample counts, label counts, warnings, and failures.
 
-**Plans**: TBD  
+**Plans**: `04-01-PLAN.md`, `04-02-PLAN.md`  
 **UI hint**: yes
 
 ## Progress
@@ -74,4 +74,4 @@ Deliver a config-driven local importer that loads images and Datumaro JSON into 
 | 1. Configured Ingestion Foundation | 0/TBD | Not started | - |
 | 2. Pose Contract Mapping | 2/2 | Complete   | 2026-06-12 |
 | 3. Visibility Fidelity | 3/3 | Complete | 2026-06-12 |
-| 4. FiftyOne Viewing and Run Reporting | 0/TBD | Not started | - |
+| 4. FiftyOne Viewing and Run Reporting | 2/2 | Planned | - |
