@@ -467,13 +467,14 @@ def write_verify_reports(output_dir: Path, rows: list[dict], summary: dict) -> d
 ```python
 # in src/fiftyone_pose_importer/verify_runner.py
 from pathlib import Path
-import json
 import fiftyone as fo
 import yaml
 from .verify_config import load_verify_config
 from .verify_rules import parse_rules
 from .deterministic_checks import evaluate_hard_checks
 from .verify_report import write_verify_reports
+from .cropper import compute_crop_bounds
+from .vlm_client import parse_vlm_json
 
 
 def run_verify(config_path: str) -> tuple[bool, dict]:
@@ -485,11 +486,35 @@ def run_verify(config_path: str) -> tuple[bool, dict]:
         keypoints = sample.get(cfg.label_field)
         if keypoints is None:
             continue
+        metadata = sample.metadata
+        img_w = int(metadata.width or 0)
+        img_h = int(metadata.height or 0)
         for idx, kp in enumerate(keypoints.keypoints):
             class_name = str(getattr(kp, "label", "unknown"))
-            metrics = {"w": 0.0, "h": 0.0, "ratio": 0.0}
+            bbox = kp.get("source_bbox") or [0, 0, 0, 0]
+            x, y, w, h = map(float, bbox)
+            ratio = (w / h) if h > 0 else 0.0
+            metrics = {"w": w, "h": h, "ratio": ratio}
             det = evaluate_hard_checks(class_name, metrics, rules)
-            status = "FAIL" if det["hard_fail"] else "PASS"
+            cls_rule = rules.classes.get(class_name)
+            vlm_status = None
+            vlm_conf = None
+            is_ambiguous = (not det["hard_fail"]) and (w < 48 or h < 48)
+            if cls_rule and should_run_vlm(
+                vlm_enabled=cls_rule.vlm_enabled,
+                vlm_policy=cls_rule.vlm_policy,
+                is_ambiguous=is_ambiguous,
+            ):
+                bounds = compute_crop_bounds(
+                    x=x, y=y, w=w, h=h, img_w=img_w, img_h=img_h,
+                    padding_ratio=cfg.crop_padding_ratio, min_w=cfg.crop_min_w, min_h=cfg.crop_min_h,
+                )
+                # request_vlm() is implemented in this module in a later step
+                vlm_raw = request_vlm(sample.filepath, bounds, class_name, cls_rule.vlm_checks)
+                parsed = parse_vlm_json(vlm_raw)
+                vlm_status = parsed["status"]
+                vlm_conf = parsed["confidence"]
+            status = combine_decision(hard_fail=det["hard_fail"], vlm_status=vlm_status, vlm_confidence=vlm_conf)
             rows.append(
                 {
                     "sample_id": sample.id,
@@ -497,6 +522,8 @@ def run_verify(config_path: str) -> tuple[bool, dict]:
                     "class": class_name,
                     "status": status,
                     "failed_rule_ids": ",".join(det["failed_rule_ids"]),
+                    "vlm_status": vlm_status or "",
+                    "vlm_confidence": "" if vlm_conf is None else vlm_conf,
                 }
             )
     summary = {
@@ -546,10 +573,6 @@ Outputs:
 
 - `verify-report.csv`
 - `verify-summary.json`
-```
-
-```bash
-python -m fiftyone_pose_importer.cli --verify-config ./verify.example.yaml
 ```
 
 - [ ] **Step 6: Run full test pass**
