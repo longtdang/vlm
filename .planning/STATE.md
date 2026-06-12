@@ -1,30 +1,41 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: 1.1
 milestone: v1.1
 milestone_name: Skeleton Field Rendering + Configurable VLM Verification
 status: planning
 last_updated: "2026-06-12T08:16:09.822Z"
 last_activity: 2026-06-12
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
   percent: 0
----
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-11)
+See: .planning/PROJECT.md
 
-**Core value:** Given only config paths, reliably import and visualize CVAT/Datumaro pose annotations in FiftyOne with correct skeleton visibility behavior.  
-**Current focus:** Milestone transition
+**Core value:** Given only config paths, reliably import and visualize CVAT/Datumaro pose annotations in FiftyOne with correct skeleton visibility behavior.
+**Current focus:** Phase 5 — implement Datumaro -> Importer -> FiftyOne flow and validate skeleton contracts, visibility mapping, and per-skeleton field mapping.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-06-12 — Milestone v1.1 started
+Phase: 5 (Contracts & Preflight)
+Plan: defining (implement Datumaro import mapping and metadata emission)
+Status: Not started
+Last activity: 2026-06-12 — Roadmap revised for explicit import flow and VLM adapter constraints.
+
+## Accumulated Context
+
+- v1.0 shipped core importer. v1.1 focuses on field-preserving imports and verification pipeline (deterministic-first, VLM opt-in).
+- Key decisions: VLM opt-in default = false; do not mutate canonical dataset with VLM outputs in v1.1.
+- Phase 7 must support Qwen2.5-VL-7B-Instruct via a configurable external OpenAI-compatible adapter endpoint; fallback to installed FiftyOne 1.17 model-zoo Qwen3-VL models must be supported.
+
+## Next Actions
+
+1. Phase 5: implement Datumaro import mapping, config_model changes, and src/main.py contract validation; add preflight tests for visibility states and mapping metadata emission.
+2. Phase 6: implement deterministic cropper, rules engine (detection, attribute, skeleton-count, visibility-format rules), and report exports with PASS/FAIL/REVIEW gating.
+3. Phase 7: implement VLM adapter interface with external-adapter option for Qwen2.5, fallback to model-zoo Qwen3-VL models, per-rule prompt templates, aggregation, and report + review queue export.
