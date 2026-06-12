@@ -15,9 +15,11 @@ from .preflight import PreflightReport
 from .summary import write_summary
 
 
-def _extract_points_and_visibility(annotation: dict[str, Any]) -> tuple[list[list[float]], list[int]]:
+def _extract_points_and_visibility(annotation: dict[str, Any]) -> tuple[list[list[float]], list[int], list[int], bool]:
     raw_points = annotation.get("points") or []
-    visibility = annotation.get("visibility") or []
+    source_visibility = annotation.get("visibility")
+    visibility_defaulted = source_visibility is None
+    visibility = list(source_visibility) if source_visibility is not None else []
     if len(raw_points) % 2 != 0:
         raise ValueError("Invalid points payload (must be x,y pairs)")
     points = [[raw_points[i], raw_points[i + 1]] for i in range(0, len(raw_points), 2)]
@@ -27,7 +29,7 @@ def _extract_points_and_visibility(annotation: dict[str, Any]) -> tuple[list[lis
         raise ValueError("Visibility length does not match points length")
     if any(vis not in (0, 1, 2) for vis in visibility):
         raise ValueError("Visibility values must be one of 0, 1, or 2")
-    return points, visibility
+    return points, visibility, list(source_visibility or []), visibility_defaulted
 
 
 def _normalize_points(points: list[list[float]], width: float, height: float, visibility: list[int]) -> list[list[float]]:
@@ -103,6 +105,7 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         "matched_count": len(matches),
         "preflight": report.to_dict(),
         "written_samples": 0,
+        "visibility": {"absent": 0, "hidden": 0, "visible": 0, "defaulted_annotations": 0},
     }
 
     if report.has_errors():
@@ -124,13 +127,20 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         sample_id = str(item.get("id", "unknown"))
         for ann in _ordered_point_annotations(item):
             try:
-                points, visibility = _extract_points_and_visibility(ann)
+                points, visibility, source_visibility, visibility_defaulted = _extract_points_and_visibility(ann)
                 if width is None or height is None or width <= 0 or height <= 0:
                     raise SchemaContractError("missing_image_size", "Missing valid image size metadata")
                 points, visibility = _align_points_to_contract(points, visibility, label_count, sample_id)
                 norm = _normalize_points(points, width, height, visibility)
                 kp = fo.Keypoint(points=norm)
                 kp["visibility"] = visibility
+                kp["source_visibility"] = source_visibility
+                kp["visibility_defaulted"] = visibility_defaulted
+                summary["visibility"]["absent"] += visibility.count(0)
+                summary["visibility"]["hidden"] += visibility.count(1)
+                summary["visibility"]["visible"] += visibility.count(2)
+                if visibility_defaulted:
+                    summary["visibility"]["defaulted_annotations"] += 1
                 keypoints.append(kp)
             except SchemaContractError as exc:
                 report.add_schema_mismatch(exc.category, sample_id)

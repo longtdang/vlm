@@ -162,3 +162,112 @@ def test_skeleton_labels_edges_applied() -> None:
     assert len(mapped) == 2
     # id=1 should come first after deterministic sort by annotation id
     assert mapped[0].points[0] == [0.1, 0.1]
+
+
+def test_visibility_fidelity_mapping() -> None:
+    module = _load_run_import_module()
+    item = {
+        "id": "sample-4",
+        "image": {"size": [100, 100]},
+        "annotations": [
+            {
+                "type": "points",
+                "points": [10, 10, 20, 20, 30, 30],
+                "visibility": [0, 1, 2],
+            }
+        ],
+    }
+    data = _base_data()
+    data["items"] = [item]
+
+    module.load_config = lambda _: SimpleNamespace(
+        datumaro_json=Path("datumaro.json"),
+        image_dir=Path("images"),
+        dataset_name="ds",
+        label_field="ground_truth",
+        config_path=Path("config.yaml"),
+    )
+    module.load_datumaro = lambda _: data
+    module.build_image_index = lambda _: ({}, [])
+    module.build_matches = lambda _a, _b: ([(Path("img4.jpg"), item)], [], [], [])
+    module.write_summary = lambda _config, _summary: Path("summary.json")
+
+    ok, _summary = module.run_import("config.yaml")
+    assert ok is True
+    dataset = sys.modules["fiftyone"].Dataset.last_created
+    pose = dataset.samples[0]["ground_truth"].keypoints[0]
+    assert pose["visibility"] == [0, 1, 2]
+    assert pose.points[0][0] != pose.points[0][0]  # NaN for absent
+    assert pose.points[1] == [0.2, 0.2]
+    assert pose.points[2] == [0.3, 0.3]
+
+
+def test_visibility_metadata_preserved() -> None:
+    module = _load_run_import_module()
+    item = {
+        "id": "sample-5",
+        "image": {"size": [100, 100]},
+        "annotations": [
+            {"id": 2, "type": "points", "points": [20, 20, 30, 30], "visibility": [1, 2]},
+            {"id": 1, "type": "points", "points": [10, 10, 15, 15]},
+        ],
+    }
+    data = _base_data()
+    data["items"] = [item]
+
+    module.load_config = lambda _: SimpleNamespace(
+        datumaro_json=Path("datumaro.json"),
+        image_dir=Path("images"),
+        dataset_name="ds",
+        label_field="ground_truth",
+        config_path=Path("config.yaml"),
+    )
+    module.load_datumaro = lambda _: data
+    module.build_image_index = lambda _: ({}, [])
+    module.build_matches = lambda _a, _b: ([(Path("img5.jpg"), item)], [], [], [])
+    module.write_summary = lambda _config, _summary: Path("summary.json")
+
+    ok, _summary = module.run_import("config.yaml")
+    assert ok is True
+    dataset = sys.modules["fiftyone"].Dataset.last_created
+    keypoints = dataset.samples[0]["ground_truth"].keypoints
+    assert len(keypoints) == 2
+    assert keypoints[0]["source_visibility"] == []
+    assert keypoints[0]["visibility_defaulted"] is True
+    assert keypoints[1]["source_visibility"] == [1, 2]
+    assert keypoints[1]["visibility_defaulted"] is False
+
+
+def test_visibility_summary_counts_and_defaults() -> None:
+    module = _load_run_import_module()
+    item = {
+        "id": "sample-6",
+        "image": {"size": [100, 100]},
+        "annotations": [
+            {"type": "points", "points": [10, 10, 20, 20, 30, 30], "visibility": [0, 1, 2]},
+            {"type": "points", "points": [40, 40, 50, 50, 60, 60]},
+        ],
+    }
+    data = _base_data()
+    data["items"] = [item]
+
+    module.load_config = lambda _: SimpleNamespace(
+        datumaro_json=Path("datumaro.json"),
+        image_dir=Path("images"),
+        dataset_name="ds",
+        label_field="ground_truth",
+        config_path=Path("config.yaml"),
+    )
+    module.load_datumaro = lambda _: data
+    module.build_image_index = lambda _: ({}, [])
+    module.build_matches = lambda _a, _b: ([(Path("img6.jpg"), item)], [], [], [])
+    module.write_summary = lambda _config, _summary: Path("summary.json")
+
+    ok, summary = module.run_import("config.yaml")
+    assert ok is True
+    assert summary["visibility"] == {
+        "absent": 1,
+        "hidden": 1,
+        "visible": 4,
+        "defaulted_annotations": 1,
+    }
