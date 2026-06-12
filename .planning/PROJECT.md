@@ -42,6 +42,16 @@ Given only config paths, the project reliably imports and visualizes CVAT/Datuma
 - **Usability**: Config-first setup — no hardcoded paths in import logic
 - **Visualization Correctness**: Skeleton visibility semantics must be preserved — incorrect visibility undermines dataset trust
 
+## Current Milestone: v1.1 Skeleton Field Rendering + Configurable VLM Verification
+
+**Goal:** Keep per-skeleton-type field rendering reliable and add a reusable, config-driven VLM annotation verification pipeline.
+
+**Target features:**
+- Standardize per-skeleton-type keypoint field mapping (not single `keypoints` field) so edges render correctly per skeleton type
+- Add reusable verification flow: annotation crop → deterministic rule checks → optional VLM checks
+- Configure per-label verification scope, rule sets, and prompt templates through config files
+- Export verification outputs as machine-readable reports for triage
+
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
@@ -59,8 +69,8 @@ Given only config paths, the project reliably imports and visualizes CVAT/Datuma
 
 ## Next Milestone Goals
 
-- Define new scope and requirements with `/gsd-new-milestone`.
-- Carry forward operational warning: keep a canonicalized known-good dataset fixture for manual visibility UAT.
+- Execute milestone v1.1 focused on skeleton field rendering reliability and configurable VLM verification.
+- Preserve operational warning: keep a canonicalized known-good dataset fixture for manual visibility UAT.
 
 ## Evolution
 
@@ -80,4 +90,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-12 after v1.0 completion*
+*Last updated: 2026-06-12 for v1.1 initialization*
