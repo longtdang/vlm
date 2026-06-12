@@ -12,7 +12,7 @@ Given only config paths, the project reliably imports and visualizes CVAT/Datuma
 
 ### Validated
 
-(None yet — ship to validate)
+- CONF-01/02/03/04, ING-01/02/03, POSE-01/02/03, VIS-01/02/03, OUT-01/02/03 (v1.0 shipped)
 
 ### Active
 
@@ -50,6 +50,18 @@ Given only config paths, the project reliably imports and visualizes CVAT/Datuma
 | Prioritize skeleton visibility correctness as a core requirement | Rendering correctness is explicitly critical for this workflow | — Pending |
 | Focus on CVAT-exported Datumaro JSON first | This is the concrete data source already in use | — Pending |
 
+## Current State
+
+- **Shipped milestone:** v1.0
+- **Archive roadmap:** `.planning/milestones/v1.0-ROADMAP.md`
+- **Archive requirements:** `.planning/milestones/v1.0-REQUIREMENTS.md`
+- **Milestone audit:** `.planning/v1.0-v1.0-MILESTONE-AUDIT.md` (`complete_with_warnings`)
+
+## Next Milestone Goals
+
+- Define new scope and requirements with `/gsd-new-milestone`.
+- Carry forward operational warning: keep a canonicalized known-good dataset fixture for manual visibility UAT.
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -68,4 +80,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-11 after initialization*
+*Last updated: 2026-06-12 after v1.0 completion*
