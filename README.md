@@ -41,3 +41,14 @@ PYTHONPATH=src python -m fiftyone_pose_importer.cli --config ./config.example.ya
 - If summary shows `preflight.schema_mismatches.ambiguous_skeleton`, import stops before writing samples.
   - This means skeleton labels/edges cannot be resolved to one canonical contract from the source data.
   - Fix by normalizing the source/categories skeleton definition or choosing a single canonical skeleton contract before rerun.
+
+## Launch outcome and summary interpretation
+
+- `--launch` requests opening FiftyOne after a successful import write.
+- The summary includes a `launch` block:
+  - `requested`: whether `--launch` was provided
+  - `attempted`: whether launch was attempted
+  - `ok`: launch result (when attempted)
+  - `error`: launch error message (when launch fails)
+- Summary files always include `summary_path`, pointing to `<config_stem>.summary.json`.
+- Connected skeleton viewing relies on imported dataset `default_skeleton` labels/edges from the source contract.

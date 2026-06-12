@@ -9,7 +9,7 @@ Deliver a config-driven local importer that loads images and Datumaro JSON into 
 - [ ] **Phase 1: Configured Ingestion Foundation** - Users can run import from config paths with explicit input validation and matching diagnostics.
 - [x] **Phase 2: Pose Contract Mapping** - Users get deterministic keypoint and skeleton conversion with schema safety. (completed 2026-06-12)
 - [x] **Phase 3: Visibility Fidelity** - Users retain absent/hidden/visible semantics and audit metadata after import. (completed 2026-06-12)
-- [ ] **Phase 4: FiftyOne Viewing and Run Reporting** - Users can view connected skeletons in FiftyOne and review import outcomes.
+- [x] **Phase 4: FiftyOne Viewing and Run Reporting** - Users can view connected skeletons in FiftyOne and review import outcomes. (completed 2026-06-12)
 
 ## Phase Details
 
@@ -74,4 +74,4 @@ Deliver a config-driven local importer that loads images and Datumaro JSON into 
 | 1. Configured Ingestion Foundation | 0/TBD | Not started | - |
 | 2. Pose Contract Mapping | 2/2 | Complete   | 2026-06-12 |
 | 3. Visibility Fidelity | 3/3 | Complete | 2026-06-12 |
-| 4. FiftyOne Viewing and Run Reporting | 2/2 | Planned | - |
+| 4. FiftyOne Viewing and Run Reporting | 2/2 | Complete | 2026-06-12 |

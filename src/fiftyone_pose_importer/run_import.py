@@ -105,10 +105,39 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         "matched_count": len(matches),
         "preflight": report.to_dict(),
         "written_samples": 0,
+        "label_counts": {"keypoint_annotations": 0, "keypoint_positions_total": 0},
         "visibility": {"absent": 0, "hidden": 0, "visible": 0, "defaulted_annotations": 0},
+        "warnings": {
+            "counts": {
+                "defaulted_visibility_annotations": 0,
+                "unmatched_image_keys": len(sorted(set(unmatched_image_keys))),
+                "unmatched_annotation_keys": len(sorted(set(unmatched_keys))),
+            },
+            "details": {
+                "unmatched_image_keys": sorted(set(unmatched_image_keys)),
+                "unmatched_annotation_keys": sorted(set(unmatched_keys)),
+            },
+        },
+        "failures": {
+            "counts": {
+                "duplicate_image_keys": len(sorted(set(duplicate_keys))),
+                "duplicate_annotation_keys": len(sorted(set(duplicate_annotation_keys))),
+                "schema_mismatches_total": 0,
+                "exceptions": 0,
+            },
+            "details": {
+                "schema_mismatch_counts": {},
+                "schema_mismatches": {},
+                "exception": None,
+            },
+        },
+        "launch": {"requested": launch_app, "attempted": False, "ok": None, "error": None},
     }
 
     if report.has_errors():
+        summary["failures"]["counts"]["schema_mismatches_total"] = sum(len(v) for v in report.schema_mismatches.values())
+        summary["failures"]["details"]["schema_mismatch_counts"] = summary["preflight"]["schema_mismatch_counts"]
+        summary["failures"]["details"]["schema_mismatches"] = report.schema_mismatches
         summary_path = write_summary(cfg.config_path, summary)
         summary["summary_path"] = str(summary_path)
         return False, summary
@@ -136,11 +165,14 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
                 kp["visibility"] = visibility
                 kp["source_visibility"] = source_visibility
                 kp["visibility_defaulted"] = visibility_defaulted
+                summary["label_counts"]["keypoint_annotations"] += 1
+                summary["label_counts"]["keypoint_positions_total"] += len(visibility)
                 summary["visibility"]["absent"] += visibility.count(0)
                 summary["visibility"]["hidden"] += visibility.count(1)
                 summary["visibility"]["visible"] += visibility.count(2)
                 if visibility_defaulted:
                     summary["visibility"]["defaulted_annotations"] += 1
+                    summary["warnings"]["counts"]["defaulted_visibility_annotations"] += 1
                 keypoints.append(kp)
             except SchemaContractError as exc:
                 report.add_schema_mismatch(exc.category, sample_id)
@@ -159,6 +191,9 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
             malformed_annotations=sorted(set(malformed)),
             schema_mismatches=report.schema_mismatches,
         ).to_dict()
+        summary["failures"]["counts"]["schema_mismatches_total"] = sum(len(v) for v in report.schema_mismatches.values())
+        summary["failures"]["details"]["schema_mismatch_counts"] = summary["preflight"]["schema_mismatch_counts"]
+        summary["failures"]["details"]["schema_mismatches"] = report.schema_mismatches
         summary_path = write_summary(cfg.config_path, summary)
         summary["summary_path"] = str(summary_path)
         return False, summary
@@ -169,10 +204,19 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
     dataset.add_samples(samples)
     dataset.save()
     summary["written_samples"] = len(samples)
+
+    if launch_app:
+        summary["launch"]["attempted"] = True
+        try:
+            fo.launch_app(dataset)
+            summary["launch"]["ok"] = True
+        except Exception as exc:
+            summary["launch"]["ok"] = False
+            summary["launch"]["error"] = str(exc)
+            summary["failures"]["counts"]["exceptions"] += 1
+            summary["failures"]["details"]["exception"] = str(exc)
+
     summary_path = write_summary(cfg.config_path, summary)
     summary["summary_path"] = str(summary_path)
 
-    if launch_app:
-        fo.launch_app(dataset)
-
-    return True, summary
+    return summary["failures"]["counts"]["exceptions"] == 0, summary
