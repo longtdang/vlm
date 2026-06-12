@@ -25,6 +25,7 @@ For small batches (<1000 per run), Qwen2.5-7B-Instruct is suitable as a fallback
 1. **Input Loader**
    - Reads dataset samples and target annotations
    - Produces crops + metadata (`sample_id`, `annotation_id`, `class`, geometry, optional context)
+   - Cropping is mandatory before VLM checks for enabled classes
 
 2. **Rule Spec Parser**
    - Loads and validates YAML/JSON config
@@ -68,6 +69,18 @@ For small batches (<1000 per run), Qwen2.5-7B-Instruct is suitable as a fallback
 5. Merge decisions
 6. Write CSV and JSON report outputs
 
+## Crop Logic (mandatory for VLM path)
+
+Default policy: **tight bbox + fixed padding**.
+
+1. Start from annotation bbox or polygon envelope
+2. Expand by fixed padding ratio (default `0.15` on each side)
+3. Clamp crop bounds to image size
+4. Enforce minimum crop size (default `32x32`) by symmetric expansion where possible
+5. Export crop and include crop metadata (`crop_x`, `crop_y`, `crop_w`, `crop_h`, `padding_ratio`) for traceability
+
+If crop cannot be produced (invalid geometry or unreadable image), mark annotation `REVIEW` with `io_error`.
+
 ## Error Handling
 
 - Invalid rule spec => fail-fast before processing
@@ -85,6 +98,13 @@ For small batches (<1000 per run), Qwen2.5-7B-Instruct is suitable as a fallback
 ## Configuration Sketch
 
 ```yaml
+defaults:
+  crop:
+    mode: tight_bbox_fixed_padding
+    padding_ratio: 0.15
+    min_w: 32
+    min_h: 32
+
 classes:
   person:
     vlm_enabled: true
@@ -112,4 +132,3 @@ classes:
 - VLM runs only for explicitly enabled classes
 - Every annotation has a deterministic/auditable trail in CSV
 - JSON summary supports class-level triage and failure analysis
-
