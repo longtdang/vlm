@@ -52,8 +52,8 @@ Milestone: v1.1
 **Success Criteria** (what must be TRUE):
   1. For each object selected for VLM verification, the pipeline performs: generate object crop -> run VLM per configured rule list [bbox_localization, bbox_coverage, clamp_type, roll_count, keypoint_position, occlusion_state] -> produce per-rule error_probability values that are recorded in the per-sample trace (inspect rule entries in JSON).
   2. Per-object aggregation computes object_risk = max(error_probability across rules) and assigns a status (PASS/REVIEW/FAIL) per configured thresholds; the CSV/JSON artifacts contain object-level risk_score and status (open artifact and verify fields).
-  3. System supports configurable VLM adapter selection: default adapter uses installed FiftyOne 1.17 model zoo (qwen3-vl-{2b,4b,8b}); Qwen2.5-VL-7B-Instruct is supported only via a configurable external OpenAI-compatible adapter endpoint (local server or remote) — configuration and adapter selection are recorded in run provenance (inspect run config recorded).
-  4. If the configured external adapter is unreachable, times out, or returns invalid responses, the system falls back to the configured fallback model-zoo adapter (if allowed by config) or marks the object as REVIEW and records the failure reason (observe failure entries in trace).
+  3. System supports configurable model-zoo selection using installed FiftyOne 1.17 Qwen3-VL models (`qwen3-vl-2b-instruct-torch`, `qwen3-vl-4b-instruct-torch`, `qwen3-vl-8b-instruct-torch`); selected model and adapter provenance are recorded in run artifacts (inspect run config recorded).
+  4. If the configured model-zoo inference fails (load error, runtime exception, or invalid output), the object is marked REVIEW and the failure reason is recorded in trace/report artifacts (observe failure entries in trace).
   5. The pipeline emits CSV and JSON reports and a Review Queue ordering by risk descending that can be consumed by triage tooling (open CSV/JSON and ensure review queue ordering exists).
 
 **Plans**: 3 plans

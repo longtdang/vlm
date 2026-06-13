@@ -25,7 +25,7 @@
 - [ ] **VLM-02**: User can configure prompt templates and rule-linked prompt parameters per verified label; per-rule prompt mapping covers rules: bbox_localization, bbox_coverage, clamp_type, roll_count, keypoint_position, occlusion_state.
 - [ ] **VLM-03**: User can run VLM verification only as an optional stage after deterministic checks; each VLM rule returns an error_probability and per-object aggregation computes a risk score (object_risk = max(rule error_probability)).
 - [ ] **VLM-04**: User can receive safe fallback `REVIEW` outcomes when VLM checks fail, timeout, or return invalid outputs; all failures recorded with reason.
-- [ ] **VLM-05**: User can configure an external OpenAI-compatible adapter endpoint to use Qwen2.5-VL-7B-Instruct (not present in FiftyOne 1.17 model zoo). System defaults to using installed model-zoo Qwen3-VL models (qwen3-vl-2b, qwen3-vl-4b, qwen3-vl-8b). Adapter selection and fallback behavior must be configurable and recorded in run provenance.
+- [ ] **VLM-05**: User can configure one installed FiftyOne model-zoo Qwen3-VL model (`qwen3-vl-2b-instruct-torch`, `qwen3-vl-4b-instruct-torch`, or `qwen3-vl-8b-instruct-torch`) for VLM verification. Selected model and inference outcome must be recorded in run provenance. External OpenAI-compatible adapters are deferred.
 
 ## Future Requirements (Deferred)
 
