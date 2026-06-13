@@ -1,3 +1,4 @@
+from .config import VerificationConfig, VerificationConfigError, load_verification_config
 from .types import (
     DeterministicRuleConfig,
     DeterministicVerdict,
@@ -16,4 +17,7 @@ __all__ = [
     "RuleCategoryConfig",
     "RuleResult",
     "RuleSpec",
+    "VerificationConfig",
+    "VerificationConfigError",
+    "load_verification_config",
 ]
