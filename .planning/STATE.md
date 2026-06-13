@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: planning
-last_updated: "2026-06-13T05:21:15.025Z"
-last_activity: 2026-06-13 — Roadmap revised for explicit import flow and VLM adapter constraints.
+status: in_progress
+last_updated: "2026-06-13T06:13:09.742Z"
+last_activity: 2026-06-13 — Completed plan 05-03 summary.mapping contract emission and additive schema regression coverage.
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
+  percent: 33
 ---
 
 ---
