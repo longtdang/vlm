@@ -79,6 +79,12 @@ completed: 2026-06-13
    - **Files:** `tests/phase2/test_pose_mapping_import.py`
    - **Commit:** `6bd499f`
 
+4. **[Rule 3 - Blocking] `gsd-tools` CLI unavailable in runtime**
+   - **Issue:** required `gsd-tools query ...` commands failed (`command not found`) for automated state handlers.
+   - **Fix:** performed equivalent manual updates to `.planning/STATE.md` and `.planning/ROADMAP.md`.
+   - **Files:** `.planning/STATE.md`, `.planning/ROADMAP.md`
+   - **Commit:** `e59589e`
+
 ## Auth Gates
 
 None.
