@@ -68,6 +68,10 @@ cp config.example.yaml local.verify.yaml
 
 Then edit paths in `local.verify.yaml`.
 
+Additional ready-to-copy samples:
+- `config.import-only.example.yaml` (deterministic only)
+- `config.import-vlm.example.yaml` (deterministic + VLM)
+
 ---
 
 ## Commands

@@ -1,0 +1,19 @@
+# Import + deterministic verification only (no VLM stage)
+# Copy to local.import-only.yaml and edit paths.
+image_dir: ./data/images
+datumaro_json: ./data/annotations/datumaro.json
+dataset_name: cvat_pose_dataset
+label_field: ground_truth
+
+verification:
+  output_dir: ./verification-runs
+  deterministic:
+    padding_px: 16
+    rules:
+      global:
+        detection: ["bbox_format"]
+        attribute: ["required_attributes"]
+        skeleton-count: ["keypoint_count"]
+        visibility-format: ["visibility_codes"]
+  vlm:
+    enabled: false
