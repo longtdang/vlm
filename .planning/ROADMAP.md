@@ -59,7 +59,7 @@ Milestone: v1.1
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — VLM foundation: types, config (per-label opt-in/rules/thresholds/prompts), FiftyOneZooAdapter + MockVlmAdapter, unit tests
+- [x] 07-01-PLAN.md — VLM foundation: types, config (per-label opt-in/rules/thresholds/prompts), FiftyOneZooAdapter + MockVlmAdapter, unit tests
 - [ ] 07-02-PLAN.md — VLM engine (prompt building, response parsing, risk aggregation) + report writers (CSV/JSON+review_queue/NDJSON) + unit tests
 - [ ] 07-03-PLAN.md — run_verify.py integration (VLM stage, gating D-08/D-06, summary fields) + end-to-end integration tests
 
@@ -86,7 +86,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 5 - Contracts & Preflight | 3/3 | Complete | 2026-06-13 (05-01, 05-02, 05-03) |
 | 6 - Deterministic Verification Core & Reporting | 4/4 | Complete | 2026-06-13 (06-01, 06-02, 06-03, 06-04) |
-| 7 - VLM Verification & Aggregation | 0/3 | In progress | - |
+| 7 - VLM Verification & Aggregation | 1/3 | In progress | 2026-06-13 (07-01) |
 
 ## Notes
 
