@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import yaml
+from PIL import Image
 
 from fiftyone_pose_importer.run_verify import run_verify
 
@@ -133,3 +134,107 @@ def test_cli_verify_returns_non_zero_for_fatal_errors(capsys) -> None:
     payload = json.loads(captured.err)
     assert payload["ok"] is False
     assert "error" in payload
+
+
+def _write_datumaro_with_image_paths(tmp_path: Path) -> Path:
+    image_dir = tmp_path / "images"
+    image_dir.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (40, 30), (64, 128, 255)).save(image_dir / "sample-1.png")
+
+    datumaro_path = tmp_path / "datumaro-images.json"
+    payload = {
+        "categories": {"label": {"labels": [{"name": "forklift-with-roll"}]}},
+        "items": [
+            {
+                "id": "sample-1",
+                "image": {"path": "sample-1.png", "size": [30, 40]},
+                "annotations": [
+                    {
+                        "id": "obj-1",
+                        "type": "bbox",
+                        "label_id": 0,
+                        "bbox": [3, 4, 12, 10],
+                        "attributes": {"clamp_type": "2-arm"},
+                        "keypoints": [[5, 5], [10, 10], [12, 12], [13, 13]],
+                        "visibility": [2, 2, 2, 2],
+                    }
+                ],
+            }
+        ],
+    }
+    datumaro_path.write_text(json.dumps(payload), encoding="utf-8")
+    return datumaro_path
+
+
+def test_deterministic_only_pipeline_writes_real_crop_artifacts(tmp_path: Path) -> None:
+    datumaro_path = _write_datumaro_with_image_paths(tmp_path)
+    config_path = tmp_path / "verify-real-crops.yaml"
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "datumaro_json": str(datumaro_path),
+                "verification": {
+                    "vlm": {"enabled": False},
+                    "image_dir": "images",
+                    "output_dir": "runs",
+                    "run_timestamp": "20260613T090000Z",
+                    "deterministic": {
+                        "padding_px": 6,
+                        "rules": {
+                            "global": {
+                                "detection": ["bbox_non_empty"],
+                                "attribute": [{"name": "required_attributes", "params": {"required": ["clamp_type"]}}],
+                                "skeleton-count": [{"name": "keypoint_count", "params": {"expected": 4}}],
+                                "visibility-format": ["visibility_codes"],
+                            }
+                        },
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    ok, summary = run_verify(str(config_path))
+
+    assert ok is True
+    record = summary["objects"][0]
+    crop_path = Path(record["crop_path"])
+    assert crop_path.exists()
+    assert crop_path.parent.name == "crops"
+
+
+def test_crop_path_in_summary_points_to_existing_file(tmp_path: Path) -> None:
+    datumaro_path = _write_datumaro_with_image_paths(tmp_path)
+    config_path = tmp_path / "verify-summary-crops.yaml"
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "datumaro_json": str(datumaro_path),
+                "verification": {
+                    "vlm": {"enabled": False},
+                    "image_dir": "images",
+                    "output_dir": "runs",
+                    "run_timestamp": "20260613T091500Z",
+                    "deterministic": {
+                        "padding_px": 6,
+                        "rules": {
+                            "global": {
+                                "detection": ["bbox_non_empty"],
+                                "attribute": [{"name": "required_attributes", "params": {"required": ["clamp_type"]}}],
+                                "skeleton-count": [{"name": "keypoint_count", "params": {"expected": 4}}],
+                                "visibility-format": ["visibility_codes"],
+                            }
+                        },
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    ok, summary = run_verify(str(config_path))
+
+    assert ok is True
+    for record in summary["objects"]:
+        assert Path(record["crop_path"]).is_file()
