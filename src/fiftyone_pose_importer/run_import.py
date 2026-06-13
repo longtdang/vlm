@@ -102,6 +102,18 @@ def _resolve_contract(bundle: SkeletonContractBundle, annotation: dict[str, Any]
     return bundle.default
 
 
+def _target_field_for_label_id(label_id: Any) -> str:
+    if not isinstance(label_id, int):
+        raise SchemaContractError("missing_skeleton_label", "Missing or invalid label_id for annotation routing")
+    return f"keypoints_label_{label_id}"
+
+
+def _ensure_dataset_skeleton_field(dataset: fo.Dataset, field_name: str, contract: SkeletonContract) -> None:
+    skeletons = dict(getattr(dataset, "skeletons", {}) or {})
+    skeletons[field_name] = _to_fo_skeleton(contract)
+    dataset.skeletons = skeletons
+
+
 def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[str, Any]]:
     cfg = load_config(config_path)
     data = load_datumaro(cfg.datumaro_json)
@@ -176,18 +188,20 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
     canonical_contract = contract_bundle.default
     if canonical_contract is None and len(contract_bundle.by_label_id) == 1:
         canonical_contract = next(iter(contract_bundle.by_label_id.values()))
+    routed_contracts: dict[str, SkeletonContract] = {}
     for image_path, item in matches:
         image_meta = (item.get("image") or {}).get("size") or []
         width = float(image_meta[1]) if len(image_meta) >= 2 else None
         height = float(image_meta[0]) if len(image_meta) >= 2 else None
 
         sample = fo.Sample(filepath=str(image_path))
-        keypoints: list[fo.Keypoint] = []
+        keypoints_by_field: dict[str, list[fo.Keypoint]] = {}
 
         sample_id = str(item.get("id", "unknown"))
         for ann in _ordered_point_annotations(item):
             try:
                 contract = _resolve_contract(contract_bundle, ann)
+                field_name = _target_field_for_label_id(ann.get("label_id"))
                 label_count = len(contract.labels)
                 points, visibility, source_visibility, visibility_defaulted = _extract_points_and_visibility(ann)
                 if width is None or height is None or width <= 0 or height <= 0:
@@ -208,13 +222,20 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
                 if visibility_defaulted:
                     summary["visibility"]["defaulted_annotations"] += 1
                     summary["warnings"]["counts"]["defaulted_visibility_annotations"] += 1
-                keypoints.append(kp)
+                keypoints_by_field.setdefault(field_name, []).append(kp)
+                routed_contracts[field_name] = contract
             except SchemaContractError as exc:
                 report.add_schema_mismatch(exc.category, sample_id)
-            except ValueError:
-                report.add_schema_mismatch("invalid_annotation", sample_id)
+            except ValueError as exc:
+                if "Visibility length" in str(exc):
+                    report.add_schema_mismatch("visibility_length_mismatch", sample_id)
+                elif "Visibility values" in str(exc):
+                    report.add_schema_mismatch("invalid_visibility_values", sample_id)
+                else:
+                    report.add_schema_mismatch("invalid_annotation", sample_id)
 
-        sample[cfg.label_field] = fo.Keypoints(keypoints=keypoints)
+        for field_name in sorted(keypoints_by_field):
+            sample[field_name] = fo.Keypoints(keypoints=keypoints_by_field[field_name])
         samples.append(sample)
 
     if report.has_errors():
@@ -236,6 +257,9 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
     dataset = fo.Dataset(cfg.dataset_name)
     if canonical_contract is not None:
         dataset.default_skeleton = _to_fo_skeleton(canonical_contract)
+
+    for field_name, contract in sorted(routed_contracts.items()):
+        _ensure_dataset_skeleton_field(dataset, field_name, contract)
 
     dataset.add_samples(samples)
     dataset.save()
