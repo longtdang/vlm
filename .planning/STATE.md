@@ -34,7 +34,7 @@ progress:
 See: .planning/PROJECT.md
 
 **Core value:** Given only config paths, reliably import and visualize CVAT/Datumaro pose annotations in FiftyOne with correct skeleton visibility behavior.
-**Current focus:** Phase 5 — implement Datumaro -> Importer -> FiftyOne flow and validate skeleton contracts, visibility mapping, and per-skeleton field mapping.
+**Current focus:** Phase 6 — implement deterministic verification core (cropper, deterministic rules, report exports) on top of finalized importer contracts.
 
 ## Current Position
 
