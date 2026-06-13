@@ -106,3 +106,30 @@ def test_deterministic_only_pipeline_without_vlm(tmp_path: Path) -> None:
     elig_map = {record["object_id"]: record["vlm_eligible"] for record in records}
     assert elig_map["obj-pass"] is True
     assert elig_map["obj-fail"] is False
+
+
+def test_cli_exit_code_zero_with_object_failures(tmp_path: Path, capsys) -> None:
+    from fiftyone_pose_importer import cli
+
+    datumaro_path = _write_datumaro(tmp_path)
+    config_path = _write_config(tmp_path, datumaro_path)
+
+    exit_code = cli.main(["verify", "--config", str(config_path)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    payload = json.loads(captured.out)
+    assert payload["counts"]["deterministic_fail"] == 1
+    assert Path(payload["artifacts"]["csv"]).exists()
+
+
+def test_cli_verify_returns_non_zero_for_fatal_errors(capsys) -> None:
+    from fiftyone_pose_importer import cli
+
+    exit_code = cli.main(["verify", "--config", "missing-config.yaml"])
+    captured = capsys.readouterr()
+
+    assert exit_code != 0
+    payload = json.loads(captured.err)
+    assert payload["ok"] is False
+    assert "error" in payload
