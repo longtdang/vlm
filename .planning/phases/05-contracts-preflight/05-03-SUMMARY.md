@@ -76,7 +76,7 @@ completed: 2026-06-13
 - **Fix:** Continued plan execution with direct file + git workflow; state/roadmap updates handled manually.
 - **Files modified:** `.planning/STATE.md`, `.planning/ROADMAP.md`
 - **Verification:** manual file diff + git commit checks
-- **Committed in:** pending docs metadata commit
+- **Committed in:** `7730841`
 
 ---
 
