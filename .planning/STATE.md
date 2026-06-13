@@ -9,7 +9,7 @@ progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 3
-  completed_plans: 3
+  completed_plans: 4
   percent: 33
 ---
 
@@ -18,14 +18,14 @@ gsd_state_version: 1.1
 milestone: v1.1
 milestone_name: Skeleton Field Rendering + Configurable VLM Verification
 status: in_progress
-last_updated: "2026-06-13T06:44:51Z"
-last_activity: 2026-06-13 — Completed plan 06-03 deterministic reporting writers with TDD commits.
+last_updated: "2026-06-13T06:50:20Z"
+last_activity: 2026-06-13 — Completed plan 06-04 deterministic runner integration and CLI exit-code contract.
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 100
 
 # Project State
 
@@ -34,14 +34,14 @@ progress:
 See: .planning/PROJECT.md
 
 **Core value:** Given only config paths, reliably import and visualize CVAT/Datumaro pose annotations in FiftyOne with correct skeleton visibility behavior.
-**Current focus:** Phase 6 — implement deterministic verification core (cropper, deterministic rules, report exports) on top of finalized importer contracts.
+**Current focus:** Phase 7 — implement optional VLM adapter stage and risk aggregation on top of deterministic gating.
 
 ## Current Position
 
-Phase: 6 (Deterministic Verification Core & Reporting)
-Plan: 04 (pending)
-Status: In progress
-Last activity: 2026-06-13 — Completed plan 06-03 deterministic reporting writers with stable schema/order contracts.
+Phase: 7 (VLM Verification & Aggregation)
+Plan: 01 (pending)
+Status: Ready to start
+Last activity: 2026-06-13 — Completed plan 06-04 deterministic-only runner and CLI verification wiring.
 
 ## Accumulated Context
 
@@ -56,5 +56,5 @@ Last activity: 2026-06-13 — Completed plan 06-03 deterministic reporting write
 
 ## Next Actions
 
-1. Phase 6: implement deterministic-only runner integration that works with VLM disabled and surfaces report artifacts (plan 06-04).
-2. Phase 7: implement VLM adapter interface with external-adapter option for Qwen2.5, fallback to model-zoo Qwen3-VL models, per-rule prompt templates, aggregation, and report + review queue export.
+1. Phase 7: implement VLM adapter interface with external-adapter option for Qwen2.5 and fallback to model-zoo Qwen3-VL models.
+2. Add per-rule VLM prompt mapping, error-probability parsing, and object-level risk aggregation with review queue export.

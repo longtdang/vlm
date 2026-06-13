@@ -80,7 +80,7 @@ Milestone: v1.1
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 5 - Contracts & Preflight | 3/3 | Complete | 2026-06-13 (05-01, 05-02, 05-03) |
-| 6 - Deterministic Verification Core & Reporting | 3/4 | In progress | 2026-06-13 (06-01, 06-02, 06-03) |
+| 6 - Deterministic Verification Core & Reporting | 4/4 | Complete | 2026-06-13 (06-01, 06-02, 06-03, 06-04) |
 | 7 - VLM Verification & Aggregation | 0/5 | Not started | - |
 
 ## Notes
