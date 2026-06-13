@@ -8,9 +8,9 @@
 
 ### Skeleton Rendering Foundation
 
-- [ ] **SKEL-01**: User can import multi-skeleton annotations into separate label-specific keypoint fields so each skeleton type renders connected edges correctly in FiftyOne.
-- [ ] **SKEL-02**: User can run the importer without collapsing all skeleton types into one shared keypoint field.
-- [ ] **SKEL-03**: User can verify from run output/metadata which keypoint field each skeleton type was mapped to.
+- [x] **SKEL-01**: User can import multi-skeleton annotations into separate label-specific keypoint fields so each skeleton type renders connected edges correctly in FiftyOne.
+- [x] **SKEL-02**: User can run the importer without collapsing all skeleton types into one shared keypoint field.
+- [x] **SKEL-03**: User can verify from run output/metadata which keypoint field each skeleton type was mapped to.
 
 ### Deterministic Verification Core
 
@@ -42,9 +42,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SKEL-01 | Phase 5 | pending |
-| SKEL-02 | Phase 5 | pending |
-| SKEL-03 | Phase 5 | pending |
+| SKEL-01 | Phase 5 | complete (05-01) |
+| SKEL-02 | Phase 5 | complete (05-01) |
+| SKEL-03 | Phase 5 | complete (05-01) |
 | VER-01 | Phase 6 | pending |
 | VER-02 | Phase 6 | pending |
 | VER-03 | Phase 6 | pending |

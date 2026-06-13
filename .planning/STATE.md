@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: milestone
 status: planning
 last_updated: "2026-06-13T05:21:15.025Z"
-last_activity: 2026-06-12 — Roadmap revised for explicit import flow and VLM adapter constraints.
+last_activity: 2026-06-13 — Roadmap revised for explicit import flow and VLM adapter constraints.
 progress:
   total_phases: 3
   completed_phases: 0
@@ -17,15 +17,15 @@ progress:
 gsd_state_version: 1.1
 milestone: v1.1
 milestone_name: Skeleton Field Rendering + Configurable VLM Verification
-status: planning
-last_updated: "2026-06-12T08:16:09.822Z"
-last_activity: 2026-06-12
+status: in_progress
+last_updated: "2026-06-13T05:24:12Z"
+last_activity: 2026-06-13
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 8
 
 # Project State
 
@@ -39,9 +39,9 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 5 (Contracts & Preflight)
-Plan: defining (implement Datumaro import mapping and metadata emission)
-Status: Not started
-Last activity: 2026-06-12 — Roadmap revised for explicit import flow and VLM adapter constraints.
+Plan: 02 (pending)
+Status: In progress
+Last activity: 2026-06-13 — Completed plan 05-01 RED contracts for SKEL-01..03.
 
 ## Accumulated Context
 
