@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
@@ -14,6 +14,9 @@ from .verification.engine import evaluate_object
 from .verification.report_csv import _safe_run_dir, _safe_run_timestamp, write_run_reports
 from .verification.report_json import serialize_object_result
 from .verification.types import DeterministicVerdict, ObjectVerificationResult
+
+if TYPE_CHECKING:
+    from .verification.vlm_client import VlmAdapter
 
 
 def _resolve_path(base_dir: Path, value: str | None) -> Path:
@@ -157,7 +160,7 @@ def _failure_result(*, sample_id: str, object_id: str, label: str, crop_path: st
     )
 
 
-def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
+def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tuple[bool, dict[str, Any]]:
     config_file = Path(config_path).resolve()
     raw_config = _load_raw_config(config_file)
 
@@ -200,6 +203,7 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
     results: list[ObjectVerificationResult] = []
     warnings: list[str] = list(config_warnings)
     items = data.get("items") or []
+    annotation_payloads: dict[tuple[str, str], dict[str, Any]] = {}
 
     for item_index, item in enumerate(items):
         if not isinstance(item, dict):
@@ -309,6 +313,7 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
                     config=verification_config,
                 )
                 warnings.extend(engine_outcome.warnings)
+                annotation_payloads[(sample_id, object_id)] = annotation_payload
                 results.append(engine_outcome.result)
             except Exception as exc:  # pragma: no cover - defensive guard for runtime isolation
                 results.append(
@@ -322,6 +327,70 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
                 )
 
     artifact_paths = write_run_reports(results, run_root=run_root, run_timestamp=safe_timestamp)
+
+    vlm_results = []
+    vlm_artifact_paths: dict[str, Path] = {}
+    if vlm_enabled:
+        from PIL import Image as PILImage
+
+        from .verification.report_vlm import write_vlm_reports as write_vlm_run_reports
+        from .verification.vlm_client import FiftyOneZooAdapter
+        from .verification.vlm_config import VlmConfigError, load_vlm_config
+        from .verification.vlm_engine import evaluate_vlm_object
+        from .verification.vlm_types import VlmObjectResult, VlmVerdict
+
+        vlm_config_raw = verification_root.get("vlm") or {}
+        try:
+            vlm_config, vlm_cfg_warnings = load_vlm_config(vlm_config_raw)
+            warnings.extend(vlm_cfg_warnings)
+        except VlmConfigError as exc:
+            warnings.append(f"vlm_config_error:{exc}")
+            vlm_config = None
+
+        if vlm_config is not None:
+            adapter = _vlm_adapter if _vlm_adapter is not None else FiftyOneZooAdapter(
+                model_name=vlm_config.model_name,
+                max_new_tokens=vlm_config.generation.max_new_tokens,
+            )
+
+            for result in results:
+                if result.verdict is not DeterministicVerdict.PASS:
+                    continue
+                if not vlm_config.is_label_enabled(result.label):
+                    continue
+
+                try:
+                    with PILImage.open(result.crop_path) as loaded:
+                        crop_img = loaded.convert("RGB")
+                except Exception as exc:
+                    vlm_results.append(
+                        VlmObjectResult(
+                            sample_id=result.sample_id,
+                            object_id=result.object_id,
+                            label=result.label,
+                            vlm_status=VlmVerdict.REVIEW,
+                            object_risk=None,
+                            rule_results=[],
+                            adapter_model=vlm_config.model_name,
+                            failure_reason=f"crop_load_error:{type(exc).__name__}",
+                            crop_path=result.crop_path,
+                        )
+                    )
+                    continue
+
+                annotation = annotation_payloads.get((result.sample_id, result.object_id), {})
+                vlm_outcome = evaluate_vlm_object(
+                    result=result,
+                    annotation=annotation,
+                    crop_image=crop_img,
+                    adapter=adapter,
+                    vlm_config=vlm_config,
+                )
+                vlm_results.append(vlm_outcome)
+
+            vlm_artifact_paths = write_vlm_run_reports(
+                vlm_results, run_root=run_root, run_timestamp=safe_timestamp
+            )
 
     object_records = []
     for result in sorted(results, key=lambda row: (row.sample_id, row.object_id)):
@@ -343,6 +412,18 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
         "warnings": warnings,
         "objects": object_records,
     }
+    if vlm_enabled and vlm_results:
+        summary["vlm_counts"] = {
+            "vlm_total": len(vlm_results),
+            "vlm_pass": sum(1 for row in vlm_results if row.vlm_status.value == "PASS"),
+            "vlm_review": sum(1 for row in vlm_results if row.vlm_status.value == "REVIEW"),
+            "vlm_fail": sum(1 for row in vlm_results if row.vlm_status.value == "FAIL"),
+        }
+        summary["vlm_artifacts"] = {name: str(path) for name, path in vlm_artifact_paths.items()}
+    elif vlm_enabled:
+        summary["vlm_counts"] = {"vlm_total": 0, "vlm_pass": 0, "vlm_review": 0, "vlm_fail": 0}
+        summary["vlm_artifacts"] = {}
+
     return True, summary
 
 
