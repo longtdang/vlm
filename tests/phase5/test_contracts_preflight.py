@@ -213,6 +213,7 @@ def test_mapping_metadata_emitted_with_required_keys() -> None:
     assert isinstance(mapping, list)
     assert len(mapping) == 2
 
+    # Contract (D-08): each entry contains exactly the minimum required keys.
     required_keys = {
         "label_id",
         "source_label_name",
@@ -222,6 +223,10 @@ def test_mapping_metadata_emitted_with_required_keys() -> None:
         "visibility_policy",
     }
 
+    # Deterministic ordering by canonical identity.
+    assert [entry["label_id"] for entry in mapping] == [10, 11]
+
     for entry in mapping:
-        assert required_keys.issubset(entry.keys())
+        assert set(entry.keys()) == required_keys
         assert entry["target_field"] == f"keypoints_label_{entry['label_id']}"
+        assert entry["visibility_policy"] == "invalid_or_mismatch=fail,missing=default_to_2_warn"
