@@ -16,7 +16,7 @@
 
 - [x] **VER-01**: User can run annotation verification that crops each annotation region using a configurable fixed-padding policy.
 - [x] **VER-02**: User can configure deterministic verification rules per label/class and get pass/fail results per annotation (no deterministic review state). Required rule categories include detection rules, attribute rules (e.g., clamp_type), skeleton-count rules, and visibility-format rules.
-- [ ] **VER-03**: User can export verification results to CSV and JSON summaries for downstream triage, and the artifacts include per-sample traces (NDJSON/JSONL).
+- [x] **VER-03**: User can export verification results to CSV and JSON summaries for downstream triage, and the artifacts include per-sample traces (NDJSON/JSONL).
 - [ ] **VER-04**: User can run deterministic verification without requiring any VLM service; deterministic FAILs must be recorded and surfaced in reports (no VLM dependency required).
 
 ### VLM Verification
@@ -47,7 +47,7 @@
 | SKEL-03 | Phase 5 | complete (05-01) |
 | VER-01 | Phase 6 | complete (06-02) |
 | VER-02 | Phase 6 | complete (06-01) |
-| VER-03 | Phase 6 | pending |
+| VER-03 | Phase 6 | complete (06-03) |
 | VER-04 | Phase 6 | pending |
 | VLM-01 | Phase 7 | pending |
 | VLM-02 | Phase 7 | pending |
