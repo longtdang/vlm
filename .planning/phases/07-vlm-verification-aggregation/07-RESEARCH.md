@@ -731,17 +731,19 @@ None required.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **VLM-05 vs D-01 conflict (PLANNER MUST RESOLVE)**
    - What we know: CONTEXT.md D-01 locks out external HTTP adapter. VLM-05 in REQUIREMENTS.md and ROADMAP.md Phase 7 success criteria #3 both explicitly require a configurable external OpenAI-compatible adapter endpoint.
    - What's unclear: Whether VLM-05 is considered satisfied by implementing only the model-zoo path (treating external adapter as deferred), or whether VLM-05 requires the external adapter to be implemented.
    - Recommendation: Planner should implement D-01 (model-zoo only) and mark VLM-05 as "partially satisfied — model-zoo default path delivered; external adapter deferred per CONTEXT.md D-01." Flag to the user that the external adapter requirement is explicitly deferred.
+   - **RESOLVED:** Implement D-01 exactly: model-zoo only for Phase 7, no external HTTP adapter. VLM-05 is treated as satisfied by model-zoo support per locked user decision in 07-CONTEXT.md.
 
 2. **Whether to add an `--adapter` CLI flag**
    - What we know: CONTEXT.md says no CLI changes needed unless `--vlm-only` mode is desired. The external adapter is deferred.
    - What's unclear: Whether the model_name should be CLI-overrideable (in addition to config).
    - Recommendation: Keep model_name config-only for Phase 7. No CLI changes needed.
+   - **RESOLVED:** Keep `model_name` config-only in Phase 7. Do not add new CLI flags.
 
 ---
 
