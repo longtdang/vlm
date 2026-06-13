@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from pathlib import Path
+
+from PIL import Image
 
 from .types import DeterministicVerdict
 
@@ -117,3 +120,30 @@ def plan_crop(
         adjusted_visibility=adjusted_visibility,
         out_of_frame_point_indices=out_of_frame_indices,
     )
+
+
+def materialize_crop(*, source_image_path: Path | str, crop_plan: CropPlan, output_path: Path | str) -> Path:
+    if crop_plan.verdict is DeterministicVerdict.FAIL:
+        raise ValueError(f"Cannot materialize failed crop plan: {crop_plan.reason or 'crop_failed'}")
+    if crop_plan.clipped_bounds is None or crop_plan.output_size is None or crop_plan.paste_offset is None:
+        raise ValueError("Crop plan is missing bounds metadata")
+
+    source_path = Path(source_image_path)
+    destination = Path(output_path)
+
+    with Image.open(source_path) as opened:
+        source = opened.convert("RGB")
+        cx0, cy0, cx1, cy1 = crop_plan.clipped_bounds
+        clipped = source.crop((cx0, cy0, cx1, cy1))
+
+        if crop_plan.policy == "skeleton_preserve_canvas":
+            rendered = Image.new("RGB", crop_plan.output_size, color=(0, 0, 0))
+            if clipped.size[0] > 0 and clipped.size[1] > 0:
+                rendered.paste(clipped, crop_plan.paste_offset)
+        else:
+            rendered = clipped
+
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        rendered.save(destination, format="PNG")
+
+    return destination
