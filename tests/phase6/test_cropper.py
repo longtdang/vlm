@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from fiftyone_pose_importer.verification.config import load_verification_config
-from fiftyone_pose_importer.verification.cropper import plan_crop
+from PIL import Image
+
+from fiftyone_pose_importer.verification.cropper import materialize_crop, plan_crop
 from fiftyone_pose_importer.verification.types import DeterministicVerdict
 
 
@@ -79,3 +81,47 @@ def test_out_of_frame_skeleton_points_are_marked_occluded() -> None:
 
     assert plan.adjusted_visibility == [1, 2, 1]
     assert plan.out_of_frame_point_indices == [0, 2]
+
+
+def test_materialize_crop_skeleton_padded_canvas(tmp_path: Path) -> None:
+    source = tmp_path / "source.png"
+    Image.new("RGB", (10, 10), (255, 0, 0)).save(source)
+
+    plan = plan_crop(
+        image_width=10,
+        image_height=10,
+        bbox=(2.0, 2.0, 4.0, 4.0),
+        padding_px=4,
+        is_skeleton=True,
+    )
+    out_path = tmp_path / "skeleton.png"
+
+    written = materialize_crop(source_image_path=source, crop_plan=plan, output_path=out_path)
+
+    assert written == out_path
+    saved = Image.open(out_path)
+    assert saved.size == plan.output_size
+    assert saved.getpixel((0, 0)) == (0, 0, 0)
+    assert saved.getpixel((2, 2)) == (255, 0, 0)
+
+
+def test_materialize_crop_non_skeleton_clipped(tmp_path: Path) -> None:
+    source = tmp_path / "source.png"
+    Image.new("RGB", (10, 10), (255, 0, 0)).save(source)
+
+    plan = plan_crop(
+        image_width=10,
+        image_height=10,
+        bbox=(2.0, 2.0, 4.0, 4.0),
+        padding_px=4,
+        is_skeleton=False,
+    )
+    out_path = tmp_path / "bbox.png"
+
+    written = materialize_crop(source_image_path=source, crop_plan=plan, output_path=out_path)
+
+    assert written == out_path
+    saved = Image.open(out_path)
+    assert saved.size == plan.output_size
+    assert saved.size == (10, 10)
+    assert saved.getpixel((0, 0)) == (255, 0, 0)
