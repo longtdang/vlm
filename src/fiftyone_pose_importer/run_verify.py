@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -8,9 +9,9 @@ import yaml
 
 from .datumaro_reader import load_datumaro
 from .verification.config import load_verification_config
-from .verification.cropper import plan_crop
+from .verification.cropper import materialize_crop, plan_crop
 from .verification.engine import evaluate_object
-from .verification.report_csv import write_run_reports
+from .verification.report_csv import _safe_run_dir, _safe_run_timestamp, write_run_reports
 from .verification.report_json import serialize_object_result
 from .verification.types import DeterministicVerdict, ObjectVerificationResult
 
@@ -22,6 +23,14 @@ def _resolve_path(base_dir: Path, value: str | None) -> Path:
     if not candidate.is_absolute():
         candidate = (base_dir / candidate).resolve()
     return candidate.resolve()
+
+
+def _is_within(base: Path, candidate: Path) -> bool:
+    try:
+        candidate.relative_to(base)
+        return True
+    except ValueError:
+        return False
 
 
 def _load_raw_config(config_path: Path) -> dict[str, Any]:
@@ -95,6 +104,47 @@ def _image_size(item: dict[str, Any]) -> tuple[int, int] | None:
     return width, height
 
 
+def _resolve_item_image_path(*, item: dict[str, Any], config_dir: Path, image_root: Path | None) -> Path:
+    image_meta = item.get("image") or {}
+    if not isinstance(image_meta, dict):
+        raise ValueError("image_path_missing_or_malformed")
+
+    raw_path = image_meta.get("path")
+    if not isinstance(raw_path, str) or not raw_path.strip():
+        raise ValueError("image_path_missing_or_malformed")
+
+    allowed_roots: list[Path] = [config_dir]
+    if image_root is not None:
+        allowed_roots.append(image_root)
+
+    candidate_path = Path(raw_path)
+    if candidate_path.is_absolute():
+        resolved = candidate_path.resolve()
+    else:
+        candidates: list[Path] = []
+        if image_root is not None:
+            candidates.append((image_root / candidate_path).resolve())
+        candidates.append((config_dir / candidate_path).resolve())
+        resolved = next((candidate for candidate in candidates if candidate.exists()), candidates[0])
+
+    if not any(_is_within(root, resolved) for root in allowed_roots):
+        raise ValueError("image_path_outside_allowed_roots")
+    if not resolved.exists() or not resolved.is_file():
+        raise ValueError("image_path_not_found")
+
+    return resolved
+
+
+def _safe_token(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("._")
+    return cleaned or "unknown"
+
+
+def _crop_output_path(*, run_dir: Path, sample_id: str, object_id: str) -> Path:
+    filename = f"{_safe_token(sample_id)}_{_safe_token(object_id)}.png"
+    return run_dir / "crops" / filename
+
+
 def _failure_result(*, sample_id: str, object_id: str, label: str, crop_path: str, reason: str) -> ObjectVerificationResult:
     return ObjectVerificationResult(
         sample_id=sample_id,
@@ -129,9 +179,19 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
     else:
         raise ValueError("verification.output_dir must be a string path")
 
+    image_dir_raw = verification_root.get("image_dir")
+    if image_dir_raw is None:
+        image_root = None
+    elif isinstance(image_dir_raw, str):
+        image_root = _resolve_path(config_file.parent, image_dir_raw)
+    else:
+        raise ValueError("verification.image_dir must be a string path")
+
     run_timestamp = verification_root.get("run_timestamp")
     if run_timestamp is not None and not isinstance(run_timestamp, str):
         raise ValueError("verification.run_timestamp must be a string when provided")
+    safe_timestamp = _safe_run_timestamp(run_timestamp)
+    run_dir = _safe_run_dir(run_root=run_root, run_timestamp=safe_timestamp)
 
     vlm_enabled = bool(((verification_root.get("vlm") or {}).get("enabled", False)))
 
@@ -154,6 +214,13 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
             warnings.append(f"Sample {sample_id} annotations malformed; skipped")
             continue
 
+        try:
+            source_image_path = _resolve_item_image_path(item=item, config_dir=config_file.parent, image_root=image_root)
+            image_path_error: str | None = None
+        except ValueError as exc:
+            source_image_path = None
+            image_path_error = str(exc)
+
         for annotation_index, annotation in enumerate(annotations):
             if not isinstance(annotation, dict):
                 warnings.append(f"Sample {sample_id} annotation index {annotation_index} malformed; skipped")
@@ -162,7 +229,8 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
             object_id = str(annotation.get("id") or f"{sample_id}-ann-{annotation_index}")
             label_id = annotation.get("label_id")
             label = label_names.get(label_id, str(annotation.get("label") or "unknown")) if isinstance(label_id, int) else str(annotation.get("label") or "unknown")
-            crop_path = f"crops/{sample_id}_{object_id}.png"
+            crop_file = _crop_output_path(run_dir=run_dir, sample_id=sample_id, object_id=object_id)
+            crop_path = str(crop_file)
 
             keypoints, visibility = _keypoints_visibility(annotation)
             bbox = _parse_bbox(annotation)
@@ -199,6 +267,32 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
                 )
                 continue
 
+            if image_path_error is not None or source_image_path is None:
+                results.append(
+                    _failure_result(
+                        sample_id=sample_id,
+                        object_id=object_id,
+                        label=label,
+                        crop_path=crop_path,
+                        reason=image_path_error or "image_path_unresolved",
+                    )
+                )
+                continue
+
+            try:
+                materialize_crop(source_image_path=source_image_path, crop_plan=crop, output_path=crop_file)
+            except Exception as exc:  # pragma: no cover - defensive guard for runtime isolation
+                results.append(
+                    _failure_result(
+                        sample_id=sample_id,
+                        object_id=object_id,
+                        label=label,
+                        crop_path=crop_path,
+                        reason=f"crop_materialization_error:{type(exc).__name__}",
+                    )
+                )
+                continue
+
             try:
                 annotation_payload = {
                     "bbox": list(bbox),
@@ -227,7 +321,7 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
                     )
                 )
 
-    artifact_paths = write_run_reports(results, run_root=run_root, run_timestamp=run_timestamp)
+    artifact_paths = write_run_reports(results, run_root=run_root, run_timestamp=safe_timestamp)
 
     object_records = []
     for result in sorted(results, key=lambda row: (row.sample_id, row.object_id)):
