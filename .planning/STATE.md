@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-06-13T06:31:44.546Z"
-last_activity: 2026-06-13 — Completed plan 05-03 summary.mapping contract emission and additive schema regression coverage.
+last_updated: "2026-06-13T06:56:20.617Z"
+last_activity: 2026-06-13 — Completed plan 06-04 deterministic-only runner and CLI verification wiring.
 progress:
   total_phases: 3
   completed_phases: 1
