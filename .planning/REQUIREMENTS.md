@@ -15,7 +15,7 @@
 ### Deterministic Verification Core
 
 - [ ] **VER-01**: User can run annotation verification that crops each annotation region using a configurable fixed-padding policy.
-- [ ] **VER-02**: User can configure deterministic verification rules per label/class and get pass/fail/review results per annotation. Required rule categories include detection rules, attribute rules (e.g., clamp_type), skeleton-count rules, and visibility-format rules.
+- [ ] **VER-02**: User can configure deterministic verification rules per label/class and get pass/fail results per annotation (no deterministic review state). Required rule categories include detection rules, attribute rules (e.g., clamp_type), skeleton-count rules, and visibility-format rules.
 - [ ] **VER-03**: User can export verification results to CSV and JSON summaries for downstream triage, and the artifacts include per-sample traces (NDJSON/JSONL).
 - [ ] **VER-04**: User can run deterministic verification without requiring any VLM service; deterministic FAILs must be recorded and surfaced in reports (no VLM dependency required).
 

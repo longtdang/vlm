@@ -174,11 +174,10 @@ Deprecated/outdated:
 | A1 | OpenCV/pandas are unnecessary for this phase | Standard Stack | Team may prefer different internal standard |
 | A2 | Sorted output keys should be sample_id/object_id/label | Patterns | Ordering might not match stakeholder preference |
 
-## Open Questions
-1. Should Phase 6 emit REVIEW at all?
-   - What we know: D-01 says no REVIEW.
-   - What is unclear: VER-02 text includes REVIEW.
-   - Recommendation: treat D-01 as locked unless user explicitly changes it.
+## Open Questions (RESOLVED)
+1. Should Phase 6 emit REVIEW at all? **RESOLVED: No.**
+   - Decision lock: deterministic stage remains PASS/FAIL only.
+   - Requirement alignment: roadmap/requirements updated to PASS/FAIL-only wording for Phase 6.
 
 ## Environment Availability
 

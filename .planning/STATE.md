@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-06-13T06:13:09.742Z"
+last_updated: "2026-06-13T06:31:44.546Z"
 last_activity: 2026-06-13 — Completed plan 05-03 summary.mapping contract emission and additive schema regression coverage.
 progress:
   total_phases: 3
@@ -40,7 +40,7 @@ See: .planning/PROJECT.md
 
 Phase: 6 (Deterministic Verification Core & Reporting)
 Plan: 01 (pending)
-Status: In progress
+Status: Ready to execute
 Last activity: 2026-06-13 — Completed plan 05-03 summary.mapping contract emission and additive schema regression coverage.
 
 ## Accumulated Context
@@ -51,5 +51,5 @@ Last activity: 2026-06-13 — Completed plan 05-03 summary.mapping contract emis
 
 ## Next Actions
 
-1. Phase 6: implement deterministic cropper, rules engine (detection, attribute, skeleton-count, visibility-format rules), and report exports with PASS/FAIL/REVIEW gating.
+1. Phase 6: implement deterministic cropper, rules engine (detection, attribute, skeleton-count, visibility-format rules), and report exports with PASS/FAIL-only gating.
 2. Phase 7: implement VLM adapter interface with external-adapter option for Qwen2.5, fallback to model-zoo Qwen3-VL models, per-rule prompt templates, aggregation, and report + review queue export.

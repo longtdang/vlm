@@ -35,7 +35,7 @@ Milestone: v1.1
 
 **Success Criteria** (what must be TRUE):
   1. For each annotation, the pipeline generates a crop according to the configured fixed-padding policy and records crop paths or in-memory references in the verification artifact (inspect crop files/paths).
-  2. Deterministic rules are available and applied per label/class; the engine produces a deterministic verdict for each rule (PASS/FAIL/REVIEW). Deterministic rules must include at minimum: detection rules (e.g., bbox localization format), attribute rules (e.g., clamp_type attribute consistency), skeleton count rules (expected keypoint count per skeleton type), and visibility format rules (valid v codes and semantics).
+  2. Deterministic rules are available and applied per label/class; the engine produces a deterministic verdict for each rule (PASS/FAIL only, no deterministic REVIEW state). Deterministic rules must include at minimum: detection rules (e.g., bbox localization format), attribute rules (e.g., clamp_type attribute consistency), skeleton count rules (expected keypoint count per skeleton type), and visibility format rules (valid v codes and semantics).
   3. Deterministic FAIL results are surfaced immediately in the report artifact (CSV/JSON) with rule name and deterministic reason; deterministic PASS results allow that object to proceed to the optional VLM stage or be marked PASS at pipeline end if VLM is disabled (observable via run outputs).
   4. Pipeline produces NDJSON/JSON per-sample traces and a CSV summary consumable by downstream triage tools (open CSV/JSON to inspect expected columns).
   5. The deterministic verification stage can run with VLM disabled and still produce complete reports (run with VLM disabled and inspect artifacts).
