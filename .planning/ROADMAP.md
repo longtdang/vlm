@@ -54,7 +54,7 @@ Milestone: v1.1
   2. Per-object aggregation computes object_risk = max(error_probability across rules) and assigns a status (PASS/REVIEW/FAIL) per configured thresholds; the CSV/JSON artifacts contain object-level risk_score and status (open artifact and verify fields).
   3. System supports configurable model-zoo selection using installed FiftyOne 1.17 Qwen3-VL models (`qwen3-vl-2b-instruct-torch`, `qwen3-vl-4b-instruct-torch`, `qwen3-vl-8b-instruct-torch`); selected model and adapter provenance are recorded in run artifacts (inspect run config recorded).
   4. If the configured model-zoo inference fails (load error, runtime exception, or invalid output), the object is marked REVIEW and the failure reason is recorded in trace/report artifacts (observe failure entries in trace).
-  5. The pipeline emits CSV and JSON reports and a Review Queue ordering by risk descending that can be consumed by triage tooling (open CSV/JSON and ensure review queue ordering exists).
+  5. The pipeline emits CSV and JSON reports and a Review Queue ordering by adapter_failure first, then risk descending, then sample_id/object_id that can be consumed by triage tooling (open CSV/JSON and ensure review queue ordering exists).
 
 **Plans**: 3 plans
 
