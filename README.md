@@ -1,54 +1,120 @@
-# FiftyOne Datumaro Importer
+# FiftyOne Datumaro Importer + Verification
 
-Use `config.example.yaml` to provide:
+This project provides commands for:
+1. Importing Datumaro/CVAT pose data into FiftyOne
+2. Running deterministic verification
+3. Running optional VLM verification (model-zoo Qwen3-VL)
 
-- `image_dir`: image folder path
-- `datumaro_json`: Datumaro JSON path (CVAT export)
-- `dataset_name`
-- `label_field`
-
-## Run importer
-
-Recommended (installed console entrypoint):
+## Install
 
 ```bash
 pip install -e .
-fiftyone-datumaro-import --config ./config.example.yaml --launch
 ```
 
-Fallback (module invocation from repo root):
+## Config basics
+
+`config.example.yaml` contains the base import fields:
+- `image_dir`
+- `datumaro_json`
+- `dataset_name`
+- `label_field`
+
+Create your local config:
 
 ```bash
-PYTHONPATH=src python -m fiftyone_pose_importer.cli --config ./config.example.yaml --launch
+cp config.example.yaml local.verify.yaml
 ```
 
-## Manual visibility verification quick path
+Then edit paths in `local.verify.yaml`.
 
-1. Create a local verification config:
-   ```bash
-   cp config.example.yaml local.verify.yaml
-   ```
-2. Edit `local.verify.yaml` paths to point to your local image folder and Datumaro JSON.
-3. Run importer with `--launch` and inspect keypoint metadata (`visibility`, `source_visibility`, `visibility_defaulted`).
+## Commands
+
+### 1) Import dataset
+
+```bash
+fiftyone-datumaro-import --config ./local.verify.yaml --launch
+```
+
+Equivalent subcommand form:
+
+```bash
+fiftyone-datumaro-import import --config ./local.verify.yaml --launch
+```
+
+Module fallback:
+
+```bash
+PYTHONPATH=src python -m fiftyone_pose_importer.cli import --config ./local.verify.yaml --launch
+```
+
+### 2) Run verification pipeline (deterministic + optional VLM)
+
+Subcommand form:
+
+```bash
+fiftyone-datumaro-import verify --config ./local.verify.yaml
+```
+
+Dedicated entrypoint:
+
+```bash
+fiftyone-datumaro-verify --config ./local.verify.yaml
+```
+
+Module fallback:
+
+```bash
+PYTHONPATH=src python -m fiftyone_pose_importer.run_verify --config ./local.verify.yaml
+```
+
+## Verification config (example)
+
+Add a `verification:` block in your YAML:
+
+```yaml
+verification:
+  output_dir: ./verification-runs
+  deterministic:
+    padding_px: 16
+    rules:
+      global:
+        detection: ["bbox_format"]
+        attribute: ["required_attributes"]
+        skeleton-count: ["keypoint_count"]
+        visibility-format: ["visibility_codes"]
+  vlm:
+    enabled: true
+    model_name: qwen3-vl-2b-instruct-torch
+    thresholds:
+      pass_below: 0.20
+      review_below: 0.60
+    generation:
+      max_new_tokens: 256
+      timeout_seconds: 8.0
+    labels:
+      forklift:
+        enabled: true
+        rules: ["bbox_localization", "bbox_coverage", "clamp_type"]
+```
+
+Notes:
+- VLM is **model-zoo only** in this milestone (`qwen3-vl-{2b,4b,8b}-instruct-torch`)
+- VLM runs only for deterministic `PASS` objects and VLM-enabled labels
+- Outputs include deterministic and VLM artifacts under the same timestamped run directory
+
+## Output artifacts
+
+- Import run summary: `<config_stem>.summary.json`
+- Deterministic reports: `deterministic_report.csv/json`, `deterministic_trace.ndjson`
+- VLM reports (when enabled): `vlm_report.csv/json`, `vlm_trace.ndjson`
 
 ## Troubleshooting
 
-- `ModuleNotFoundError` when running `python -m ...` usually means the module path is wrong.
-  - ✅ Use: `python -m fiftyone_pose_importer.cli`
-  - ❌ Do not use: `python -m src/fiftyone_pose_importer.cli`
-- `ModuleNotFoundError: No module named 'fiftyone'` means runtime dependency is missing.
-  - Install project dependencies first (for editable install, ensure `pip install -e .` completed successfully in your active environment).
-- If summary shows `preflight.schema_mismatches.ambiguous_skeleton`, import stops before writing samples.
-  - This means skeleton labels/edges cannot be resolved to one canonical contract from the source data.
-  - Fix by normalizing the source/categories skeleton definition or choosing a single canonical skeleton contract before rerun.
-
-## Launch outcome and summary interpretation
-
-- `--launch` requests opening FiftyOne after a successful import write.
-- The summary includes a `launch` block:
-  - `requested`: whether `--launch` was provided
-  - `attempted`: whether launch was attempted
-  - `ok`: launch result (when attempted)
-  - `error`: launch error message (when launch fails)
-- Summary files always include `summary_path`, pointing to `<config_stem>.summary.json`.
-- Connected skeleton viewing relies on imported dataset `default_skeleton` labels/edges from the source contract.
+- `ModuleNotFoundError` with `python -m`:
+  - ✅ `python -m fiftyone_pose_importer.cli ...`
+  - ✅ `python -m fiftyone_pose_importer.run_verify ...`
+  - ❌ `python -m src/fiftyone_pose_importer...`
+- `ModuleNotFoundError: No module named 'fiftyone'`:
+  - Run `pip install -e .` in your active environment
+- `preflight.schema_mismatches.ambiguous_skeleton`:
+  - Import is blocked until the source skeleton contract is unambiguous
