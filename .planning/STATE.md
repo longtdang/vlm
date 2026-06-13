@@ -18,14 +18,14 @@ gsd_state_version: 1.1
 milestone: v1.1
 milestone_name: Skeleton Field Rendering + Configurable VLM Verification
 status: in_progress
-last_updated: "2026-06-13T05:24:12Z"
+last_updated: "2026-06-13T06:05:00Z"
 last_activity: 2026-06-13
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 8
+  completed_plans: 2
+  percent: 67
 
 # Project State
 
@@ -39,9 +39,9 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 5 (Contracts & Preflight)
-Plan: 02 (pending)
+Plan: 03 (pending)
 Status: In progress
-Last activity: 2026-06-13 — Completed plan 05-01 RED contracts for SKEL-01..03.
+Last activity: 2026-06-13 — Completed plan 05-02 importer routing, per-field skeleton assignment, and visibility strictness.
 
 ## Accumulated Context
 
@@ -51,6 +51,6 @@ Last activity: 2026-06-13 — Completed plan 05-01 RED contracts for SKEL-01..03
 
 ## Next Actions
 
-1. Phase 5: implement Datumaro import mapping, config_model changes, and src/main.py contract validation; add preflight tests for visibility states and mapping metadata emission.
+1. Phase 5: complete plan 05-03 additive summary schema validation and finalize preflight artifact checks.
 2. Phase 6: implement deterministic cropper, rules engine (detection, attribute, skeleton-count, visibility-format rules), and report exports with PASS/FAIL/REVIEW gating.
 3. Phase 7: implement VLM adapter interface with external-adapter option for Qwen2.5, fallback to model-zoo Qwen3-VL models, per-rule prompt templates, aggregation, and report + review queue export.
