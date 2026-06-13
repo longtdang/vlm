@@ -147,3 +147,54 @@ def test_label_text_changes_keep_field_identity() -> None:
     # Contract (D-04): mutable text metadata must not alter canonical field identity.
     assert "keypoints_label_10" in dataset_v1.samples[0]
     assert "keypoints_label_10" in dataset_v2.samples[0]
+
+
+
+def test_visibility_invalid_values_fail_preflight() -> None:
+    bad_item = {
+        "id": "sample-bad-vis",
+        "image": {"size": [100, 100]},
+        "annotations": [
+            {"type": "points", "label_id": 10, "points": [1, 1, 2, 2], "visibility": [2, 5]},
+            {"type": "points", "label_id": 10, "points": [1, 1, 2, 2], "visibility": [2]},
+        ],
+    }
+    payload = {
+        "categories": {"points": {"items": [{"label_id": 10, "label": "Arm Clamp", "labels": ["a", "b"], "joints": [[1, 2]]}]}},
+        "items": [bad_item],
+    }
+
+    ok, summary, _dataset = _run_import_with_payload(payload, bad_item)
+
+    # Contract (D-05): invalid values and length mismatch both block import at preflight.
+    assert ok is False
+    mismatch_counts = summary["preflight"]["schema_mismatch_counts"]
+    assert "invalid_visibility_values" in mismatch_counts
+    assert "visibility_length_mismatch" in mismatch_counts
+
+
+def test_missing_visibility_defaults_to_two() -> None:
+    item = {
+        "id": "sample-default-vis",
+        "image": {"size": [100, 100]},
+        "annotations": [
+            {"type": "skeleton", "label_id": 10, "points": [10, 10, 2, 20, 20, 2]},
+            {"type": "points", "label_id": 10, "points": [30, 30, 40, 40]},
+        ],
+    }
+    payload = {
+        "categories": {"points": {"items": [{"label_id": 10, "label": "Arm Clamp", "labels": ["a", "b"], "joints": [[1, 2]]}]}},
+        "items": [item],
+    }
+
+    ok, summary, dataset = _run_import_with_payload(payload, item)
+
+    assert ok is True
+    assert summary["warnings"]["counts"]["defaulted_visibility_annotations"] == 1
+    assert summary["visibility"]["defaulted_annotations"] == 1
+
+    # Contract carries routed field expectation alongside defaulting semantics.
+    sample = dataset.samples[0]
+    assert "keypoints_label_10" in sample
+    defaulted_pose = sample["keypoints_label_10"].keypoints[1]
+    assert defaulted_pose["visibility"] == [2, 2]
