@@ -323,8 +323,14 @@ def test_multi_skeleton_dataset_imports_without_global_ambiguity_failure() -> No
     dataset = sys.modules["fiftyone"].Dataset.last_created
     # No single global default skeleton when multiple label-specific contracts exist.
     assert dataset.default_skeleton is None
-    keypoints = dataset.samples[0]["ground_truth"].keypoints
-    assert len(keypoints) == 2
-    assert keypoints[0]["visibility"] == [2, 1]
-    assert keypoints[1]["visibility"] == [2, 2, 0]
-    assert keypoints[1]["skeleton_edges"] == [[0, 1], [1, 2]]
+    sample = dataset.samples[0]
+    assert "ground_truth" not in sample
+    assert set(sample.keys()) == {"keypoints_label_10", "keypoints_label_11"}
+
+    keypoints_10 = sample["keypoints_label_10"].keypoints
+    keypoints_11 = sample["keypoints_label_11"].keypoints
+    assert len(keypoints_10) == 1
+    assert len(keypoints_11) == 1
+    assert keypoints_10[0]["visibility"] == [2, 1]
+    assert keypoints_11[0]["visibility"] == [2, 2, 0]
+    assert keypoints_11[0]["skeleton_edges"] == [[0, 1], [1, 2]]

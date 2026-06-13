@@ -224,4 +224,4 @@ def test_mapping_metadata_emitted_with_required_keys() -> None:
 
     for entry in mapping:
         assert required_keys.issubset(entry.keys())
-        assert entry["target_field"] == f"keypoints_label_{entry[label_id]}"
+        assert entry["target_field"] == f"keypoints_label_{entry['label_id']}"

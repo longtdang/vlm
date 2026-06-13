@@ -114,6 +114,52 @@ def _ensure_dataset_skeleton_field(dataset: fo.Dataset, field_name: str, contrac
     dataset.skeletons = skeletons
 
 
+def _target_field_for_annotation(
+    annotation: dict[str, Any],
+    bundle: SkeletonContractBundle,
+    fallback_field: str,
+) -> str:
+    label_id = annotation.get("label_id")
+    if isinstance(label_id, int):
+        return _target_field_for_label_id(label_id)
+    if bundle.by_label_id:
+        raise SchemaContractError("missing_skeleton_label", "Missing or invalid label_id for annotation routing")
+    return fallback_field
+
+
+def _summary_mapping(bundle: SkeletonContractBundle, data: dict[str, Any]) -> list[dict[str, Any]]:
+    points_categories = (data.get("categories") or {}).get("points") or {}
+    source_names: dict[int, str] = {}
+    if isinstance(points_categories, dict):
+        raw_items = points_categories.get("items")
+        if isinstance(raw_items, list):
+            for raw in raw_items:
+                if not isinstance(raw, dict):
+                    continue
+                label_id = raw.get("label_id")
+                if isinstance(label_id, int):
+                    source_names[label_id] = str(raw.get("label") or "")
+
+    entries: list[dict[str, Any]] = []
+    for label_id, contract in sorted(bundle.by_label_id.items()):
+        entries.append(
+            {
+                "label_id": label_id,
+                "source_label_name": source_names.get(label_id, ""),
+                "target_field": _target_field_for_label_id(label_id),
+                "skeleton_labels": contract.labels,
+                "skeleton_edges": contract.edges,
+                "visibility_policy": {
+                    "allowed": [0, 1, 2],
+                    "missing": "default_to_2",
+                    "invalid_values": "hard_fail",
+                    "length_mismatch": "hard_fail",
+                },
+            }
+        )
+    return entries
+
+
 def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[str, Any]]:
     cfg = load_config(config_path)
     data = load_datumaro(cfg.datumaro_json)
@@ -173,7 +219,11 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
             },
         },
         "launch": {"requested": launch_app, "attempted": False, "ok": None, "error": None},
+        "mapping": [],
     }
+
+    if contract_bundle is not None:
+        summary["mapping"] = _summary_mapping(contract_bundle, data)
 
     if report.has_errors():
         summary["failures"]["counts"]["schema_mismatches_total"] = sum(len(v) for v in report.schema_mismatches.values())
@@ -201,7 +251,7 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         for ann in _ordered_point_annotations(item):
             try:
                 contract = _resolve_contract(contract_bundle, ann)
-                field_name = _target_field_for_label_id(ann.get("label_id"))
+                field_name = _target_field_for_annotation(ann, contract_bundle, cfg.label_field)
                 label_count = len(contract.labels)
                 points, visibility, source_visibility, visibility_defaulted = _extract_points_and_visibility(ann)
                 if width is None or height is None or width <= 0 or height <= 0:
