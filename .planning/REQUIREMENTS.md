@@ -23,8 +23,8 @@
 
 - [x] **VLM-01**: User can configure which labels/classes are VLM-verified and which remain deterministic-only.
 - [x] **VLM-02**: User can configure prompt templates and rule-linked prompt parameters per verified label; per-rule prompt mapping covers rules: bbox_localization, bbox_coverage, clamp_type, roll_count, keypoint_position, occlusion_state.
-- [ ] **VLM-03**: User can run VLM verification only as an optional stage after deterministic checks; each VLM rule returns an error_probability and per-object aggregation computes a risk score (object_risk = max(rule error_probability)).
-- [ ] **VLM-04**: User can receive safe fallback `REVIEW` outcomes when VLM checks fail, timeout, or return invalid outputs; all failures recorded with reason.
+- [x] **VLM-03**: User can run VLM verification only as an optional stage after deterministic checks; each VLM rule returns an error_probability and per-object aggregation computes a risk score (object_risk = max(rule error_probability)).
+- [x] **VLM-04**: User can receive safe fallback `REVIEW` outcomes when VLM checks fail, timeout, or return invalid outputs; all failures recorded with reason.
 - [x] **VLM-05**: User can configure one installed FiftyOne model-zoo Qwen3-VL model (`qwen3-vl-2b-instruct-torch`, `qwen3-vl-4b-instruct-torch`, or `qwen3-vl-8b-instruct-torch`) for VLM verification. Selected model and inference outcome must be recorded in run provenance. External OpenAI-compatible adapters are deferred.
 
 ## Future Requirements (Deferred)
@@ -51,6 +51,6 @@
 | VER-04 | Phase 6 | complete (06-04) |
 | VLM-01 | Phase 7 | complete (07-01) |
 | VLM-02 | Phase 7 | complete (07-01) |
-| VLM-03 | Phase 7 | pending |
-| VLM-04 | Phase 7 | pending |
+| VLM-03 | Phase 7 | complete (07-02) |
+| VLM-04 | Phase 7 | complete (07-02) |
 | VLM-05 | Phase 7 | complete (07-01) |
