@@ -100,6 +100,8 @@ def test_summary_additive_schema() -> None:
     assert summary["label_counts"]["keypoint_positions_total"] == 3
     assert "warnings" in summary
     assert "failures" in summary
+    assert "mapping" in summary
+    assert len(summary["mapping"]) == 1
 
 
 def test_warning_failure_rollups() -> None:
