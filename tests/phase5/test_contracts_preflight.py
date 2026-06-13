@@ -198,3 +198,30 @@ def test_missing_visibility_defaults_to_two() -> None:
     assert "keypoints_label_10" in sample
     defaulted_pose = sample["keypoints_label_10"].keypoints[1]
     assert defaulted_pose["visibility"] == [2, 2]
+
+
+
+def test_mapping_metadata_emitted_with_required_keys() -> None:
+    payload, item = _multi_skeleton_payload()
+    ok, summary, _dataset = _run_import_with_payload(payload, item)
+
+    assert ok is True
+
+    # Contract (D-07): mapping metadata must exist in run summary.
+    assert "mapping" in summary
+    mapping = summary["mapping"]
+    assert isinstance(mapping, list)
+    assert len(mapping) == 2
+
+    required_keys = {
+        "label_id",
+        "source_label_name",
+        "target_field",
+        "skeleton_labels",
+        "skeleton_edges",
+        "visibility_policy",
+    }
+
+    for entry in mapping:
+        assert required_keys.issubset(entry.keys())
+        assert entry["target_field"] == f"keypoints_label_{entry[label_id]}"
