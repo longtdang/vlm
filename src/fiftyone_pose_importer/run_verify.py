@@ -252,21 +252,21 @@ def run_verify(config_path: str) -> tuple[bool, dict[str, Any]]:
     return True, summary
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     import argparse
+    import sys
 
     parser = argparse.ArgumentParser(description="Run deterministic verification")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    ok, summary = run_verify(args.config)
-    stream = None
-    if ok:
-        stream = None
-    else:
-        stream = None
-    print(json.dumps(summary, indent=2), file=stream)
-    return 0 if ok else 1
+    try:
+        ok, summary = run_verify(args.config)
+        print(json.dumps(summary, indent=2))
+        return 0 if ok else 1
+    except Exception as exc:
+        print(json.dumps({"ok": False, "error": str(exc)}, indent=2), file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

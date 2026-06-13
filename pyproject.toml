@@ -16,6 +16,7 @@ dependencies = [
 
 [project.scripts]
 fiftyone-datumaro-import = "fiftyone_pose_importer.cli:main"
+fiftyone-datumaro-verify = "fiftyone_pose_importer.run_verify:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
