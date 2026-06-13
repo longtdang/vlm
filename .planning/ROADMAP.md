@@ -56,7 +56,12 @@ Milestone: v1.1
   4. If the configured external adapter is unreachable, times out, or returns invalid responses, the system falls back to the configured fallback model-zoo adapter (if allowed by config) or marks the object as REVIEW and records the failure reason (observe failure entries in trace).
   5. The pipeline emits CSV and JSON reports and a Review Queue ordering by risk descending that can be consumed by triage tooling (open CSV/JSON and ensure review queue ordering exists).
 
-**Plans**: Implement verification/vlm_client.py (adapter interface + httpx/OpenAI-compatible adapter), model selection and fallback logic, rule-to-prompt mapping for the six rules, per-rule result parsing into error_probability, object aggregation, and report + review queue exporter. Include tests and a mock adapter for CI.
+**Plans**: 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — VLM foundation: types, config (per-label opt-in/rules/thresholds/prompts), FiftyOneZooAdapter + MockVlmAdapter, unit tests
+- [ ] 07-02-PLAN.md — VLM engine (prompt building, response parsing, risk aggregation) + report writers (CSV/JSON+review_queue/NDJSON) + unit tests
+- [ ] 07-03-PLAN.md — run_verify.py integration (VLM stage, gating D-08/D-06, summary fields) + end-to-end integration tests
 
 ## Traceability (summary)
 
@@ -81,8 +86,8 @@ Milestone: v1.1
 |-------|----------------|--------|-----------|
 | 5 - Contracts & Preflight | 3/3 | Complete | 2026-06-13 (05-01, 05-02, 05-03) |
 | 6 - Deterministic Verification Core & Reporting | 4/4 | Complete | 2026-06-13 (06-01, 06-02, 06-03, 06-04) |
-| 7 - VLM Verification & Aggregation | 0/5 | Not started | - |
+| 7 - VLM Verification & Aggregation | 0/3 | In progress | - |
 
 ## Notes
 
-- Phase 7 includes explicit support for Qwen2.5-VL-7B-Instruct only via external adapter endpoint with fallback to model zoo Qwen3-VL models (qwen3-vl-2b, qwen3-vl-4b, qwen3-vl-8b).
+- Phase 7 uses FiftyOne model-zoo only (D-01). External OpenAI-compatible adapter deferred per user decision. Models: qwen3-vl-2b-instruct-torch, qwen3-vl-4b-instruct-torch, qwen3-vl-8b-instruct-torch.
