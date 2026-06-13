@@ -149,12 +149,7 @@ def _summary_mapping(bundle: SkeletonContractBundle, data: dict[str, Any]) -> li
                 "target_field": _target_field_for_label_id(label_id),
                 "skeleton_labels": contract.labels,
                 "skeleton_edges": contract.edges,
-                "visibility_policy": {
-                    "allowed": [0, 1, 2],
-                    "missing": "default_to_2",
-                    "invalid_values": "hard_fail",
-                    "length_mismatch": "hard_fail",
-                },
+                "visibility_policy": "invalid_or_mismatch=fail,missing=default_to_2_warn",
             }
         )
     return entries
