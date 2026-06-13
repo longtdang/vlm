@@ -1,3 +1,4 @@
+from .cropper import CropPlan, plan_crop
 from .config import VerificationConfig, VerificationConfigError, load_verification_config
 from .types import (
     DeterministicRuleConfig,
@@ -10,6 +11,7 @@ from .types import (
 )
 
 __all__ = [
+    "CropPlan",
     "DeterministicRuleConfig",
     "DeterministicVerdict",
     "ObjectVerificationResult",
@@ -20,4 +22,5 @@ __all__ = [
     "VerificationConfig",
     "VerificationConfigError",
     "load_verification_config",
+    "plan_crop",
 ]
