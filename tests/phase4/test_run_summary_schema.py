@@ -86,22 +86,32 @@ def test_summary_additive_schema() -> None:
     item = {
         "id": "sample-1",
         "image": {"size": [100, 100]},
-        "annotations": [{"type": "points", "points": [10, 20, 30, 40, 50, 60], "visibility": [2, 1, 0]}],
+        "annotations": [{"type": "points", "label_id": 10, "points": [10, 20, 30, 40, 50, 60], "visibility": [2, 1, 0]}],
     }
-    data = _base_data()
-    data["items"] = [item]
+    data = {
+        "categories": {
+            "points": {
+                "items": [
+                    {
+                        "label_id": 10,
+                        "label": "Pose",
+                        "labels": ["nose", "left_eye", "right_eye"],
+                        "joints": [[1, 2], [1, 3]],
+                    }
+                ]
+            }
+        },
+        "items": [item],
+    }
     _configure(module, data, item)
 
     ok, summary = module.run_import("config.yaml")
     assert ok is True
-    assert "preflight" in summary
-    assert "visibility" in summary
+    assert {"preflight", "visibility", "warnings", "failures", "summary_path", "mapping"}.issubset(summary.keys())
     assert summary["label_counts"]["keypoint_annotations"] == 1
     assert summary["label_counts"]["keypoint_positions_total"] == 3
-    assert "warnings" in summary
-    assert "failures" in summary
-    assert "mapping" in summary
     assert len(summary["mapping"]) == 1
+    assert summary["mapping"][0]["visibility_policy"] == "invalid_or_mismatch=fail,missing=default_to_2_warn"
 
 
 def test_warning_failure_rollups() -> None:
