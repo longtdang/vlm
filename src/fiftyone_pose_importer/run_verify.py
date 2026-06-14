@@ -93,6 +93,30 @@ def _parse_bbox(annotation: dict[str, Any]) -> tuple[float, float, float, float]
         return None
 
 
+def _derive_bbox_from_annotation(annotation: dict[str, Any]) -> tuple[float, float, float, float] | None:
+    """Derive AABB (x, y, w, h) from polygon, skeleton, or points annotation when no bbox field exists."""
+    ann_type = annotation.get("type")
+    points_raw = annotation.get("points")
+    if not isinstance(points_raw, list) or not points_raw:
+        return None
+    try:
+        if ann_type == "skeleton" and len(points_raw) >= 3 and len(points_raw) % 3 == 0:
+            # skeleton: [x0, y0, v0, x1, y1, v1, ...]
+            xs = [float(points_raw[i]) for i in range(0, len(points_raw), 3)]
+            ys = [float(points_raw[i + 1]) for i in range(0, len(points_raw), 3)]
+        elif len(points_raw) >= 2 and len(points_raw) % 2 == 0:
+            # polygon or points: [x0, y0, x1, y1, ...]
+            xs = [float(points_raw[i]) for i in range(0, len(points_raw), 2)]
+            ys = [float(points_raw[i + 1]) for i in range(0, len(points_raw), 2)]
+        else:
+            return None
+    except (TypeError, ValueError):
+        return None
+    if not xs:
+        return None
+    return min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
+
+
 def _image_size(item: dict[str, Any]) -> tuple[int, int] | None:
     raw_size = ((item.get("image") or {}).get("size")) or []
     if not isinstance(raw_size, list) or len(raw_size) < 2:
@@ -238,6 +262,8 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
 
             keypoints, visibility = _keypoints_visibility(annotation)
             bbox = _parse_bbox(annotation)
+            if bbox is None:
+                bbox = _derive_bbox_from_annotation(annotation)
 
             if image_size is None:
                 results.append(_failure_result(sample_id=sample_id, object_id=object_id, label=label, crop_path=crop_path, reason="invalid_image_size"))
@@ -247,7 +273,8 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                 continue
 
             width, height = image_size
-            is_skeleton = annotation.get("type") in {"points", "skeleton"} or bool(keypoints)
+            ann_type = annotation.get("type")
+            is_skeleton = ann_type in {"points", "skeleton"} or (bool(keypoints) and ann_type != "polygon")
 
             crop = plan_crop(
                 image_width=width,
