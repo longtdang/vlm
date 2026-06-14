@@ -120,6 +120,33 @@ def evaluate_visibility_codes(annotation: dict[str, Any], _spec: RuleSpec) -> tu
     return DeterministicVerdict.PASS, None
 
 
+def evaluate_out_of_frame_occluded(annotation: dict[str, Any], _spec: RuleSpec) -> tuple[DeterministicVerdict, str | None]:
+    """Keypoints outside the original image frame must be marked occluded (visibility=1).
+
+    Applies to skeleton annotations only. Out-of-frame indices are pre-computed
+    by ``plan_crop()`` and stored in the annotation payload under
+    ``out_of_frame_indices``. If the key is absent or empty, the rule passes.
+
+    Fails if any out-of-frame point has visibility=2 (explicitly marked visible).
+    """
+    out_of_frame = annotation.get("out_of_frame_indices")
+    if not isinstance(out_of_frame, list) or not out_of_frame:
+        return DeterministicVerdict.PASS, None
+
+    visibility = annotation.get("visibility")
+    if not isinstance(visibility, list):
+        raise UnevaluableRuleError("visibility_missing_or_malformed")
+
+    violations = [
+        idx for idx in out_of_frame
+        if isinstance(idx, int) and idx < len(visibility) and visibility[idx] == 2
+    ]
+
+    if violations:
+        return DeterministicVerdict.FAIL, f"out_of_frame_points_visible:{violations}"
+    return DeterministicVerdict.PASS, None
+
+
 RULE_REGISTRY: dict[str, RuleEvaluator] = {
     "bbox_format": evaluate_bbox_format,
     "bbox_non_empty": evaluate_bbox_non_empty,
@@ -128,6 +155,7 @@ RULE_REGISTRY: dict[str, RuleEvaluator] = {
     "clamp_type_allowed": evaluate_clamp_type_allowed,
     "keypoint_count": evaluate_keypoint_count,
     "visibility_codes": evaluate_visibility_codes,
+    "out_of_frame_occluded": evaluate_out_of_frame_occluded,
 }
 
 

@@ -15,7 +15,7 @@ KNOWN_RULES: dict[str, set[str]] = {
     "detection": {"bbox_format", "bbox_non_empty"},
     "attribute": {"required_attributes", "roll_count_positive", "clamp_type_allowed"},
     "skeleton-count": {"keypoint_count"},
-    "visibility-format": {"visibility_codes"},
+    "visibility-format": {"visibility_codes", "out_of_frame_occluded"},
 }
 DEFAULT_RULES: dict[str, list[str]] = {
     "detection": ["bbox_format"],

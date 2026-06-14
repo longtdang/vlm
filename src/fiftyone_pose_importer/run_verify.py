@@ -363,6 +363,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                         "keypoints": keypoints,
                         "visibility": crop.adjusted_visibility if crop.adjusted_visibility is not None else visibility,
                         "polygon_points": polygon_points,
+                        "out_of_frame_indices": crop.out_of_frame_point_indices,
                     }
                     # Translate coordinates to crop-space so VLM rules can correlate
                     # annotation values with what the model sees in the crop image.

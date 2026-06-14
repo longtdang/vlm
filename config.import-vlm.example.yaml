@@ -22,7 +22,8 @@
 #                        when different skeletons have different point counts
 #
 # category: visibility-format
-#   visibility_codes   — every visibility value is 0 (unlabeled), 1 (occluded), or 2 (visible)
+#   visibility_codes       — every visibility value is 0 (unlabeled), 1 (occluded), or 2 (visible)
+#   out_of_frame_occluded  — any keypoint outside the original image frame must have visibility=1
 #
 # FAIL REASONS (appear in deterministic_report.csv/json)
 # ───────────────────────────────────────────────────────
@@ -33,11 +34,7 @@
 #   invalid_clamp_type:<value>           clamp_type_allowed: value not in allowed list
 #   keypoint_count_mismatch:<a>!=<e>     keypoint_count: actual ≠ expected
 #   invalid_visibility_codes             visibility_codes: value outside {0,1,2}
-#   unevaluable:bbox_missing_or_malformed       bbox absent and no points to derive from
-#   unevaluable:attributes_missing_or_malformed annotation has no attributes dict
-#   unevaluable:expected_keypoint_count_missing keypoint_count rule missing params.expected
-#   image_path_not_found                 source image file does not exist
-#   invalid_image_size                   image size missing or zero in datumaro JSON
+#   out_of_frame_points_visible:[<idx>]  out_of_frame_occluded: listed indices marked v=2
 
 image_dir: ./data/images          # also accepted at top level (shared with import command)
 datumaro_json: ./data/datumaro.json
@@ -78,6 +75,7 @@ verification:
         # --- visibility codes ---
         visibility-format:
           - visibility_codes      # checks 0/1/2 only
+          - out_of_frame_occluded # out-of-frame keypoints must be marked occluded (v=1)
 
       # Per-label overrides — any category omitted inherits from global above.
       # Remove or add label blocks as needed.

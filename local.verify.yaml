@@ -34,6 +34,7 @@ verification:
         # --- visibility codes ---
         visibility-format:
           - visibility_codes      # checks 0/1/2 only
+          - out_of_frame_occluded # out-of-frame keypoints must be marked occluded (v=1)
 
       # Per-label overrides — any category omitted inherits from global above.
       # Remove or add label blocks as needed.

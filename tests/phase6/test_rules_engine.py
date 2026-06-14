@@ -136,3 +136,80 @@ def test_per_label_override_rules_are_applied() -> None:
 
     assert outcome.result.verdict is DeterministicVerdict.FAIL
     assert "missing_required_attribute:serial" in outcome.result.failure_reasons
+
+
+def _skeleton_annotation_with_out_of_frame(out_of_frame_indices: list[int], visibility: list[int]) -> dict[str, object]:
+    keypoints = [[float(i), float(i)] for i in range(len(visibility))]
+    return {
+        "bbox": [10.0, 10.0, 40.0, 40.0],
+        "attributes": {},
+        "keypoints": keypoints,
+        "visibility": visibility,
+        "out_of_frame_indices": out_of_frame_indices,
+    }
+
+
+def test_out_of_frame_points_visible_fails() -> None:
+    """A keypoint outside the frame marked v=2 (visible) must fail."""
+    config, _ = load_verification_config(
+        {"rules": {"global": {"visibility-format": ["out_of_frame_occluded"], "skeleton-count": []}}}
+    )
+    ann = _skeleton_annotation_with_out_of_frame(out_of_frame_indices=[0], visibility=[2, 1, 1])
+    outcome = evaluate_object(
+        sample_id="s", object_id="o", label="x", crop_path="x.png",
+        annotation=ann, config=config,
+    )
+    assert outcome.result.verdict is DeterministicVerdict.FAIL
+    assert any("out_of_frame_points_visible" in (r or "") for r in outcome.result.failure_reasons)
+
+
+def test_out_of_frame_points_occluded_passes() -> None:
+    """A keypoint outside the frame correctly marked v=1 (occluded) should pass."""
+    config, _ = load_verification_config(
+        {"rules": {"global": {"visibility-format": ["out_of_frame_occluded"], "skeleton-count": []}}}
+    )
+    ann = _skeleton_annotation_with_out_of_frame(out_of_frame_indices=[0, 2], visibility=[1, 2, 1])
+    outcome = evaluate_object(
+        sample_id="s", object_id="o", label="x", crop_path="x.png",
+        annotation=ann, config=config,
+    )
+    assert outcome.result.verdict is DeterministicVerdict.PASS
+
+
+def test_out_of_frame_unlabeled_passes() -> None:
+    """A keypoint outside the frame marked v=0 (unlabeled) is not a visible violation."""
+    config, _ = load_verification_config(
+        {"rules": {"global": {"visibility-format": ["out_of_frame_occluded"], "skeleton-count": []}}}
+    )
+    ann = _skeleton_annotation_with_out_of_frame(out_of_frame_indices=[1], visibility=[2, 0, 2])
+    outcome = evaluate_object(
+        sample_id="s", object_id="o", label="x", crop_path="x.png",
+        annotation=ann, config=config,
+    )
+    assert outcome.result.verdict is DeterministicVerdict.PASS
+
+
+def test_no_out_of_frame_points_passes() -> None:
+    """When no out-of-frame indices are present the rule is a no-op."""
+    config, _ = load_verification_config(
+        {"rules": {"global": {"visibility-format": ["out_of_frame_occluded"], "skeleton-count": []}}}
+    )
+    ann = _skeleton_annotation_with_out_of_frame(out_of_frame_indices=[], visibility=[2, 2, 1])
+    outcome = evaluate_object(
+        sample_id="s", object_id="o", label="x", crop_path="x.png",
+        annotation=ann, config=config,
+    )
+    assert outcome.result.verdict is DeterministicVerdict.PASS
+
+
+def test_out_of_frame_indices_missing_passes() -> None:
+    """Annotations without out_of_frame_indices (bbox/polygon types) skip silently."""
+    config, _ = load_verification_config(
+        {"rules": {"global": {"visibility-format": ["out_of_frame_occluded"], "skeleton-count": []}}}
+    )
+    ann = {"bbox": [0.0, 0.0, 50.0, 50.0], "attributes": {}, "keypoints": None, "visibility": []}
+    outcome = evaluate_object(
+        sample_id="s", object_id="o", label="x", crop_path="x.png",
+        annotation=ann, config=config,
+    )
+    assert outcome.result.verdict is DeterministicVerdict.PASS
