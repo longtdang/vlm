@@ -10,7 +10,7 @@ import yaml
 
 from .datumaro_reader import load_datumaro, parse_keypoints_and_visibility
 from .verification.config import load_verification_config
-from .verification.cropper import materialize_crop, plan_crop
+from .verification.cropper import annotation_to_crop_space, materialize_crop, plan_crop
 from .verification.engine import evaluate_object
 from .verification.report_csv import _safe_run_dir, _safe_run_timestamp, write_run_reports
 from .verification.report_json import serialize_object_result
@@ -353,6 +353,9 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                         "keypoints": keypoints,
                         "visibility": crop.adjusted_visibility if crop.adjusted_visibility is not None else visibility,
                     }
+                    # Translate coordinates to crop-space so VLM rules can correlate
+                    # annotation values with what the model sees in the crop image.
+                    annotation_payload = annotation_to_crop_space(annotation_payload, crop)
                     engine_outcome = evaluate_object(
                         sample_id=sample_id,
                         object_id=object_id,

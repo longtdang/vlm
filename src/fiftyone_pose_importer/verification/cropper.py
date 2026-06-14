@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from PIL import Image
 
@@ -22,6 +23,45 @@ class CropPlan:
     adjusted_visibility: list[int] | None
     out_of_frame_point_indices: list[int]
 
+
+def annotation_to_crop_space(
+    annotation: dict[str, Any],
+    crop_plan: CropPlan,
+) -> dict[str, Any]:
+    """Translate bbox and keypoint coordinates from original image space to crop image space.
+
+    The VLM receives a crop of the original image. Annotation coordinates must
+    be expressed in crop-space so the model can correlate them with what it sees.
+
+    Coordinate origin:
+    - skeleton (``skeleton_preserve_canvas``): top-left of the padded canvas
+      (``padded_bounds``), which is the full crop canvas including black borders.
+    - non-skeleton (``non_skeleton_clip``): top-left of the clipped region
+      (``clipped_bounds``), which is the actual crop extent.
+
+    Width/height of ``bbox`` and visibility codes are preserved unchanged.
+    """
+    if crop_plan.policy == "skeleton_preserve_canvas":
+        if crop_plan.padded_bounds is None:
+            return annotation
+        ox, oy = crop_plan.padded_bounds[0], crop_plan.padded_bounds[1]
+    else:
+        if crop_plan.clipped_bounds is None:
+            return annotation
+        ox, oy = crop_plan.clipped_bounds[0], crop_plan.clipped_bounds[1]
+
+    result = dict(annotation)
+
+    if isinstance(result.get("bbox"), (list, tuple)) and len(result["bbox"]) == 4:
+        bx, by, bw, bh = result["bbox"]
+        result["bbox"] = [bx - ox, by - oy, bw, bh]
+
+    if isinstance(result.get("keypoints"), list):
+        result["keypoints"] = [
+            [kx - ox, ky - oy] for kx, ky in result["keypoints"]
+        ]
+
+    return result
 
 def _bbox_bounds(bbox: tuple[float, float, float, float], padding_px: int) -> tuple[int, int, int, int]:
     x, y, w, h = bbox

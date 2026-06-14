@@ -3,8 +3,62 @@ from __future__ import annotations
 from fiftyone_pose_importer.verification.config import load_verification_config
 from PIL import Image
 
-from fiftyone_pose_importer.verification.cropper import materialize_crop, plan_crop
+from fiftyone_pose_importer.verification.cropper import annotation_to_crop_space, materialize_crop, plan_crop
 from fiftyone_pose_importer.verification.types import DeterministicVerdict
+
+
+def test_annotation_to_crop_space_skeleton() -> None:
+    plan = plan_crop(
+        image_width=1000,
+        image_height=1000,
+        bbox=(100.0, 200.0, 50.0, 60.0),
+        padding_px=10,
+        is_skeleton=True,
+    )
+    # padded_bounds = (90, 190, 160, 270) → origin = (90, 190)
+    ann = {
+        "bbox": [100.0, 200.0, 50.0, 60.0],
+        "keypoints": [[120.0, 220.0], [140.0, 250.0]],
+        "attributes": {"clamp-type": "2-arm"},
+    }
+    result = annotation_to_crop_space(ann, plan)
+    assert result["bbox"] == [10.0, 10.0, 50.0, 60.0]  # origin translated, w/h unchanged
+    assert result["keypoints"] == [[30.0, 30.0], [50.0, 60.0]]
+    assert result["attributes"] == {"clamp-type": "2-arm"}  # unchanged
+
+
+def test_annotation_to_crop_space_non_skeleton() -> None:
+    plan = plan_crop(
+        image_width=1000,
+        image_height=1000,
+        bbox=(100.0, 200.0, 50.0, 60.0),
+        padding_px=10,
+        is_skeleton=False,
+    )
+    # clipped_bounds = (90, 190, 160, 270) → origin = (90, 190)
+    ann = {
+        "bbox": [100.0, 200.0, 50.0, 60.0],
+        "keypoints": None,
+        "attributes": {},
+    }
+    result = annotation_to_crop_space(ann, plan)
+    assert result["bbox"] == [10.0, 10.0, 50.0, 60.0]
+    assert result["keypoints"] is None  # None keypoints pass through unchanged
+
+
+def test_annotation_to_crop_space_failed_plan_returns_unchanged() -> None:
+    plan = plan_crop(
+        image_width=100,
+        image_height=100,
+        bbox=(10.0, 10.0, 0.0, 0.0),  # invalid — zero size
+        padding_px=5,
+        is_skeleton=False,
+    )
+    assert plan.verdict is DeterministicVerdict.FAIL
+    ann = {"bbox": [10.0, 10.0, 0.0, 0.0], "keypoints": None, "attributes": {}}
+    result = annotation_to_crop_space(ann, plan)
+    # No bounds on a failed plan — returns annotation unchanged
+    assert result == ann
 
 
 def test_skeleton_preserves_padded_canvas_with_out_of_image_fill() -> None:
