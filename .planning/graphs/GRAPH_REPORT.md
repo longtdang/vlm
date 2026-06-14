@@ -1,16 +1,16 @@
 # Graph Report - vlm  (2026-06-14)
 
 ## Corpus Check
-- 111 files · ~74,562 words
+- 112 files · ~76,158 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1170 nodes · 1923 edges · 87 communities (80 shown, 7 thin omitted)
-- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 284 edges (avg confidence: 0.6)
+- 1190 nodes · 1960 edges · 89 communities (82 shown, 7 thin omitted)
+- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 294 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `21dd30fd`
+- Built from commit: `ed7e2adc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -95,6 +95,8 @@
 - [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `run_verify()` - 50 edges
@@ -104,9 +106,9 @@
 5. `MockVlmAdapter` - 25 edges
 6. `evaluate_vlm_object()` - 23 edges
 7. `run_import()` - 22 edges
-8. `RuleSpec` - 22 edges
-9. `Phase 7: VLM Verification & Aggregation - Research` - 22 edges
-10. `load_vlm_config()` - 21 edges
+8. `load_verification_config()` - 22 edges
+9. `RuleSpec` - 22 edges
+10. `Phase 7: VLM Verification & Aggregation - Research` - 22 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_padding_px_is_consumed_from_config()` --calls--> `load_verification_config()`  [INFERRED]
@@ -123,19 +125,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (87 total, 7 thin omitted)
+## Communities (89 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.10
-Nodes (57): BaseException, DeterministicRuleConfig, Enum, test_any_failed_rule_forces_object_fail(), test_per_label_override_rules_are_applied(), test_unevaluable_rule_is_converted_to_explicit_fail_reason(), test_unknown_rule_names_are_warning_only_and_skipped(), _valid_annotation() (+49 more)
+Cohesion: 0.09
+Nodes (63): DeterministicRuleConfig, Enum, A keypoint outside the frame marked v=2 (visible) must fail., A keypoint outside the frame correctly marked v=1 (occluded) should pass., A keypoint outside the frame marked v=0 (unlabeled) is not a visible violation., When no out-of-frame indices are present the rule is a no-op., Annotations without out_of_frame_indices (bbox/polygon types) skip silently., _skeleton_annotation_with_out_of_frame() (+55 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (66): _crop_output_path(), _derive_bbox_from_annotation(), _failure_result(), _image_size(), _is_within(), _label_lookup(), _load_raw_config(), main() (+58 more)
+Cohesion: 0.08
+Nodes (60): BaseException, _crop_output_path(), _derive_bbox_from_annotation(), _failure_result(), _image_size(), _is_within(), _label_lookup(), _load_raw_config() (+52 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
-Nodes (63): test_load_vlm_config_default_prompt_template_override(), test_load_vlm_config_defaults(), test_load_vlm_config_invalid_thresholds_raises(), test_load_vlm_config_per_label_enabled_flag(), test_load_vlm_config_per_label_prompt_override(), test_load_vlm_config_per_label_rules(), test_load_vlm_config_per_label_threshold_override(), test_load_vlm_config_raises_on_missing_model_name() (+55 more)
+Nodes (66): test_load_vlm_config_default_prompt_template_override(), test_load_vlm_config_defaults(), test_load_vlm_config_invalid_thresholds_raises(), test_load_vlm_config_per_label_enabled_flag(), test_load_vlm_config_per_label_prompt_override(), test_load_vlm_config_per_label_rules(), test_load_vlm_config_per_label_threshold_override(), test_load_vlm_config_raises_on_missing_model_name() (+58 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.09
@@ -170,8 +172,8 @@ Cohesion: 0.09
 Nodes (22): Adapter strategy, Artifacts, Canonical References, Deferred Ideas, Established Patterns, Existing Code Insights, Implementation Decisions, Integration Points (+14 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.10
-Nodes (42): _object_results(), test_csv_json_ndjson_emitted_with_required_columns(), test_json_ndjson_schema_and_order(), _make_vlm_result(), test_review_queue_adapter_failure_first(), test_serialize_vlm_object_result_has_all_keys(), test_serialize_vlm_object_result_review_failure_reason(), test_vlm_csv_has_correct_header() (+34 more)
+Cohesion: 0.25
+Nodes (20): _make_vlm_result(), test_review_queue_adapter_failure_first(), test_serialize_vlm_object_result_has_all_keys(), test_serialize_vlm_object_result_review_failure_reason(), test_vlm_csv_has_correct_header(), test_vlm_json_has_objects_and_review_queue(), test_vlm_ndjson_one_line_per_result(), test_write_vlm_reports_creates_three_files() (+12 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.11
@@ -417,20 +419,28 @@ Nodes (3): Requirements Archive: v1.0, v1 Requirement Outcomes, Validation Refer
 Cohesion: 0.67
 Nodes (3): Primary (HIGH confidence), Secondary (matches locked CONTEXT.md decisions), Sources
 
+### Community 87 - "Community 87"
+Cohesion: 0.12
+Nodes (32): Bbox-only annotation renders orange-red rectangle outline., Skeleton annotation draws color-coded keypoint dots, no bbox., Polygon annotation draws cyan-blue outline, no keypoint dots., Empty annotation dict produces a copy of the source with no crash., test_annotation_to_crop_space_failed_plan_returns_unchanged(), test_annotation_to_crop_space_non_skeleton(), test_annotation_to_crop_space_polygon_points(), test_annotation_to_crop_space_skeleton() (+24 more)
+
+### Community 88 - "Community 88"
+Cohesion: 0.29
+Nodes (6): Annotation (index 9, skeleton, label_id=4 = clamp-2-arm), Crop image, Current Focus, Known Facts, Symptoms, VLM contradiction
+
 ## Knowledge Gaps
-- **562 isolated node(s):** `ResolvedConfig`, `Path`, `Path`, `ObjectVerificationResult`, `Path` (+557 more)
+- **567 isolated node(s):** `ResolvedConfig`, `Path`, `Path`, `ObjectVerificationResult`, `Path` (+562 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `run_verify()` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 6`, `Community 11`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `DeterministicVerdict` connect `Community 0` to `Community 1`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `ObjectVerificationResult` connect `Community 0` to `Community 1`, `Community 2`, `Community 11`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `run_verify()` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 6`, `Community 11`, `Community 87`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `load_vlm_config()` connect `Community 2` to `Community 1`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `evaluate_vlm_object()` connect `Community 2` to `Community 1`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **Are the 28 inferred relationships involving `ObjectVerificationResult` (e.g. with `BaseException` and `Any`) actually correct?**
   _`ObjectVerificationResult` has 28 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 22 inferred relationships involving `VlmVerdict` (e.g. with `Any` and `Path`) actually correct?**
