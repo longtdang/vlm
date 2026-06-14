@@ -36,7 +36,7 @@
 - [ ] **Step 1: Create scripts package marker**
 
 ```bash
-touch /path/to/repo/scripts/__init__.py
+touch /home/longtdang/KMS/vlm/scripts/__init__.py
 ```
 
 File content: empty.
@@ -48,6 +48,7 @@ File content: empty.
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import re
 import sys
@@ -181,7 +182,7 @@ if str(ROOT) not in sys.path:
 - [ ] **Step 4: Verify the scaffold runs**
 
 ```bash
-cd /path/to/repo && python scripts/crop_validate.py --help
+cd /home/longtdang/KMS/vlm && uv run python scripts/crop_validate.py --help
 ```
 
 Expected: argparse help message showing all flags with no import errors.
@@ -325,7 +326,7 @@ class TestSafeToken:
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_helpers.py -v 2>&1 | head -30
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_helpers.py -v 2>&1 | head -30
 ```
 
 Expected: `ImportError` — functions not yet defined.
@@ -333,10 +334,10 @@ Expected: `ImportError` — functions not yet defined.
 - [ ] **Step 3: Implement helpers in scripts/crop_validate.py**
 
 Add these functions after the constants block:
+
+> Note: `json` was added to the scaffold imports in Task 1 (`import json` at the top of the file). No re-import needed here.
+
 ```python
-import json  # add to imports at top of file
-
-
 def _annotation_type(datumaro_type: str | None) -> str:
     """Map Datumaro annotation type string to our three-way type: detection/segmentation/skeleton."""
     if datumaro_type == "polygon":
@@ -391,8 +392,7 @@ def _label_lookup(data: dict[str, Any]) -> dict[int, str]:
 
 
 def _safe_token(value: str) -> str:
-    import re as _re
-    cleaned = _re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("._")
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("._")
     return cleaned or "unknown"
 
 
@@ -416,7 +416,7 @@ def _get_polygon_points(annotation: dict[str, Any]) -> list[list[float]] | None:
 - [ ] **Step 4: Run tests to verify they pass**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_helpers.py -v
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_helpers.py -v
 ```
 
 Expected: all tests PASS.
@@ -519,7 +519,7 @@ class TestEpToVerdict:
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_vlm_parse.py -v 2>&1 | head -20
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_vlm_parse.py -v 2>&1 | head -20
 ```
 
 Expected: `ImportError`.
@@ -564,7 +564,7 @@ def _ep_to_verdict(ep: float | None, pass_threshold: float, review_threshold: fl
 - [ ] **Step 4: Run tests to verify they pass**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_vlm_parse.py -v
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_vlm_parse.py -v
 ```
 
 Expected: all PASS.
@@ -592,7 +592,6 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import fiftyone as fo
 import pytest
@@ -742,7 +741,7 @@ class TestSkeletonSample:
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_fo_sample.py -v 2>&1 | head -20
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_fo_sample.py -v 2>&1 | head -20
 ```
 
 Expected: `ImportError`.
@@ -819,7 +818,7 @@ def _to_fo_sample(
 - [ ] **Step 4: Run tests to verify they pass**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_fo_sample.py -v
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_fo_sample.py -v
 ```
 
 Expected: all PASS.
@@ -1080,33 +1079,34 @@ def _apply_vlm(
 ) -> None:
     """Apply Qwen2.5-VL VQA to each crop, parse responses, write vlm_verdict field."""
     print(f"[crop_validate] Registering plugin source: {plugin_source}")
-    foz.register_zoo_model_source(plugin_source, overwrite=False)
+    try:
+        foz.register_zoo_model_source(plugin_source)
+    except Exception:
+        pass  # already registered — idempotent
 
     print(f"[crop_validate] Loading model: {model_name}")
     model = foz.load_zoo_model(model_name)
     model.operation = "vqa"
 
-    # Group samples by annotation_type and run apply_model once per type
+    # Group samples by annotation_type and run apply_model once per type.
+    # model.prompt is a global property — we set one prompt per type group.
+    # Prompts use "{label}" as a placeholder; at type-level we fill it with
+    # the type name (e.g. "detection"). For per-label prompts, group by
+    # annotation_label instead and use LABEL_PROMPTS.get(label) overrides.
     for ann_type in ("detection", "segmentation", "skeleton"):
         view = dataset.match(F("annotation_type") == ann_type)
         if len(view) == 0:
             continue
         prompt_template = DEFAULT_PROMPTS[ann_type]
-        # Use a generic placeholder label in the global prompt; per-label is handled post-hoc
-        # by substituting the actual label per sample when parsing
         model.prompt = prompt_template.replace("{label}", ann_type)
         print(f"[crop_validate] Running VQA for {len(view)} '{ann_type}' samples…")
         view.apply_model(model, label_field="vlm_raw_response")
 
     # Parse raw VQA responses and write fo.Classification to vlm_verdict
-    import json as _json  # already imported at module level but explicit for clarity
     updated = 0
     for sample in dataset.iter_samples(progress=True):
         raw = sample.get_field("vlm_raw_response")
         raw_str = str(raw) if raw is not None else ""
-        # Build a label-specific prompt for parsing context (informational)
-        label = sample.get_field("annotation_label") or ""
-        ann_type = sample.get_field("annotation_type") or "detection"
         ep, reason = _parse_vlm_response(raw_str)
         verdict = _ep_to_verdict(ep, pass_threshold, review_threshold)
         confidence = ep if ep is not None else 0.0
@@ -1236,7 +1236,7 @@ class TestWriteReport:
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_report.py -v 2>&1 | head -20
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_report.py -v 2>&1 | head -20
 ```
 
 Expected: FAIL (stub `_write_report` does nothing, so file not created).
@@ -1314,7 +1314,7 @@ def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> 
 - [ ] **Step 4: Run tests to verify they pass**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_report.py -v
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_report.py -v
 ```
 
 Expected: all PASS.
@@ -1340,7 +1340,6 @@ Create `tests/crop_validate/test_integration.py`:
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 
 import pytest
@@ -1400,8 +1399,9 @@ def test_no_vlm_builds_crops_and_report(
     json_path, image_dir = datumaro_fixture
     output_dir = tmp_path / "output"
 
-    from scripts.crop_validate import main as _main_fn
     import argparse
+    import fiftyone as fo
+    from scripts.crop_validate import _build_dataset, _write_report
 
     # Build args namespace directly (avoids sys.argv mutation)
     args = argparse.Namespace(
@@ -1418,9 +1418,6 @@ def test_no_vlm_builds_crops_and_report(
         overwrite_dataset=True,
         no_vlm=True,
     )
-
-    from scripts.crop_validate import _build_dataset, _write_report
-    import fiftyone as fo
 
     dataset = _build_dataset(args)
     try:
@@ -1502,7 +1499,7 @@ def test_crops_have_annotation_overlays(
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_integration.py -v 2>&1 | head -30
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_integration.py -v 2>&1 | head -30
 ```
 
 Expected: FAIL (functions not yet wired, or assertion errors).
@@ -1512,7 +1509,7 @@ Expected: FAIL (functions not yet wired, or assertion errors).
 Fix any wiring issues in `scripts/crop_validate.py` (the most common issue will be the `_build_dataset` loop not correctly matching annotations to images via `image_index`/`build_matches`).
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/test_integration.py -v
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/test_integration.py -v
 ```
 
 Expected: both integration tests PASS.
@@ -1520,7 +1517,7 @@ Expected: both integration tests PASS.
 - [ ] **Step 4: Run the full test suite**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/crop_validate/ -v
+cd /home/longtdang/KMS/vlm && uv run pytest tests/crop_validate/ -v
 ```
 
 Expected: all tests PASS.
@@ -1539,7 +1536,7 @@ git commit -m "test: add end-to-end integration tests for crop_validate --no-vlm
 - [ ] **Step 1: Run all project tests (regression check)**
 
 ```bash
-cd /path/to/repo && uv run pytest tests/ -v --tb=short 2>&1 | tail -20
+cd /home/longtdang/KMS/vlm && uv run pytest tests/ -v --tb=short 2>&1 | tail -20
 ```
 
 Expected: all tests pass (no regressions in existing tests).
@@ -1547,7 +1544,7 @@ Expected: all tests pass (no regressions in existing tests).
 - [ ] **Step 2: Verify CLI help and --no-vlm smoke test**
 
 ```bash
-cd /path/to/repo && python scripts/crop_validate.py --help
+cd /home/longtdang/KMS/vlm && uv run python scripts/crop_validate.py --help
 ```
 
 Expected: full help message with all flags documented.
