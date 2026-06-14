@@ -128,12 +128,19 @@ def evaluate_out_of_frame_occluded(annotation: dict[str, Any], _spec: RuleSpec) 
     ``out_of_frame_indices``. If the key is absent or empty, the rule passes.
 
     Fails if any out-of-frame point has visibility=2 (explicitly marked visible).
+
+    The rule reads ``original_visibility`` when available (populated by ``plan_crop()``
+    before the auto-correction step), falling back to ``visibility`` for backward
+    compatibility.  This prevents a false-pass caused by ``plan_crop()`` silently
+    changing out-of-frame visibility 2→1 in ``adjusted_visibility`` before the rule runs.
     """
     out_of_frame = annotation.get("out_of_frame_indices")
     if not isinstance(out_of_frame, list) or not out_of_frame:
         return DeterministicVerdict.PASS, None
 
-    visibility = annotation.get("visibility")
+    # Prefer original_visibility (pre-adjustment) so the rule sees what the annotator
+    # actually submitted.  Fall back to visibility for backward compatibility.
+    visibility = annotation.get("original_visibility") or annotation.get("visibility")
     if not isinstance(visibility, list):
         raise UnevaluableRuleError("visibility_missing_or_malformed")
 

@@ -213,3 +213,35 @@ def test_out_of_frame_indices_missing_passes() -> None:
         annotation=ann, config=config,
     )
     assert outcome.result.verdict is DeterministicVerdict.PASS
+
+
+def test_out_of_frame_visible_in_original_fails_after_adjustment() -> None:
+    """Rule must detect the original annotator violation even after plan_crop adjusts visibility.
+
+    run_verify.py stores crop.adjusted_visibility in annotation_payload["visibility"], which
+    silently changes out-of-frame points from 2→1 before the rule runs.  The rule must read
+    annotation["original_visibility"] (the pre-adjustment copy) to see that the annotator
+    originally marked those points as visible (=2).
+
+    Before fix: rule reads visibility[0]==1  → no violation → PASS  (false pass)
+    After fix:  rule reads original_visibility[0]==2 → violation → FAIL (correct)
+    """
+    config, _ = load_verification_config(
+        {"rules": {"global": {"visibility-format": ["out_of_frame_occluded"], "skeleton-count": []}}}
+    )
+    ann = {
+        "bbox": [10.0, 10.0, 40.0, 40.0],
+        "attributes": {},
+        "keypoints": [[-5.0, -5.0], [20.0, 20.0], [30.0, 30.0]],
+        # adjusted_visibility: out-of-frame point at idx=0 already auto-corrected to 1
+        "visibility": [1, 2, 1],
+        # original_visibility: what the annotator actually submitted (idx=0 was visible=2)
+        "original_visibility": [2, 2, 1],
+        "out_of_frame_indices": [0],
+    }
+    outcome = evaluate_object(
+        sample_id="s", object_id="o", label="x", crop_path="x.png",
+        annotation=ann, config=config,
+    )
+    assert outcome.result.verdict is DeterministicVerdict.FAIL
+    assert any("out_of_frame_points_visible" in (r or "") for r in outcome.result.failure_reasons)

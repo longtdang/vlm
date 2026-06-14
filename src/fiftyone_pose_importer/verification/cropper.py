@@ -21,6 +21,7 @@ class CropPlan:
     output_size: tuple[int, int] | None
     paste_offset: tuple[int, int] | None
     adjusted_visibility: list[int] | None
+    original_visibility: list[int] | None
     out_of_frame_point_indices: list[int]
 
 
@@ -129,6 +130,7 @@ def plan_crop(
             output_size=None,
             paste_offset=None,
             adjusted_visibility=visibility,
+            original_visibility=visibility,
             out_of_frame_point_indices=[],
         )
 
@@ -143,6 +145,7 @@ def plan_crop(
         keypoints=keypoints,
         visibility=visibility,
     )
+    original_visibility = list(visibility) if visibility is not None else None
 
     if is_skeleton:
         output_size = (max(0, px1 - px0), max(0, py1 - py0))
@@ -163,6 +166,7 @@ def plan_crop(
         output_size=output_size,
         paste_offset=paste_offset,
         adjusted_visibility=adjusted_visibility,
+        original_visibility=original_visibility,
         out_of_frame_point_indices=out_of_frame_indices,
     )
 
