@@ -7,7 +7,7 @@ from typing import Any
 import fiftyone as fo
 
 from .config_loader import load_config
-from .datumaro_reader import load_datumaro
+from .datumaro_reader import load_datumaro, parse_keypoints_and_visibility
 from .image_index import build_image_index
 from .matching import build_matches
 from .pose_contract import (
@@ -18,34 +18,6 @@ from .pose_contract import (
 )
 from .preflight import PreflightReport
 from .summary import write_summary
-
-
-def _extract_points_and_visibility(annotation: dict[str, Any]) -> tuple[list[list[float]], list[int], list[int], bool]:
-    ann_type = annotation.get("type")
-    raw_points = annotation.get("points") or []
-    source_visibility = annotation.get("visibility")
-
-    if ann_type == "skeleton":
-        if len(raw_points) % 3 != 0:
-            raise ValueError("Invalid skeleton points payload (must be x,y,v triplets)")
-        points = [[raw_points[i], raw_points[i + 1]] for i in range(0, len(raw_points), 3)]
-        source_visibility = [int(raw_points[i + 2]) for i in range(0, len(raw_points), 3)]
-        visibility_defaulted = False
-        visibility = list(source_visibility)
-    else:
-        visibility_defaulted = source_visibility is None
-        visibility = list(source_visibility) if source_visibility is not None else []
-        if len(raw_points) % 2 != 0:
-            raise ValueError("Invalid points payload (must be x,y pairs)")
-        points = [[raw_points[i], raw_points[i + 1]] for i in range(0, len(raw_points), 2)]
-        if not visibility:
-            visibility = [2] * len(points)
-
-    if len(visibility) != len(points):
-        raise ValueError("Visibility length does not match points length")
-    if any(vis not in (0, 1, 2) for vis in visibility):
-        raise ValueError("Visibility values must be one of 0, 1, or 2")
-    return points, visibility, list(source_visibility or []), visibility_defaulted
 
 
 def _normalize_points(points: list[list[float]], width: float, height: float, visibility: list[int]) -> list[list[float]]:
@@ -250,7 +222,7 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
                 contract = _resolve_contract(contract_bundle, ann)
                 field_name = _target_field_for_annotation(ann, contract_bundle, cfg.label_field)
                 label_count = len(contract.labels)
-                points, visibility, source_visibility, visibility_defaulted = _extract_points_and_visibility(ann)
+                points, visibility, source_visibility, visibility_defaulted = parse_keypoints_and_visibility(ann)
                 if width is None or height is None or width <= 0 or height <= 0:
                     raise SchemaContractError("missing_image_size", "Missing valid image size metadata")
                 points, visibility = _align_points_to_contract(points, visibility, label_count, sample_id)

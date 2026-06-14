@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from .datumaro_reader import load_datumaro
+from .datumaro_reader import load_datumaro, parse_keypoints_and_visibility
 from .verification.config import load_verification_config
 from .verification.cropper import materialize_crop, plan_crop
 from .verification.engine import evaluate_object
@@ -56,32 +56,6 @@ def _label_lookup(data: dict[str, Any]) -> dict[int, str]:
         else:
             lookup[index] = f"label-{index}"
     return lookup
-
-
-def _keypoints_visibility(annotation: dict[str, Any]) -> tuple[list[list[float]], list[int]]:
-    keypoints = annotation.get("keypoints")
-    visibility = annotation.get("visibility")
-
-    if isinstance(keypoints, list) and all(isinstance(point, list) and len(point) == 2 for point in keypoints):
-        parsed_points = [[float(point[0]), float(point[1])] for point in keypoints]
-        if isinstance(visibility, list) and len(visibility) == len(parsed_points):
-            parsed_visibility = [int(v) for v in visibility]
-        else:
-            parsed_visibility = [2 for _ in parsed_points]
-        return parsed_points, parsed_visibility
-
-    points = annotation.get("points")
-    if isinstance(points, list):
-        if len(points) % 3 == 0 and annotation.get("type") == "skeleton":
-            parsed_points = [[float(points[idx]), float(points[idx + 1])] for idx in range(0, len(points), 3)]
-            parsed_visibility = [int(points[idx + 2]) for idx in range(0, len(points), 3)]
-            return parsed_points, parsed_visibility
-        if len(points) % 2 == 0:
-            parsed_points = [[float(points[idx]), float(points[idx + 1])] for idx in range(0, len(points), 2)]
-            parsed_visibility = [2 for _ in parsed_points]
-            return parsed_points, parsed_visibility
-
-    return [], []
 
 
 def _parse_bbox(annotation: dict[str, Any]) -> tuple[float, float, float, float] | None:
@@ -261,7 +235,10 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
             crop_file = _crop_output_path(run_dir=run_dir, sample_id=sample_id, object_id=object_id)
             crop_path = str(crop_file)
 
-            keypoints, visibility = _keypoints_visibility(annotation)
+            try:
+                keypoints, visibility, _, _ = parse_keypoints_and_visibility(annotation)
+            except ValueError:
+                keypoints, visibility = [], []
             bbox = _parse_bbox(annotation)
             if bbox is None:
                 bbox = _derive_bbox_from_annotation(annotation)
