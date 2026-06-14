@@ -265,6 +265,9 @@ verification:
             Your task: for each GREEN or ORANGE dot, decide if its color is correct.
               - GREEN dot on a surface that is BLOCKED (hidden behind a roll or object) → WRONG
               - ORANGE dot on a surface that is DIRECTLY VISIBLE (nothing in front) → WRONG
+              - DOMAIN RULE: if a GREEN dot appears to sit ON TOP OF a cylindrical roll
+                (the dot is on the roll's surface), the clamp arm at that position is behind
+                the roll → it MUST be orange. A green dot ON a roll surface is always WRONG.
             Check every dot individually. Even ONE clearly wrong dot color scores 0.5 or higher.
             Scoring guide:
               0.0–0.2 = all green/orange dots correctly reflect visible vs hidden
@@ -272,6 +275,7 @@ verification:
               0.5–1.0 = one or more dots have clearly the wrong color
             Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
             {"error_probability": 0.05, "reason": "all dot colors match actual visibility"}
+      clamp-3-arm:
         enabled: true
         # skeleton type: bbox is auto-derived from keypoints — skip bbox rules.
         rules: ["keypoint_position", "occlusion_state"]
@@ -304,6 +308,9 @@ verification:
             Your task: for each GREEN or ORANGE dot, decide if its color is correct.
               - GREEN dot on a surface that is BLOCKED (hidden behind a roll or object) → WRONG
               - ORANGE dot on a surface that is DIRECTLY VISIBLE (nothing in front) → WRONG
+              - DOMAIN RULE: if a GREEN dot appears to sit ON TOP OF a cylindrical roll
+                (the dot is on the roll's surface), the clamp arm at that position is behind
+                the roll → it MUST be orange. A green dot ON a roll surface is always WRONG.
             Check every dot individually. Even ONE clearly wrong dot color scores 0.5 or higher.
             Scoring guide:
               0.0–0.2 = all green/orange dots correctly reflect visible vs hidden
