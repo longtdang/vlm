@@ -8,7 +8,7 @@ verification:
   output_dir: ./verification-runs
   image_dir: ./data/images        # optional: overrides top-level image_dir for verify only
   deterministic:
-    padding_px: 16                # pixels of padding added around each crop
+    padding_px: 25                # pixels of padding added around each crop
     rules:
       global:
         # --- detection (applies to ALL annotation types) ---
@@ -63,8 +63,9 @@ verification:
 
   vlm:
     enabled: true
-    model_name: Qwen/Qwen2.5-VL-7B-Instruct
-    zoo_model_source: https://github.com/harpreetsahota204/qwen2_5_vl
+    model_name: qwen3-vl-2b-instruct-torch
+    # model_name: Qwen/Qwen2.5-VL-3B-Instruct
+    # zoo_model_source: https://github.com/harpreetsahota204/qwen2_5_vl
     # Built-in zoo models (no zoo_model_source needed):
     #   qwen3-vl-2b-instruct-torch
     #   qwen3-vl-4b-instruct-torch
@@ -74,8 +75,8 @@ verification:
       review_below: 0.60          # risk ≤ 0.60 → REVIEW, above → FAIL
     generation:
       max_new_tokens: 256
-      timeout_seconds: 60.0       # increased for local CPU/GPU inference; low values force REVIEW via adapter_timeout
-      batch_size: 1               # increase to 4–16 for higher GPU utilization (monitor VRAM)
+      timeout_seconds: 300.0       # increased for local CPU/GPU inference; low values force REVIEW via adapter_timeout
+      batch_size: 2               # increase to 4–16 for higher GPU utilization (monitor VRAM)
 
     # DEFAULT PROMPT TEMPLATE
     # ─────────────────────────
@@ -95,6 +96,7 @@ verification:
     # overlaid directly on the pixels:
     #   - Bounding box: orange-red rectangle outline
     #   - Keypoints: colored dots — green (visible), orange (occluded), gray (unlabeled)
+    #                plus a small white text label above each dot showing its anatomical name
     # Vision rules (bbox_*, keypoint_*, occlusion_*) use the drawn overlay;
     # attribute rules (clamp_type, roll_count) also receive a JSON payload.
     #
@@ -138,33 +140,62 @@ verification:
         # Per-rule prompt overrides — use {label}, {rule}, {annotation_fields_json}.
         prompts:
           bbox_localization: |
-            You are validating label '{label}' for rule '{rule}'.
-            The image shows a crop that may contain multiple objects.
-            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
-            Judge whether the bounding box tightly localizes the intended object.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            This crop shows one annotated object for label '{label}'.
+            An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
+            Question: Is the orange-red box placed on the CORRECT type of object — a '{label}' —
+            and NOT on empty background, a roll alone, or a completely different object type?
+            Do NOT judge whether the box is tight or loose here. Only judge object identity.
+            Scoring guide:
+              0.0–0.2 = the box is clearly on a correct '{label}' object
+              0.2–0.6 = the box is on the right object but placement is ambiguous or partially off
+              0.6–1.0 = the box is on the wrong object type, or mostly on empty background
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "box is on the correct forklift"}
           bbox_coverage: |
-            You are validating label '{label}' for rule '{rule}'.
-            The image shows a crop that may contain multiple objects.
-            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
-            Judge whether the bbox covers the full object without major clipping or excess background.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            This crop shows one annotated object for label '{label}'.
+            An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
+            Question: Does the orange-red box TIGHTLY enclose the '{label}'?
+            A tight box has its edges close to the true object boundary, with no large empty space
+            inside and no significant part of the object cut off.
+            IMPORTANT: A box that is 1.5x or more the object's visual size — with large empty regions
+            inside — is a HIGH error even if the object is technically inside it.
+            Scoring guide:
+              0.0–0.2 = box tightly covers the full object, edges close to object boundary
+              0.2–0.6 = box is slightly loose or a small part of the object is clipped
+              0.6–1.0 = box is much larger than the object (lots of empty space inside), OR
+                        a significant part of the object extends outside the box
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "box tightly covers the full forklift"}
           clamp_type: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the clamp-type attribute value matches the clamp visually present in the crop.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            Annotation data: {annotation_fields_json}
+            The annotation above states the clamp type for label '{label}'.
+            A "2-arm" clamp has exactly 2 gripping arms extending from its central hub.
+            A "3-arm" clamp has exactly 3 gripping arms extending from its central hub.
+            Step 1: Look at the clamp attached to the forklift inside the orange-red bounding box.
+            Step 2: Count the number of distinct gripping arms extending from the central hub.
+            Step 3: Compare your arm count to the stated type ("2-arm" = 2, "3-arm" = 3).
+            IMPORTANT: If your count clearly does NOT match the stated type, score 0.7 or higher.
+            If the clamp is too occluded to count arms reliably, score 0.5 — never guess PASS.
+            Scoring guide:
+              0.0–0.2 = your arm count clearly matches the stated type
+              0.2–0.5 = clamp is partially occluded, arm count is uncertain
+              0.6–1.0 = your arm count clearly does NOT match the stated type
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "counted 2 arms, matches stated 2-arm type"}
           roll_count: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the roll-count attribute matches the number of rolls visible in the crop.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            Annotation data: {annotation_fields_json}
+            The annotation above states the number of rolls the '{label}' is carrying.
+            Step 1: Look inside the orange-red bounding box.
+            Step 2: Count the visible cylindrical rolls that the forklift is carrying or holding.
+            Step 3: Compare your count to the stated number.
+            IMPORTANT: If your count clearly does NOT match the stated number, score 0.7 or higher.
+            If rolls are too occluded to count reliably, score 0.5 — never guess PASS.
+            Scoring guide:
+              0.0–0.2 = your roll count clearly matches the stated number
+              0.2–0.5 = partially occluded, roll count is uncertain
+              0.6–1.0 = your roll count clearly does NOT match the stated number
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "counted 2 rolls, matches stated count"}
         # Per-label thresholds (optional — inherits global when absent):
         # thresholds:
         #   pass_below: 0.15
@@ -175,19 +206,32 @@ verification:
         rules: ["bbox_localization", "bbox_coverage"]
         prompts:
           bbox_localization: |
-            You are validating label '{label}' for rule '{rule}'.
-            The image shows a crop that may contain multiple objects.
-            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
-            Judge whether the bounding box tightly localizes the intended object.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            This crop shows one annotated object for label '{label}'.
+            An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
+            Question: Is the orange-red box placed on the CORRECT type of object — a '{label}' —
+            and NOT on empty background or a completely different object type?
+            Do NOT judge whether the box is tight or loose here. Only judge object identity.
+            Scoring guide:
+              0.0–0.2 = the box is clearly on a correct '{label}' object
+              0.2–0.6 = the box is on the right object but placement is ambiguous or partially off
+              0.6–1.0 = the box is on the wrong object type, or mostly on empty background
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "box is on the correct forklift"}
           bbox_coverage: |
-            You are validating label '{label}' for rule '{rule}'.
-            The image shows a crop that may contain multiple objects.
-            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
-            Judge whether the bbox covers the full object without major clipping or excess background.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            This crop shows one annotated object for label '{label}'.
+            An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
+            Question: Does the orange-red box TIGHTLY enclose the '{label}'?
+            A tight box has its edges close to the true object boundary, with no large empty space
+            inside and no significant part of the object cut off.
+            IMPORTANT: A box that is 1.5x or more the object's visual size — with large empty regions
+            inside — is a HIGH error even if the object is technically inside it.
+            Scoring guide:
+              0.0–0.2 = box tightly covers the full object, edges close to object boundary
+              0.2–0.6 = box is slightly loose or a small part of the object is clipped
+              0.6–1.0 = box is much larger than the object (lots of empty space inside), OR
+                        a significant part of the object extends outside the box
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "box tightly covers the full forklift"}
       clamp-2-arm:
         enabled: true
         # skeleton type: bbox is auto-derived from keypoints — skip bbox rules.
@@ -195,49 +239,78 @@ verification:
         prompts:
           keypoint_position: |
             You are verifying keypoint placement for the '{label}' object (rule: '{rule}').
-            The image shows a crop that may contain multiple objects.
-            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
-            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether keypoints are placed correctly on expected clamp landmarks.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            Colored dots mark structural keypoints. Each dot has a small white text label above it
+            showing its name. Do NOT confuse these dots with text, stickers, or printed labels in scene.
+            Dot colors: green = visible, orange = occluded (hidden behind another object), gray = unlabeled.
+            Note: orange dots may appear ON rolls or occluding objects — this is intentional and CORRECT.
+            For each dot: ignore its color. Only judge whether the dot's POSITION is on a plausible
+            structural landmark for a '{label}' (arm joint, hub, contact pad, etc.).
+            A dot is WRONG if it sits on: empty background, a roll instead of the clamp structure,
+            a text sticker, or clearly the wrong part of the object.
+            Scoring guide:
+              0.0–0.2 = all dots are on plausible structural positions for a '{label}'
+              0.2–0.5 = one dot looks slightly misplaced but roughly in the right area
+              0.5–1.0 = one or more dots are clearly on the wrong location
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "all keypoints on plausible structural positions"}
           occlusion_state: |
-            You are verifying the occlusion annotation for the '{label}' object (rule: '{rule}').
-            The image shows a crop that may contain multiple objects.
-            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
-            Dot color meaning:
-              green  = this part of the '{label}' structure is directly visible in the image
-              orange = this part of the '{label}' structure is hidden behind another object (e.g. a roll); the dot marks where that surface is, even though it is blocked
-              gray   = this keypoint is unlabeled
-            Important: an orange dot whose position falls on or overlaps a roll or another object is CORRECT — it marks a hidden surface of the '{label}'.
-            Judge whether each dot color matches the actual visibility of the '{label}' structure at that position.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
-      clamp-3-arm:
+            You are checking visibility labels for the '{label}' object (rule: '{rule}').
+            Colored dots mark structural keypoints. Each dot has a small white text label above it.
+            Dot color rules (STRICT):
+              GREEN dot  = the physical surface at that exact position IS directly visible to the camera.
+                           Nothing is in front of it blocking your view.
+              ORANGE dot = the physical surface at that position IS BLOCKED by another object
+                           (e.g. a roll, a wall, another clamp) — you cannot see through to that surface.
+              GRAY dot   = unlabeled, skip.
+            Your task: for each GREEN or ORANGE dot, decide if its color is correct.
+              - GREEN dot on a surface that is BLOCKED (hidden behind a roll or object) → WRONG
+              - ORANGE dot on a surface that is DIRECTLY VISIBLE (nothing in front) → WRONG
+            Check every dot individually. Even ONE clearly wrong dot color scores 0.5 or higher.
+            Scoring guide:
+              0.0–0.2 = all green/orange dots correctly reflect visible vs hidden
+              0.2–0.5 = one dot's visibility is uncertain or borderline
+              0.5–1.0 = one or more dots have clearly the wrong color
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "all dot colors match actual visibility"}
         enabled: true
         # skeleton type: bbox is auto-derived from keypoints — skip bbox rules.
         rules: ["keypoint_position", "occlusion_state"]
         prompts:
           keypoint_position: |
             You are verifying keypoint placement for the '{label}' object (rule: '{rule}').
-            The image shows a crop that may contain multiple objects.
-            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
-            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether keypoints are placed correctly on expected clamp landmarks.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            Colored dots mark structural keypoints. Each dot has a small white text label above it
+            showing its name. Do NOT confuse these dots with text, stickers, or printed labels in scene.
+            Dot colors: green = visible, orange = occluded (hidden behind another object), gray = unlabeled.
+            Note: orange dots may appear ON rolls or occluding objects — this is intentional and CORRECT.
+            For each dot: ignore its color. Only judge whether the dot's POSITION is on a plausible
+            structural landmark for a '{label}' (arm joint, hub, contact pad, etc.).
+            A dot is WRONG if it sits on: empty background, a roll instead of the clamp structure,
+            a text sticker, or clearly the wrong part of the object.
+            Scoring guide:
+              0.0–0.2 = all dots are on plausible structural positions for a '{label}'
+              0.2–0.5 = one dot looks slightly misplaced but roughly in the right area
+              0.5–1.0 = one or more dots are clearly on the wrong location
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "all keypoints on plausible structural positions"}
           occlusion_state: |
-            You are verifying the occlusion annotation for the '{label}' object (rule: '{rule}').
-            The image shows a crop that may contain multiple objects.
-            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
-            Dot color meaning:
-              green  = this part of the '{label}' structure is directly visible in the image
-              orange = this part of the '{label}' structure is hidden behind another object (e.g. a roll); the dot marks where that surface is, even though it is blocked
-              gray   = this keypoint is unlabeled
-            Important: an orange dot whose position falls on or overlaps a roll or another object is CORRECT — it marks a hidden surface of the '{label}'.
-            Judge whether each dot color matches the actual visibility of the '{label}' structure at that position.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            You are checking visibility labels for the '{label}' object (rule: '{rule}').
+            Colored dots mark structural keypoints. Each dot has a small white text label above it.
+            Dot color rules (STRICT):
+              GREEN dot  = the physical surface at that exact position IS directly visible to the camera.
+                           Nothing is in front of it blocking your view.
+              ORANGE dot = the physical surface at that position IS BLOCKED by another object
+                           (e.g. a roll, a wall, another clamp) — you cannot see through to that surface.
+              GRAY dot   = unlabeled, skip.
+            Your task: for each GREEN or ORANGE dot, decide if its color is correct.
+              - GREEN dot on a surface that is BLOCKED (hidden behind a roll or object) → WRONG
+              - ORANGE dot on a surface that is DIRECTLY VISIBLE (nothing in front) → WRONG
+            Check every dot individually. Even ONE clearly wrong dot color scores 0.5 or higher.
+            Scoring guide:
+              0.0–0.2 = all green/orange dots correctly reflect visible vs hidden
+              0.2–0.5 = one dot's visibility is uncertain or borderline
+              0.5–1.0 = one or more dots have clearly the wrong color
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "all dot colors match actual visibility"}
       roll-keypoints:
         enabled: true
         # skeleton type: bbox is auto-derived from keypoints — skip bbox rules.
@@ -245,24 +318,39 @@ verification:
         prompts:
           keypoint_position: |
             You are verifying keypoint placement for the '{label}' object (rule: '{rule}').
-            The image shows a crop that may contain multiple objects.
-            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
-            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether roll keypoints are placed correctly on expected landmarks.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            Colored dots mark structural keypoints. Each dot has a small white text label above it
+            showing its name. Do NOT confuse these dots with text, stickers, or printed labels in scene.
+            Dot colors: green = visible, orange = occluded (hidden behind another object), gray = unlabeled.
+            Note: orange dots may appear ON other objects — this is intentional and CORRECT.
+            For each dot: ignore its color. Only judge whether the dot's POSITION is on a plausible
+            structural landmark for a '{label}' (roll edge, center, end cap, etc.).
+            A dot is WRONG if it sits on: empty background, a non-roll structure,
+            a text sticker, or clearly the wrong part of the object.
+            Scoring guide:
+              0.0–0.2 = all dots are on plausible structural positions for a '{label}'
+              0.2–0.5 = one dot looks slightly misplaced but roughly in the right area
+              0.5–1.0 = one or more dots are clearly on the wrong location
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "all keypoints on plausible structural positions"}
           occlusion_state: |
-            You are verifying the occlusion annotation for the '{label}' object (rule: '{rule}').
-            The image shows a crop that may contain multiple objects.
-            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
-            Dot color meaning:
-              green  = this part of the '{label}' structure is directly visible in the image
-              orange = this part of the '{label}' structure is hidden behind another object; the dot marks where that surface is, even though it is blocked
-              gray   = this keypoint is unlabeled
-            Important: an orange dot whose position falls on or overlaps another object is CORRECT — it marks a hidden surface of the '{label}'.
-            Judge whether each dot color matches the actual visibility of the '{label}' structure at that position.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+            You are checking visibility labels for the '{label}' object (rule: '{rule}').
+            Colored dots mark structural keypoints. Each dot has a small white text label above it.
+            Dot color rules (STRICT):
+              GREEN dot  = the physical surface at that exact position IS directly visible to the camera.
+                           Nothing is in front of it blocking your view.
+              ORANGE dot = the physical surface at that position IS BLOCKED by another object
+                           — you cannot see through to that surface.
+              GRAY dot   = unlabeled, skip.
+            Your task: for each GREEN or ORANGE dot, decide if its color is correct.
+              - GREEN dot on a surface that is BLOCKED (hidden behind another object) → WRONG
+              - ORANGE dot on a surface that is DIRECTLY VISIBLE (nothing in front) → WRONG
+            Check every dot individually. Even ONE clearly wrong dot color scores 0.5 or higher.
+            Scoring guide:
+              0.0–0.2 = all green/orange dots correctly reflect visible vs hidden
+              0.2–0.5 = one dot's visibility is uncertain or borderline
+              0.5–1.0 = one or more dots have clearly the wrong color
+            Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
+            {"error_probability": 0.05, "reason": "all dot colors match actual visibility"}
       # mask/polygon labels — none of the 6 VLM rules apply (no manually-placed bbox,
       # no keypoints, no relevant attributes in the annotation payload).
       clamp-mask:
