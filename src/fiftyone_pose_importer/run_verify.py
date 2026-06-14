@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 import yaml
 
 from .datumaro_reader import load_datumaro, parse_keypoints_and_visibility
+from .pose_contract import SchemaContractError, extract_skeleton_contract_bundle
 from .verification.config import load_verification_config
 from .verification.cropper import annotation_to_crop_space, materialize_crop, plan_crop, render_annotation_overlay
 from .verification.engine import evaluate_object
@@ -201,6 +202,12 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
 
     label_names = _label_lookup(data)
 
+    # Extract skeleton point-name labels so they can be drawn on crop overlays.
+    try:
+        _skeleton_bundle = extract_skeleton_contract_bundle(data)
+    except (SchemaContractError, Exception):
+        _skeleton_bundle = None
+
     ndjson_trace_path = run_dir / "deterministic_trace.ndjson"
 
     class _StreamingResults:
@@ -357,14 +364,23 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                                 for i in range(0, len(raw_pts) - 1, 2)
                             ]
 
+                    # Resolve skeleton point names for this annotation
+                    _skeleton_labels: list[str] | None = None
+                    if is_skeleton and _skeleton_bundle is not None:
+                        _contract = _skeleton_bundle.by_label_id.get(label_id) if isinstance(label_id, int) else None
+                        if _contract is None:
+                            _contract = _skeleton_bundle.default
+                        if _contract is not None:
+                            _skeleton_labels = _contract.labels
+
                     annotation_payload = {
                         "bbox": list(bbox),
                         "attributes": annotation.get("attributes") if isinstance(annotation.get("attributes"), dict) else {},
                         "keypoints": keypoints,
                         "visibility": crop.adjusted_visibility if crop.adjusted_visibility is not None else visibility,
-                        "original_visibility": crop.original_visibility,
                         "polygon_points": polygon_points,
                         "out_of_frame_indices": crop.out_of_frame_point_indices,
+                        "point_names": _skeleton_labels,
                     }
                     # Translate coordinates to crop-space so VLM rules can correlate
                     # annotation values with what the model sees in the crop image.

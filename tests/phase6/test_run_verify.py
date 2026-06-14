@@ -533,3 +533,75 @@ def test_derive_bbox_from_annotation_no_points_returns_none() -> None:
     assert _derive_bbox_from_annotation({"type": "bbox", "bbox": [1, 2, 3, 4]}) is None
     assert _derive_bbox_from_annotation({"type": "polygon"}) is None
     assert _derive_bbox_from_annotation({}) is None
+
+
+def test_run_verify_skeleton_overlay_includes_point_names(tmp_path: Path) -> None:
+    """run_verify injects skeleton point names into the overlay so labels appear on crop images."""
+    import json
+
+    import yaml
+    from PIL import Image as PILImage
+
+    from fiftyone_pose_importer.run_verify import run_verify
+
+    # Minimal 200x200 white source image
+    img_dir = tmp_path / "images"
+    img_dir.mkdir()
+    img_path = img_dir / "frame_001.jpg"
+    PILImage.new("RGB", (200, 200), (255, 255, 255)).save(img_path)
+
+    datumaro_data = {
+        "categories": {
+            "label": {"labels": [{"name": "person", "attributes": []}]},
+            "points": {
+                "labels": ["nose", "left_eye"],
+                "joints": []
+            }
+        },
+        "items": [
+            {
+                "id": "frame_001",
+                "image": {"path": str(img_path), "size": [200, 200]},
+                "annotations": [
+                    {
+                        "id": "ann-0",
+                        "type": "skeleton",
+                        "label_id": 0,
+                        "bbox": [50.0, 50.0, 80.0, 80.0],
+                        "points": [90.0, 90.0, 2, 110.0, 90.0, 2],  # x,y,v triplets
+                    }
+                ]
+            }
+        ]
+    }
+
+    datumaro_path = tmp_path / "data.json"
+    datumaro_path.write_text(json.dumps(datumaro_data))
+
+    config = {
+        "datumaro_json": str(datumaro_path),
+        "verification": {
+            "image_dir": str(img_dir),
+            "output_dir": str(tmp_path / "runs"),
+            "deterministic": {
+                "padding_px": 10,
+            },
+        },
+    }
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(yaml.dump(config))
+
+    result = run_verify(str(config_path))
+    assert result is not None
+
+    # Find the crop file written by run_verify
+    crops = list((tmp_path / "runs").rglob("*.png"))
+    assert len(crops) >= 1, "Expected at least one crop image"
+    crop_img = PILImage.open(crops[0])
+
+    # The first keypoint (nose) is at x=90, y=90 in original space.
+    # After crop, text labels appear above the dot. Some pixels in the label
+    # region must be non-white (text was drawn).
+    pixels = list(crop_img.convert("RGB").getdata())
+    non_white = [p for p in pixels if p != (255, 255, 255)]
+    assert len(non_white) > 0, "Expected text label pixels in crop overlay"
