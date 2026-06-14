@@ -1,19 +1,103 @@
 # Import + deterministic verification only (no VLM stage)
-# Copy to local.import-only.yaml and edit paths.
-image_dir: ./data/images
-datumaro_json: ./data/annotations/datumaro.json
+# Copy to local.verify.yaml and edit paths + labels.
+#
+# RULES QUICK REFERENCE
+# ─────────────────────
+# category: detection
+#   bbox_format        — bbox exists and has 4 numeric values
+#                        (auto-derived from polygon/skeleton/points when bbox field absent)
+#   bbox_non_empty     — width > 0 AND height > 0
+#
+# category: attribute
+#   required_attributes  params: {required: [<key>, ...]}
+#                        — every listed key exists in annotation.attributes
+#   roll_count_positive  — attributes.roll_count is numeric and > 0
+#   clamp_type_allowed   params: {allowed: ["2-arm", "3-arm"]}  (default shown)
+#                        — attributes.clamp_type is one of the allowed values
+#
+# category: skeleton-count
+#   keypoint_count     params: {expected: <int>}  ← REQUIRED
+#                      — keypoint count exactly matches expected
+#                      — set skeleton-count: [] globally and override per label
+#                        when different skeletons have different point counts
+#
+# category: visibility-format
+#   visibility_codes   — every visibility value is 0 (unlabeled), 1 (occluded), or 2 (visible)
+#
+# FAIL REASONS (appear in deterministic_report.csv/json)
+# ───────────────────────────────────────────────────────
+#   invalid_bbox                         bbox_non_empty failed
+#   missing_required_attribute:<key>     required_attributes failed
+#   missing_roll_count                   roll_count_positive: field absent
+#   roll_count_non_positive              roll_count_positive: value ≤ 0
+#   invalid_clamp_type:<value>           clamp_type_allowed: value not in allowed list
+#   keypoint_count_mismatch:<a>!=<e>     keypoint_count: actual ≠ expected
+#   invalid_visibility_codes             visibility_codes: value outside {0,1,2}
+#   unevaluable:bbox_missing_or_malformed       bbox absent and no points to derive from
+#   unevaluable:attributes_missing_or_malformed annotation has no attributes dict
+#   unevaluable:expected_keypoint_count_missing keypoint_count rule missing params.expected
+#   image_path_not_found                 source image file does not exist
+#   invalid_image_size                   image size missing or zero in datumaro JSON
+
+image_dir: ./data/images          # also accepted at top level (shared with import command)
+datumaro_json: ./data/datumaro.json
 dataset_name: cvat_pose_dataset
 label_field: ground_truth
 
 verification:
   output_dir: ./verification-runs
+  image_dir: ./data/images        # optional: overrides top-level image_dir for verify only
   deterministic:
-    padding_px: 16
+    padding_px: 16                # pixels of padding added around each crop
     rules:
       global:
-        detection: ["bbox_format"]
-        attribute: ["required_attributes"]
-        skeleton-count: ["keypoint_count"]
-        visibility-format: ["visibility_codes"]
+        # --- detection (applies to ALL annotation types) ---
+        detection:
+          - bbox_format           # always keep — ensures geometry is valid before other checks
+          - bbox_non_empty        # catches zero-size boxes
+
+        # --- attribute checks ---
+        attribute:
+          - name: required_attributes
+            params:
+              required: [clamp_type]    # list every attribute key that must be present
+          # Uncomment to also check roll_count and clamp_type values:
+          # - roll_count_positive
+          # - name: clamp_type_allowed
+          #   params:
+          #     allowed: ["2-arm", "3-arm"]
+
+        # --- keypoint count ---
+        # Set [] here and use per-label overrides when skeletons have different counts.
+        # Set a single expected value here only if ALL labels share the same count.
+        skeleton-count:
+          - name: keypoint_count
+            params:
+              expected: 4         # ← change or move to per-label overrides below
+
+        # --- visibility codes ---
+        visibility-format:
+          - visibility_codes      # checks 0/1/2 only
+
+      # Per-label overrides — any category omitted inherits from global above.
+      # Remove or add label blocks as needed.
+      overrides:
+        # Example: different skeleton types with different keypoint counts
+        # clamp-2-arm:
+        #   skeleton-count:
+        #     - name: keypoint_count
+        #       params:
+        #         expected: 12
+        # clamp-3-arm:
+        #   skeleton-count:
+        #     - name: keypoint_count
+        #       params:
+        #         expected: 16
+        # Polygon labels — disable skeleton-count (variable point count)
+        # clamp-mask:
+        #   skeleton-count: []
+        # roll-mask:
+        #   skeleton-count: []
+
   vlm:
     enabled: false
