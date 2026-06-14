@@ -99,7 +99,8 @@ verification:
     # Override template used for all labels/rules (unless per-rule prompt override is set below):
     default_prompt_template: |
       You are verifying annotation quality for label '{label}' and rule '{rule}'.
-      The image shows the annotated crop with the annotation drawn on it.
+      The image shows a crop that may contain multiple objects. The annotation being
+      evaluated is drawn directly on the image — focus ONLY on the marked annotation.
       {annotation_fields_json}
       Return ONLY strict JSON, with no markdown and no prose:
       {"error_probability": <float between 0 and 1>, "reason": "<brief reason>"}
@@ -132,13 +133,15 @@ verification:
         prompts:
           bbox_localization: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
+            The image shows a crop that may contain multiple objects.
+            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
             Judge whether the bounding box tightly localizes the intended object.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           bbox_coverage: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
+            The image shows a crop that may contain multiple objects.
+            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
             Judge whether the bbox covers the full object without major clipping or excess background.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
@@ -167,13 +170,15 @@ verification:
         prompts:
           bbox_localization: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
+            The image shows a crop that may contain multiple objects.
+            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
             Judge whether the bounding box tightly localizes the intended object.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           bbox_coverage: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
+            The image shows a crop that may contain multiple objects.
+            An orange-red rectangle marks the bounding box being evaluated — focus ONLY on that object.
             Judge whether the bbox covers the full object without major clipping or excess background.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
@@ -184,16 +189,18 @@ verification:
         prompts:
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with colored dots marking keypoint positions:
-            green = fully visible, orange = occluded, gray = unlabeled.
+            The image shows a crop that may contain multiple objects.
+            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoints are placed correctly on expected clamp landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with colored dots marking keypoint positions:
-            green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether keypoint visibility/occlusion states match what is visible.
+            The image shows a crop that may contain multiple objects.
+            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
+            Judge whether the dot colors correctly reflect what is visible vs occluded.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       clamp-3-arm:
@@ -203,16 +210,18 @@ verification:
         prompts:
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with colored dots marking keypoint positions:
-            green = fully visible, orange = occluded, gray = unlabeled.
+            The image shows a crop that may contain multiple objects.
+            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoints are placed correctly on expected clamp landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with colored dots marking keypoint positions:
-            green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether keypoint visibility/occlusion states match what is visible.
+            The image shows a crop that may contain multiple objects.
+            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
+            Judge whether the dot colors correctly reflect what is visible vs occluded.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       roll-keypoints:
@@ -222,16 +231,18 @@ verification:
         prompts:
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with colored dots marking keypoint positions:
-            green = fully visible, orange = occluded, gray = unlabeled.
+            The image shows a crop that may contain multiple objects.
+            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether roll keypoints are placed correctly on expected landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
             You are validating label '{label}' for rule '{rule}'.
-            The image shows the crop with colored dots marking keypoint positions:
-            green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether keypoint visibility/occlusion states match what is visible.
+            The image shows a crop that may contain multiple objects.
+            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
+            Judge whether the dot colors correctly reflect what is visible vs occluded.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       # mask/polygon labels — none of the 6 VLM rules apply (no manually-placed bbox,
