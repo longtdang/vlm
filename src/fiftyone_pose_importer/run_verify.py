@@ -205,7 +205,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
     # Extract skeleton point-name labels so they can be drawn on crop overlays.
     try:
         _skeleton_bundle = extract_skeleton_contract_bundle(data)
-    except (SchemaContractError, Exception):
+    except SchemaContractError:
         _skeleton_bundle = None
 
     ndjson_trace_path = run_dir / "deterministic_trace.ndjson"
@@ -378,6 +378,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                         "attributes": annotation.get("attributes") if isinstance(annotation.get("attributes"), dict) else {},
                         "keypoints": keypoints,
                         "visibility": crop.adjusted_visibility if crop.adjusted_visibility is not None else visibility,
+                        "original_visibility": crop.original_visibility,
                         "polygon_points": polygon_points,
                         "out_of_frame_indices": crop.out_of_frame_point_indices,
                         "point_names": _skeleton_labels,
