@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 from .types import DeterministicVerdict
 
@@ -230,8 +230,6 @@ def render_annotation_overlay(
 
     Returns the output path.
     """
-    from PIL import ImageDraw
-
     with Image.open(crop_image_path) as src:
         img = src.convert("RGB").copy()
 
@@ -251,7 +249,6 @@ def render_annotation_overlay(
 
     elif isinstance(keypoints, list) and len(keypoints) > 0:
         # Skeleton mode: draw color-coded keypoint dots, no bbox
-        from PIL import ImageFont
         visibility = annotation_crop_space.get("visibility")
         point_names = annotation_crop_space.get("point_names")
         font = ImageFont.load_default()
@@ -265,7 +262,7 @@ def render_annotation_overlay(
             draw.ellipse([kx - r, ky - r, kx + r, ky + r], fill=color, outline=(0, 0, 0))
             if isinstance(point_names, list) and idx < len(point_names):
                 label = str(point_names[idx])
-                label_x, label_y = kx - r, ky - r - 11  # 11 px above dot top: 9 px font + 2 px gap
+                label_x, label_y = kx - r, max(0.0, ky - r - 11)  # 11 px above dot top: 9 px font + 2 px gap
                 # Black shadow for contrast on any background
                 draw.text((label_x + 1, label_y + 1), label, fill=(0, 0, 0), font=font)
                 # White foreground
