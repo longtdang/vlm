@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 
 from .report_json import _sorted_results, serialize_object_result, write_json_report
-from .report_ndjson import write_ndjson_report
+from .report_ndjson import NdjsonStreamWriter, write_ndjson_report
 from .types import ObjectVerificationResult
 
 _TIMESTAMP_PATTERN = re.compile(r"^\d{8}T\d{6}Z$")
@@ -78,14 +78,29 @@ def write_run_reports(
     *,
     run_root: Path,
     run_timestamp: str | None = None,
+    ndjson_path: Path | None = None,
 ) -> dict[str, Path]:
+    """Write CSV, JSON, and NDJSON deterministic reports.
+
+    Args:
+        results: all deterministic results from the verification loop.
+        run_root: root directory for run output.
+        run_timestamp: optional fixed timestamp (YYYYMMDDTHHMMSSZ). If None,
+            the current UTC time is used.
+        ndjson_path: if the NDJSON trace was already written incrementally via
+            :class:`~fiftyone_pose_importer.verification.report_ndjson.NdjsonStreamWriter`,
+            pass the path here to skip re-writing it. If None, the NDJSON is
+            written from ``results`` in sorted order.
+    """
     safe_timestamp = _safe_run_timestamp(run_timestamp)
     run_dir = _safe_run_dir(run_root=run_root, run_timestamp=safe_timestamp)
     run_dir.mkdir(parents=True, exist_ok=True)
 
     csv_path = write_csv_report(results, run_dir / "deterministic_report.csv")
     json_path = write_json_report(results, run_dir / "deterministic_report.json")
-    ndjson_path = write_ndjson_report(results, run_dir / "deterministic_trace.ndjson")
+
+    if ndjson_path is None:
+        ndjson_path = write_ndjson_report(results, run_dir / "deterministic_trace.ndjson")
 
     return {
         "run_dir": run_dir,

@@ -14,6 +14,7 @@ from .verification.cropper import materialize_crop, plan_crop
 from .verification.engine import evaluate_object
 from .verification.report_csv import _safe_run_dir, _safe_run_timestamp, write_run_reports
 from .verification.report_json import serialize_object_result
+from .verification.report_ndjson import NdjsonStreamWriter
 from .verification.types import DeterministicVerdict, ObjectVerificationResult
 
 if TYPE_CHECKING:
@@ -194,155 +195,192 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
         raise ValueError("verification.run_timestamp must be a string when provided")
     safe_timestamp = _safe_run_timestamp(run_timestamp)
     run_dir = _safe_run_dir(run_root=run_root, run_timestamp=safe_timestamp)
+    run_dir.mkdir(parents=True, exist_ok=True)
 
     vlm_enabled = bool(((verification_root.get("vlm") or {}).get("enabled", False)))
 
     label_names = _label_lookup(data)
 
-    results: list[ObjectVerificationResult] = []
+    ndjson_trace_path = run_dir / "deterministic_trace.ndjson"
+
+    class _StreamingResults:
+        """List-like that streams each append to an NDJSON writer immediately.
+
+        Avoids buffering the full result list for NDJSON output — the trace
+        file is written line-by-line during processing rather than all at once
+        after the loop. CSV and JSON reports still use the accumulated list,
+        which is bounded by annotation count.
+        """
+
+        def __init__(self, writer: NdjsonStreamWriter) -> None:
+            self._list: list[ObjectVerificationResult] = []
+            self._writer = writer
+
+        def append(self, result: ObjectVerificationResult) -> None:
+            self._list.append(result)
+            self._writer.write(result)
+
+        # Delegate all list operations used elsewhere in this function
+        def __iter__(self):  # type: ignore[override]
+            return iter(self._list)
+
+        def __len__(self) -> int:
+            return len(self._list)
+
+        def as_list(self) -> list[ObjectVerificationResult]:
+            return self._list
+
     warnings: list[str] = list(config_warnings)
     items = data.get("items") or []
     annotation_payloads: dict[tuple[str, str], dict[str, Any]] = {}
 
-    for item_index, item in enumerate(items):
-        if not isinstance(item, dict):
-            warnings.append(f"Skipped malformed item at index {item_index}")
-            continue
+    with NdjsonStreamWriter(ndjson_trace_path) as ndjson_writer:
+        results = _StreamingResults(ndjson_writer)
 
-        sample_id = str(item.get("id") or f"sample-{item_index}")
-        image_size = _image_size(item)
-
-        annotations = item.get("annotations") or []
-        if not isinstance(annotations, list):
-            warnings.append(f"Sample {sample_id} annotations malformed; skipped")
-            continue
-
-        try:
-            source_image_path = _resolve_item_image_path(item=item, config_dir=config_file.parent, image_root=image_root)
-            image_path_error: str | None = None
-        except ValueError as exc:
-            source_image_path = None
-            image_path_error = str(exc)
-
-        for annotation_index, annotation in enumerate(annotations):
-            if not isinstance(annotation, dict):
-                warnings.append(f"Sample {sample_id} annotation index {annotation_index} malformed; skipped")
+        for item_index, item in enumerate(items):
+            if not isinstance(item, dict):
+                warnings.append(f"Skipped malformed item at index {item_index}")
                 continue
 
-            object_id = str(annotation.get("id") or f"ann-{annotation_index}")
-            label_id = annotation.get("label_id")
-            label = label_names.get(label_id, str(annotation.get("label") or "unknown")) if isinstance(label_id, int) else str(annotation.get("label") or "unknown")
-            crop_file = _crop_output_path(run_dir=run_dir, sample_id=sample_id, object_id=object_id)
-            crop_path = str(crop_file)
+            sample_id = str(item.get("id") or f"sample-{item_index}")
+            image_size = _image_size(item)
 
-            try:
-                keypoints, visibility, _, _ = parse_keypoints_and_visibility(annotation)
-            except ValueError:
-                keypoints, visibility = [], []
-            bbox = _parse_bbox(annotation)
-            if bbox is None:
-                bbox = _derive_bbox_from_annotation(annotation)
-
-            if image_size is None:
-                results.append(_failure_result(sample_id=sample_id, object_id=object_id, label=label, crop_path=crop_path, reason="invalid_image_size"))
-                continue
-            if bbox is None:
-                results.append(_failure_result(sample_id=sample_id, object_id=object_id, label=label, crop_path=crop_path, reason="bbox_missing_or_malformed"))
-                continue
-
-            width, height = image_size
-            ann_type = annotation.get("type")
-            _SKELETON_ANN_TYPES = {"points", "skeleton"}
-            _NON_SKELETON_ANN_TYPES = {"polygon", "bbox", "mask", "ellipse", "polyline"}
-            if ann_type in _SKELETON_ANN_TYPES:
-                is_skeleton = True
-            elif ann_type in _NON_SKELETON_ANN_TYPES or ann_type is None:
-                is_skeleton = False
-            else:
-                print(
-                    f"[run_verify] warning: unknown ann_type={ann_type!r} for object_id={object_id}; defaulting is_skeleton=False",
-                    file=sys.stderr,
-                )
-                is_skeleton = False
-
-            crop = plan_crop(
-                image_width=width,
-                image_height=height,
-                bbox=bbox,
-                padding_px=verification_config.padding_px,
-                is_skeleton=is_skeleton,
-                keypoints=[(point[0], point[1]) for point in keypoints] if keypoints else None,
-                visibility=visibility if visibility else None,
-            )
-
-            if crop.verdict is DeterministicVerdict.FAIL:
-                results.append(
-                    _failure_result(
-                        sample_id=sample_id,
-                        object_id=object_id,
-                        label=label,
-                        crop_path=crop_path,
-                        reason=crop.reason or "crop_failed",
-                    )
-                )
-                continue
-
-            if image_path_error is not None or source_image_path is None:
-                results.append(
-                    _failure_result(
-                        sample_id=sample_id,
-                        object_id=object_id,
-                        label=label,
-                        crop_path=crop_path,
-                        reason=image_path_error or "image_path_unresolved",
-                    )
-                )
+            annotations = item.get("annotations") or []
+            if not isinstance(annotations, list):
+                warnings.append(f"Sample {sample_id} annotations malformed; skipped")
                 continue
 
             try:
-                materialize_crop(source_image_path=source_image_path, crop_plan=crop, output_path=crop_file)
-            except Exception as exc:  # pragma: no cover - defensive guard for runtime isolation
-                results.append(
-                    _failure_result(
+                source_image_path = _resolve_item_image_path(item=item, config_dir=config_file.parent, image_root=image_root)
+                image_path_error: str | None = None
+            except ValueError as exc:
+                source_image_path = None
+                image_path_error = str(exc)
+
+            for annotation_index, annotation in enumerate(annotations):
+                if not isinstance(annotation, dict):
+                    warnings.append(f"Sample {sample_id} annotation index {annotation_index} malformed; skipped")
+                    continue
+
+                object_id = str(annotation.get("id") or f"ann-{annotation_index}")
+                label_id = annotation.get("label_id")
+                label = label_names.get(label_id, str(annotation.get("label") or "unknown")) if isinstance(label_id, int) else str(annotation.get("label") or "unknown")
+                crop_file = _crop_output_path(run_dir=run_dir, sample_id=sample_id, object_id=object_id)
+                crop_path = str(crop_file)
+
+                try:
+                    keypoints, visibility, _, _ = parse_keypoints_and_visibility(annotation)
+                except ValueError:
+                    keypoints, visibility = [], []
+                bbox = _parse_bbox(annotation)
+                if bbox is None:
+                    bbox = _derive_bbox_from_annotation(annotation)
+
+                if image_size is None:
+                    results.append(_failure_result(sample_id=sample_id, object_id=object_id, label=label, crop_path=crop_path, reason="invalid_image_size"))
+                    continue
+                if bbox is None:
+                    results.append(_failure_result(sample_id=sample_id, object_id=object_id, label=label, crop_path=crop_path, reason="bbox_missing_or_malformed"))
+                    continue
+
+                width, height = image_size
+                ann_type = annotation.get("type")
+                _SKELETON_ANN_TYPES = {"points", "skeleton"}
+                _NON_SKELETON_ANN_TYPES = {"polygon", "bbox", "mask", "ellipse", "polyline"}
+                if ann_type in _SKELETON_ANN_TYPES:
+                    is_skeleton = True
+                elif ann_type in _NON_SKELETON_ANN_TYPES or ann_type is None:
+                    is_skeleton = False
+                else:
+                    print(
+                        f"[run_verify] warning: unknown ann_type={ann_type!r} for object_id={object_id}; defaulting is_skeleton=False",
+                        file=sys.stderr,
+                    )
+                    is_skeleton = False
+
+                crop = plan_crop(
+                    image_width=width,
+                    image_height=height,
+                    bbox=bbox,
+                    padding_px=verification_config.padding_px,
+                    is_skeleton=is_skeleton,
+                    keypoints=[(point[0], point[1]) for point in keypoints] if keypoints else None,
+                    visibility=visibility if visibility else None,
+                )
+
+                if crop.verdict is DeterministicVerdict.FAIL:
+                    results.append(
+                        _failure_result(
+                            sample_id=sample_id,
+                            object_id=object_id,
+                            label=label,
+                            crop_path=crop_path,
+                            reason=crop.reason or "crop_failed",
+                        )
+                    )
+                    continue
+
+                if image_path_error is not None or source_image_path is None:
+                    results.append(
+                        _failure_result(
+                            sample_id=sample_id,
+                            object_id=object_id,
+                            label=label,
+                            crop_path=crop_path,
+                            reason=image_path_error or "image_path_unresolved",
+                        )
+                    )
+                    continue
+
+                try:
+                    materialize_crop(source_image_path=source_image_path, crop_plan=crop, output_path=crop_file)
+                except Exception as exc:  # pragma: no cover - defensive guard for runtime isolation
+                    results.append(
+                        _failure_result(
+                            sample_id=sample_id,
+                            object_id=object_id,
+                            label=label,
+                            crop_path=crop_path,
+                            reason=f"crop_materialization_error:{type(exc).__name__}",
+                        )
+                    )
+                    continue
+
+                try:
+                    annotation_payload = {
+                        "bbox": list(bbox),
+                        "attributes": annotation.get("attributes") if isinstance(annotation.get("attributes"), dict) else {},
+                        "keypoints": keypoints,
+                        "visibility": crop.adjusted_visibility if crop.adjusted_visibility is not None else visibility,
+                    }
+                    engine_outcome = evaluate_object(
                         sample_id=sample_id,
                         object_id=object_id,
                         label=label,
                         crop_path=crop_path,
-                        reason=f"crop_materialization_error:{type(exc).__name__}",
+                        annotation=annotation_payload,
+                        config=verification_config,
                     )
-                )
-                continue
-
-            try:
-                annotation_payload = {
-                    "bbox": list(bbox),
-                    "attributes": annotation.get("attributes") if isinstance(annotation.get("attributes"), dict) else {},
-                    "keypoints": keypoints,
-                    "visibility": crop.adjusted_visibility if crop.adjusted_visibility is not None else visibility,
-                }
-                engine_outcome = evaluate_object(
-                    sample_id=sample_id,
-                    object_id=object_id,
-                    label=label,
-                    crop_path=crop_path,
-                    annotation=annotation_payload,
-                    config=verification_config,
-                )
-                warnings.extend(engine_outcome.warnings)
-                annotation_payloads[(sample_id, object_id)] = annotation_payload
-                results.append(engine_outcome.result)
-            except Exception as exc:  # pragma: no cover - defensive guard for runtime isolation
-                results.append(
-                    _failure_result(
-                        sample_id=sample_id,
-                        object_id=object_id,
-                        label=label,
-                        crop_path=crop_path,
-                        reason=f"runtime_error:{type(exc).__name__}",
+                    warnings.extend(engine_outcome.warnings)
+                    annotation_payloads[(sample_id, object_id)] = annotation_payload
+                    results.append(engine_outcome.result)
+                except Exception as exc:  # pragma: no cover - defensive guard for runtime isolation
+                    results.append(
+                        _failure_result(
+                            sample_id=sample_id,
+                            object_id=object_id,
+                            label=label,
+                            crop_path=crop_path,
+                            reason=f"runtime_error:{type(exc).__name__}",
+                        )
                     )
-                )
 
-    artifact_paths = write_run_reports(results, run_root=run_root, run_timestamp=safe_timestamp)
+    artifact_paths = write_run_reports(
+        results.as_list(),
+        run_root=run_root,
+        run_timestamp=safe_timestamp,
+        ndjson_path=ndjson_trace_path,
+    )
 
     vlm_results = []
     vlm_artifact_paths: dict[str, Path] = {}
