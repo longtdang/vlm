@@ -98,7 +98,8 @@ def _resolve_contract(bundle: SkeletonContractBundle, annotation: dict[str, Any]
         if contract is None:
             raise SchemaContractError("unknown_skeleton_label", f"No skeleton contract found for label_id={label_id}")
         return contract
-    assert bundle.default is not None
+    if bundle.default is None:
+        raise SchemaContractError("missing_default_contract", "No default skeleton contract available and no label_id routing configured")
     return bundle.default
 
 
@@ -229,7 +230,8 @@ def run_import(config_path: str, launch_app: bool = False) -> tuple[bool, dict[s
         return False, summary
 
     samples: list[fo.Sample] = []
-    assert contract_bundle is not None
+    if contract_bundle is None:
+        raise SchemaContractError("missing_contract_bundle", "Schema contract bundle is None after preflight; this indicates a logic error in the import pipeline")
     canonical_contract = contract_bundle.default
     if canonical_contract is None and len(contract_bundle.by_label_id) == 1:
         canonical_contract = next(iter(contract_bundle.by_label_id.values()))
