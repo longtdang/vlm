@@ -1,9 +1,8 @@
 from pathlib import Path
 
 import yaml
-from pydantic import ValidationError
 
-from .config_model import ImportConfig, ResolvedConfig
+from .config_model import ImportConfig, ImportConfigError, ResolvedConfig
 
 
 class ConfigLoadError(ValueError):
@@ -21,8 +20,8 @@ def load_config(config_path: str) -> ResolvedConfig:
         raw = yaml.safe_load(f) or {}
 
     try:
-        parsed = ImportConfig.model_validate(raw)
-    except ValidationError as exc:
+        parsed = ImportConfig.from_dict(raw)
+    except ImportConfigError as exc:
         raise ConfigLoadError(f"Config validation failed: {exc}") from exc
 
     resolved = parsed.resolve_paths(cfg_path)
