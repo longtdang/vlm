@@ -36,6 +36,12 @@ class FiftyOneZooAdapter:
                 self._model_name,
                 max_new_tokens=self._max_new_tokens,
             )
+            # Decoder-only models require left-padding for correct batched
+            # generation — right-padding shifts generated tokens for shorter
+            # sequences in a batch.
+            processor = self._zoo_model._processor
+            tokenizer = getattr(processor, "tokenizer", processor)
+            tokenizer.padding_side = "left"
 
     def generate_text(self, image: PILImage.Image, prompt: str) -> str:
         return self.generate_text_batch([image], [prompt])[0]
@@ -75,7 +81,7 @@ class FiftyOneZooAdapter:
             add_generation_prompt=True,
             return_dict=True,
             return_tensors="pt",
-            padding=True,
+            processor_kwargs={"padding": True},
         )
         # Move tensor values to the model's device; non-tensors (strings etc.)
         # are passed through unchanged via the hasattr guard.
