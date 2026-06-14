@@ -15,3 +15,5 @@ local.verify.yaml
 src/*.egg-info/
 .planning/graphs/
 .planning/research/.cache/
+
+.venv/
