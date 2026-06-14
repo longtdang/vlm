@@ -69,6 +69,7 @@ verification:
     generation:
       max_new_tokens: 256
       timeout_seconds: 60.0       # increased for local CPU/GPU inference; low values force REVIEW via adapter_timeout
+      batch_size: 1               # increase to 4–16 for higher GPU utilization (monitor VRAM)
 
     # DEFAULT PROMPT TEMPLATE
     # ─────────────────────────
@@ -105,11 +106,21 @@ verification:
       #   keypoint_position  — are keypoints placed correctly on the object?
       #   occlusion_state    — do visibility codes correctly reflect occlusion?
       #
+      # Rule selection by annotation type:
+      #   bbox labels (forklift-*): bbox_localization, bbox_coverage, attribute rules
+      #   skeleton labels (clamp-*-arm, roll-keypoints): keypoint_position, occlusion_state
+      #     → bbox_localization/bbox_coverage are NOT used for skeletons because the bbox
+      #       is auto-derived from keypoint coordinates — there is no manually-placed bbox
+      #       to evaluate for localization or coverage quality.
+      #   mask/polygon labels (clamp-mask, roll-mask): no applicable rules currently;
+      #     the 6 VLM rules require either a manually-placed bbox or keypoints.
+      #
       # Add one block per label that should be VLM-checked.
       # Only deterministic-PASS objects for enabled labels reach the VLM stage.
       forklift-with-roll:
         enabled: true
-        rules: ["bbox_localization", "bbox_coverage", "clamp_type"]
+        # bbox type: manually-placed bbox + clamp-type + roll-count attributes
+        rules: ["bbox_localization", "bbox_coverage", "clamp_type", "roll_count"]
         # Per-rule prompt overrides — use {label}, {rule}, {annotation_fields_json}.
         prompts:
           bbox_localization: |
@@ -130,7 +141,14 @@ verification:
             You are validating label '{label}' for rule '{rule}'.
             Annotation fields:
             {annotation_fields_json}
-            Judge whether the clamp_type attribute matches what is visible in the crop.
+            Judge whether the clamp-type attribute value matches the clamp visually present in the crop.
+            Return ONLY JSON:
+            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+          roll_count: |
+            You are validating label '{label}' for rule '{rule}'.
+            Annotation fields:
+            {annotation_fields_json}
+            Judge whether the roll-count attribute matches the number of rolls visible in the crop.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
         # Per-label thresholds (optional — inherits global when absent):
@@ -139,6 +157,7 @@ verification:
         #   review_below: 0.50
       forklift-no-roll:
         enabled: true
+        # bbox type: manually-placed bbox only (no roll/clamp attributes to validate)
         rules: ["bbox_localization", "bbox_coverage"]
         prompts:
           bbox_localization: |
@@ -157,22 +176,9 @@ verification:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       clamp-2-arm:
         enabled: true
-        rules: ["bbox_localization", "bbox_coverage", "keypoint_position", "occlusion_state"]
+        # skeleton type: bbox is auto-derived from keypoints — skip bbox rules.
+        rules: ["keypoint_position", "occlusion_state"]
         prompts:
-          bbox_localization: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the bounding box tightly localizes the clamp object.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
-          bbox_coverage: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the bbox covers the full clamp object without major clipping.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
             Annotation fields:
@@ -189,22 +195,9 @@ verification:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       clamp-3-arm:
         enabled: true
-        rules: ["bbox_localization", "bbox_coverage", "keypoint_position", "occlusion_state"]
+        # skeleton type: bbox is auto-derived from keypoints — skip bbox rules.
+        rules: ["keypoint_position", "occlusion_state"]
         prompts:
-          bbox_localization: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the bounding box tightly localizes the clamp object.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
-          bbox_coverage: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the bbox covers the full clamp object without major clipping.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
             Annotation fields:
@@ -221,22 +214,9 @@ verification:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       roll-keypoints:
         enabled: true
-        rules: ["bbox_localization", "bbox_coverage", "keypoint_position", "occlusion_state"]
+        # skeleton type: bbox is auto-derived from keypoints — skip bbox rules.
+        rules: ["keypoint_position", "occlusion_state"]
         prompts:
-          bbox_localization: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the bounding box tightly localizes the roll object.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
-          bbox_coverage: |
-            You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
-            Judge whether the bbox covers the full roll object without major clipping.
-            Return ONLY JSON:
-            {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
             Annotation fields:
@@ -251,3 +231,9 @@ verification:
             Judge whether keypoint visibility/occlusion states match what is visible.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
+      # mask/polygon labels — none of the 6 VLM rules apply (no manually-placed bbox,
+      # no keypoints, no relevant attributes in the annotation payload).
+      clamp-mask:
+        enabled: false
+      roll-mask:
+        enabled: false
