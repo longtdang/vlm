@@ -211,6 +211,99 @@ Notes:
 
 ---
 
+## Deterministic rules reference
+
+Deterministic rules run on every annotation before the VLM stage. An annotation that fails **any** enabled rule is marked `FAIL` and excluded from VLM processing.
+
+Rules are grouped into four categories. Each category key maps to a list of rule entries in the config.
+
+### Category: `detection`
+
+| Rule name | What it checks | Fail reason |
+|-----------|---------------|-------------|
+| `bbox_format` | Bounding box exists and is a list of 4 numbers. For non-bbox annotation types (`polygon`, `skeleton`, `points`) the bbox is derived automatically from the `points` coordinates. | `unevaluable:bbox_missing_or_malformed` |
+| `bbox_non_empty` | Derived or explicit bounding box has width > 0 **and** height > 0 | `invalid_bbox` |
+
+### Category: `attribute`
+
+| Rule name | Params | What it checks | Fail reason |
+|-----------|--------|---------------|-------------|
+| `required_attributes` | `required: [<key>, ...]` | Every key listed in `params.required` exists in `annotation.attributes` | `missing_required_attribute:<key>` |
+| `roll_count_positive` | — | `attributes.roll_count` exists, is numeric, and > 0 | `missing_roll_count` / `roll_count_non_positive` |
+| `clamp_type_allowed` | `allowed: [<str>, ...]` (default: `["2-arm", "3-arm"]`) | `attributes.clamp_type` is one of the allowed values | `invalid_clamp_type:<value>` |
+
+### Category: `skeleton-count`
+
+| Rule name | Params | What it checks | Fail reason |
+|-----------|--------|---------------|-------------|
+| `keypoint_count` | `expected: <int>` (**required**) | Number of keypoints equals `params.expected` exactly | `keypoint_count_mismatch:<actual>!=<expected>` |
+
+> **Tip:** Different skeleton types usually have different keypoint counts. Use `rules.overrides.<label>` to set per-label `expected` values, and set `skeleton-count: []` in `rules.global` to disable the global default.
+
+### Category: `visibility-format`
+
+| Rule name | What it checks | Fail reason |
+|-----------|---------------|-------------|
+| `visibility_codes` | Every entry in the visibility list is `0` (not labeled), `1` (occluded), or `2` (visible) — COCO convention | `invalid_visibility_codes` |
+
+### Unevaluable rules
+
+When a rule cannot be evaluated because prerequisite data is missing or malformed (e.g. `attributes` field is absent, `keypoint_count` has no `expected` param), the result is still recorded as `FAIL` with reason `unevaluable:<reason>`. This ensures silent skipping never hides a configuration error.
+
+Common unevaluable reasons:
+
+| Reason | Cause |
+|--------|-------|
+| `unevaluable:bbox_missing_or_malformed` | `bbox` absent and no `points` to derive it from |
+| `unevaluable:attributes_missing_or_malformed` | Annotation has no `attributes` dict |
+| `unevaluable:expected_keypoint_count_missing` | `keypoint_count` rule has no `params.expected` — set it per label using `rules.overrides` |
+| `unevaluable:required_attribute_params_invalid` | `required_attributes` rule missing `params.required` list |
+| `unevaluable:clamp_type_missing` | `attributes.clamp_type` is absent or not a string |
+
+### How annotation types are handled
+
+All Datumaro annotation types are supported. The bounding box used for cropping and the `bbox_format`/`bbox_non_empty` rules is derived as follows:
+
+| Datumaro type | Bbox source | `is_skeleton` crop policy |
+|---------------|-------------|--------------------------|
+| `bbox` | `bbox` field directly | Skeleton canvas if keypoints present, tight crop otherwise |
+| `polygon` | AABB of `points` pairs `[x,y, x,y, ...]` | Tight crop (not skeleton) |
+| `skeleton` | AABB of `points` triples `[x,y,v, x,y,v, ...]` | Skeleton canvas (preserves spatial offset) |
+| `points` | AABB of `points` pairs `[x,y, x,y, ...]` | Skeleton canvas |
+
+### Example: mixed label types
+
+```yaml
+verification:
+  deterministic:
+    rules:
+      global:
+        detection: ["bbox_format"]
+        attribute: ["required_attributes"]
+        skeleton-count: []           # disabled globally; set per label below
+        visibility-format: ["visibility_codes"]
+      overrides:
+        clamp-2-arm:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 12
+        clamp-3-arm:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 16
+        roll-keypoints:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 4
+        clamp-mask:
+          skeleton-count: []         # polygon — variable point count, skip check
+```
+
+---
+
 ## Output artifacts
 
 - Import run summary: `<config_stem>.summary.json`
