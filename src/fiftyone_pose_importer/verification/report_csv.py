@@ -43,7 +43,6 @@ def write_csv_report(results: list[ObjectVerificationResult], output_path: Path)
         "object_id",
         "label",
         "verdict",
-        "crop_path",
         "failure_reasons",
         "rule_details",
     ]
@@ -66,7 +65,6 @@ def write_csv_report(results: list[ObjectVerificationResult], output_path: Path)
                     "object_id": _sanitize_csv_cell(record["object_id"]),
                     "label": _sanitize_csv_cell(record["label"]),
                     "verdict": record["verdict"],
-                    "crop_path": _sanitize_csv_cell(record["crop_path"]),
                     "failure_reasons": _sanitize_csv_cell(failure_reasons),
                     "rule_details": _sanitize_csv_cell(rule_details),
                 }

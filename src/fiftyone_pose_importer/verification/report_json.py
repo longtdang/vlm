@@ -21,7 +21,6 @@ def serialize_object_result(result: ObjectVerificationResult) -> dict[str, Any]:
         "object_id": result.object_id,
         "label": result.label,
         "verdict": result.verdict.value,
-        "crop_path": result.crop_path,
         "failure_reasons": sorted(result.failure_reasons),
         "rule_results": [
             {

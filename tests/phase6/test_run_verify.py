@@ -203,13 +203,13 @@ def test_deterministic_only_pipeline_writes_real_crop_artifacts(tmp_path: Path) 
     ok, summary = run_verify(str(config_path))
 
     assert ok is True
-    record = summary["objects"][0]
-    crop_path = Path(record["crop_path"])
-    assert crop_path.exists()
-    assert crop_path.parent.name == "crops"
+    run_dir = Path(summary["artifacts"]["run_dir"])
+    crops = sorted((run_dir / "crops").glob("*.png"))
+    assert crops
+    assert crops[0].parent.name == "crops"
 
 
-def test_crop_path_in_summary_points_to_existing_file(tmp_path: Path) -> None:
+def test_summary_objects_do_not_include_crop_path(tmp_path: Path) -> None:
     datumaro_path = _write_datumaro_with_image_paths(tmp_path)
     config_path = tmp_path / "verify-summary-crops.yaml"
     config_path.write_text(
@@ -242,7 +242,41 @@ def test_crop_path_in_summary_points_to_existing_file(tmp_path: Path) -> None:
 
     assert ok is True
     for record in summary["objects"]:
-        assert Path(record["crop_path"]).is_file()
+        assert "crop_path" not in record
+
+
+def test_missing_annotation_id_uses_ann_index_object_id(tmp_path: Path) -> None:
+    datumaro_path = tmp_path / "datumaro-no-id.json"
+    image_dir = tmp_path / "images"
+    image_dir.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (40, 30), (64, 128, 255)).save(image_dir / "sample-1.png")
+
+    payload = {
+        "categories": {"label": {"labels": [{"name": "forklift-with-roll"}]}},
+        "items": [
+            {
+                "id": "sample-1",
+                "image": {"path": "sample-1.png", "size": [30, 40]},
+                "annotations": [
+                    {
+                        "type": "bbox",
+                        "label_id": 0,
+                        "bbox": [3, 4, 12, 10],
+                        "attributes": {"clamp_type": "2-arm"},
+                        "keypoints": [[5, 5], [10, 10], [12, 12], [13, 13]],
+                        "visibility": [2, 2, 2, 2],
+                    }
+                ],
+            }
+        ],
+    }
+    datumaro_path.write_text(json.dumps(payload), encoding="utf-8")
+    config_path = _write_config(tmp_path, datumaro_path)
+
+    ok, summary = run_verify(str(config_path))
+
+    assert ok is True
+    assert summary["objects"][0]["object_id"] == "ann-0"
 
 
 def test_run_verify_marks_object_fail_when_crop_materialization_fails(tmp_path: Path) -> None:

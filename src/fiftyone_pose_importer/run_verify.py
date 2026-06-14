@@ -230,7 +230,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                 warnings.append(f"Sample {sample_id} annotation index {annotation_index} malformed; skipped")
                 continue
 
-            object_id = str(annotation.get("id") or f"{sample_id}-ann-{annotation_index}")
+            object_id = str(annotation.get("id") or f"ann-{annotation_index}")
             label_id = annotation.get("label_id")
             label = label_names.get(label_id, str(annotation.get("label") or "unknown")) if isinstance(label_id, int) else str(annotation.get("label") or "unknown")
             crop_file = _crop_output_path(run_dir=run_dir, sample_id=sample_id, object_id=object_id)

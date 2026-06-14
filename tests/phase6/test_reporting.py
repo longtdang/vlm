@@ -73,7 +73,7 @@ def test_json_ndjson_schema_and_order(tmp_path: Path) -> None:
     assert [record["sample_id"] for record in report["objects"]] == ["sample-a", "sample-b"]
     assert [record["sample_id"] for record in trace_records] == ["sample-a", "sample-b"]
 
-    required = {"sample_id", "object_id", "label", "verdict", "crop_path", "failure_reasons", "rule_results"}
+    required = {"sample_id", "object_id", "label", "verdict", "failure_reasons", "rule_results"}
     assert required <= set(report["objects"][0])
     assert required <= set(trace_records[0])
 
@@ -109,12 +109,10 @@ def test_csv_json_ndjson_emitted_with_required_columns(tmp_path: Path) -> None:
         "object_id",
         "label",
         "verdict",
-        "crop_path",
         "failure_reasons",
         "rule_details",
     ]
     assert rows[1]["verdict"] == "FAIL"
-    assert rows[1]["crop_path"].endswith("sample-b_obj-2.png")
     assert "invalid_visibility_code:3" in rows[1]["rule_details"]
     assert rows[1]["label"].startswith("'")
     assert rows[1]["failure_reasons"].startswith("'")
