@@ -203,9 +203,11 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
     label_names = _label_lookup(data)
 
     # Extract skeleton point-name labels so they can be drawn on crop overlays.
+    # Catch Exception broadly: malformed Datumaro input (e.g. non-dict categories)
+    # can raise AttributeError or KeyError in addition to SchemaContractError.
     try:
         _skeleton_bundle = extract_skeleton_contract_bundle(data)
-    except SchemaContractError:
+    except Exception:
         _skeleton_bundle = None
 
     ndjson_trace_path = run_dir / "deterministic_trace.ndjson"
