@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -274,7 +275,18 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
 
             width, height = image_size
             ann_type = annotation.get("type")
-            is_skeleton = ann_type in {"points", "skeleton"} or (bool(keypoints) and ann_type != "polygon")
+            _SKELETON_ANN_TYPES = {"points", "skeleton"}
+            _NON_SKELETON_ANN_TYPES = {"polygon", "bbox", "mask", "ellipse", "polyline"}
+            if ann_type in _SKELETON_ANN_TYPES:
+                is_skeleton = True
+            elif ann_type in _NON_SKELETON_ANN_TYPES or ann_type is None:
+                is_skeleton = False
+            else:
+                print(
+                    f"[run_verify] warning: unknown ann_type={ann_type!r} for object_id={object_id}; defaulting is_skeleton=False",
+                    file=sys.stderr,
+                )
+                is_skeleton = False
 
             crop = plan_crop(
                 image_width=width,
