@@ -78,12 +78,19 @@ verification:
     #   {label}                  — annotation label name (e.g. "forklift-with-roll")
     #   {rule}                   — rule name being evaluated (e.g. "clamp_type")
     #   {annotation_fields_json} — JSON of relevant annotation fields for this rule:
-    #                              bbox_localization → {"bbox": [...]}
-    #                              bbox_coverage     → {"bbox": [...], "attributes": {...}}
+    #                              bbox_localization → {} (bbox drawn on image)
+    #                              bbox_coverage     → {} (bbox drawn on image)
     #                              clamp_type        → {"attributes": {...}}
     #                              roll_count        → {"attributes": {...}}
-    #                              keypoint_position → {"keypoints": [...], "visibility": [...]}
-    #                              occlusion_state   → {"keypoints": [...], "visibility": [...]}
+    #                              keypoint_position → {} (keypoints drawn on image)
+    #                              occlusion_state   → {} (keypoints drawn on image)
+    #
+    # NOTE: The image shown to the VLM is an annotated crop with the annotation
+    # overlaid directly on the pixels:
+    #   - Bounding box: orange-red rectangle outline
+    #   - Keypoints: colored dots — green (visible), orange (occluded), gray (unlabeled)
+    # Vision rules (bbox_*, keypoint_*, occlusion_*) use the drawn overlay;
+    # attribute rules (clamp_type, roll_count) also receive a JSON payload.
     #
     # The model MUST return strict JSON:
     #   {"error_probability": <float 0–1>, "reason": "<brief reason>"}
@@ -92,7 +99,7 @@ verification:
     # Override template used for all labels/rules (unless per-rule prompt override is set below):
     default_prompt_template: |
       You are verifying annotation quality for label '{label}' and rule '{rule}'.
-      Use only the provided annotation fields JSON:
+      The image shows the annotated crop with the annotation drawn on it.
       {annotation_fields_json}
       Return ONLY strict JSON, with no markdown and no prose:
       {"error_probability": <float between 0 and 1>, "reason": "<brief reason>"}
@@ -125,15 +132,13 @@ verification:
         prompts:
           bbox_localization: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
             Judge whether the bounding box tightly localizes the intended object.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           bbox_coverage: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
             Judge whether the bbox covers the full object without major clipping or excess background.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
@@ -162,15 +167,13 @@ verification:
         prompts:
           bbox_localization: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
             Judge whether the bounding box tightly localizes the intended object.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           bbox_coverage: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with an orange-red rectangle drawn where the bounding box is annotated.
             Judge whether the bbox covers the full object without major clipping or excess background.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
@@ -181,15 +184,15 @@ verification:
         prompts:
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with colored dots marking keypoint positions:
+            green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoints are placed correctly on expected clamp landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with colored dots marking keypoint positions:
+            green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoint visibility/occlusion states match what is visible.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
@@ -200,15 +203,15 @@ verification:
         prompts:
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with colored dots marking keypoint positions:
+            green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoints are placed correctly on expected clamp landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with colored dots marking keypoint positions:
+            green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoint visibility/occlusion states match what is visible.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
@@ -219,15 +222,15 @@ verification:
         prompts:
           keypoint_position: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with colored dots marking keypoint positions:
+            green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether roll keypoints are placed correctly on expected landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
             You are validating label '{label}' for rule '{rule}'.
-            Annotation fields:
-            {annotation_fields_json}
+            The image shows the crop with colored dots marking keypoint positions:
+            green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoint visibility/occlusion states match what is visible.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
@@ -237,3 +240,4 @@ verification:
         enabled: false
       roll-mask:
         enabled: false
+

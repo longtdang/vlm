@@ -187,3 +187,70 @@ def materialize_crop(*, source_image_path: Path | str, crop_plan: CropPlan, outp
         rendered.save(destination, format="PNG")
 
     return destination
+
+
+# Visibility-code → overlay color mapping
+_VIS_COLORS: dict[int, tuple[int, int, int]] = {
+    2: (0, 230, 0),     # visible → bright green
+    1: (255, 165, 0),   # occluded → orange
+    0: (140, 140, 140), # unlabeled → gray
+}
+_VIS_DEFAULT_COLOR = (200, 0, 200)  # magenta for unknown codes
+_KEYPOINT_RADIUS = 6                # dot radius in pixels
+_BBOX_COLOR = (255, 80, 0)          # orange-red for bbox rectangle
+_BBOX_WIDTH = 3                     # outline stroke width
+
+
+def render_annotation_overlay(
+    crop_image_path: Path | str,
+    annotation_crop_space: dict[str, Any],
+    output_path: Path | str,
+) -> Path:
+    """Render a copy of the crop image with annotation overlaid for VLM inspection.
+
+    Draws:
+    - Keypoints as filled circles, color-coded by visibility code:
+        green  (0,230,0)   — visible (code 2)
+        orange (255,165,0) — occluded (code 1)
+        gray   (140,140,140) — unlabeled (code 0)
+    - Bounding box as an orange-red rectangle outline.
+
+    Annotation coordinates must already be in crop-space (use
+    ``annotation_to_crop_space`` first). Only fields present and non-None
+    in ``annotation_crop_space`` are drawn.
+
+    Returns the output path.
+    """
+    from PIL import ImageDraw
+
+    with Image.open(crop_image_path) as src:
+        img = src.convert("RGB").copy()
+
+    draw = ImageDraw.Draw(img)
+    w, h = img.size
+
+    # Draw bounding box
+    bbox = annotation_crop_space.get("bbox")
+    if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
+        bx, by, bw, bh = (float(v) for v in bbox)
+        x0, y0, x1, y1 = bx, by, bx + bw, by + bh
+        for i in range(_BBOX_WIDTH):
+            draw.rectangle([x0 - i, y0 - i, x1 + i, y1 + i], outline=_BBOX_COLOR)
+
+    # Draw keypoints
+    keypoints = annotation_crop_space.get("keypoints")
+    visibility = annotation_crop_space.get("visibility")
+    if isinstance(keypoints, list):
+        for idx, kp in enumerate(keypoints):
+            if not isinstance(kp, (list, tuple)) or len(kp) < 2:
+                continue
+            kx, ky = float(kp[0]), float(kp[1])
+            vis_code = visibility[idx] if isinstance(visibility, list) and idx < len(visibility) else 2
+            color = _VIS_COLORS.get(int(vis_code) if isinstance(vis_code, (int, float)) else 2, _VIS_DEFAULT_COLOR)
+            r = _KEYPOINT_RADIUS
+            draw.ellipse([kx - r, ky - r, kx + r, ky + r], fill=color, outline=(0, 0, 0))
+
+    dest = Path(output_path)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    img.save(dest, format="PNG")
+    return dest

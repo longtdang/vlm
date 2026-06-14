@@ -73,7 +73,8 @@ def test_build_prompt_substitutes_placeholders() -> None:
     )
     assert "label=forklift" in result
     assert "rule=bbox_localization" in result
-    assert '"bbox"' in result
+    # bbox_localization is a vision rule — bbox drawn on image, no JSON fields injected
+    assert result.endswith("fields={}")
 
 
 def test_build_prompt_filters_annotation_fields_by_rule() -> None:
@@ -83,13 +84,19 @@ def test_build_prompt_filters_annotation_fields_by_rule() -> None:
         "keypoints": [[1, 1]],
         "visibility": [2],
     }
+    # Vision rules: no fields injected (annotation drawn on image)
     result_bbox = build_prompt("{annotation_fields_json}", "l", "bbox_localization", annotation)
     parsed_bbox = json.loads(result_bbox)
-    assert set(parsed_bbox) == {"bbox"}
+    assert parsed_bbox == {}
 
     result_kp = build_prompt("{annotation_fields_json}", "l", "keypoint_position", annotation)
     parsed_kp = json.loads(result_kp)
-    assert set(parsed_kp) == {"keypoints", "visibility"}
+    assert parsed_kp == {}
+
+    # Attribute rules: still send the attribute payload
+    result_clamp = build_prompt("{annotation_fields_json}", "l", "clamp_type", annotation)
+    parsed_clamp = json.loads(result_clamp)
+    assert set(parsed_clamp) == {"attributes"}
 
 
 def test_parse_vlm_response_valid_json() -> None:

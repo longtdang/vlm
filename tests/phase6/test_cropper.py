@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
 from fiftyone_pose_importer.verification.config import load_verification_config
 from PIL import Image
 
-from fiftyone_pose_importer.verification.cropper import annotation_to_crop_space, materialize_crop, plan_crop
+from fiftyone_pose_importer.verification.cropper import (
+    annotation_to_crop_space,
+    materialize_crop,
+    plan_crop,
+    render_annotation_overlay,
+)
 from fiftyone_pose_importer.verification.types import DeterministicVerdict
 
 
@@ -179,3 +187,58 @@ def test_materialize_crop_non_skeleton_clipped(tmp_path: Path) -> None:
     assert saved.size == plan.output_size
     assert saved.size == (10, 10)
     assert saved.getpixel((0, 0)) == (255, 0, 0)
+
+
+def test_render_annotation_overlay_bbox_only(tmp_path: Path) -> None:
+    """Overlay renders a bbox rectangle without raising."""
+    source = tmp_path / "crop.png"
+    Image.new("RGB", (100, 100), (200, 200, 200)).save(source)
+
+    annotation = {"bbox": [10.0, 10.0, 50.0, 40.0], "keypoints": None, "visibility": None}
+    out = tmp_path / "overlay.png"
+    result = render_annotation_overlay(source, annotation, out)
+
+    assert result == out
+    assert out.exists()
+    img = Image.open(out)
+    assert img.size == (100, 100)
+
+
+def test_render_annotation_overlay_keypoints_color_coded(tmp_path: Path) -> None:
+    """Keypoints are drawn with the correct visibility colors."""
+    source = tmp_path / "crop.png"
+    img_base = Image.new("RGB", (100, 100), (0, 0, 0))
+    img_base.save(source)
+
+    annotation = {
+        "bbox": None,
+        "keypoints": [[20.0, 20.0], [50.0, 50.0], [80.0, 80.0]],
+        "visibility": [2, 1, 0],  # visible, occluded, unlabeled
+    }
+    out = tmp_path / "kp_overlay.png"
+    render_annotation_overlay(source, annotation, out)
+
+    img = Image.open(out)
+    # Pixel at center of each dot should match the expected color (approximate — antialiasing)
+    # Use getpixel at the dot centers
+    r_vis = img.getpixel((20, 20))   # visible → green
+    r_occ = img.getpixel((50, 50))   # occluded → orange
+    r_unl = img.getpixel((80, 80))   # unlabeled → gray
+
+    assert r_vis[1] > r_vis[0] and r_vis[1] > r_vis[2], "visible dot should be greenish"
+    assert r_occ[0] > r_occ[2], "occluded dot should be reddish/orange"
+    assert abs(int(r_unl[0]) - int(r_unl[1])) < 30, "unlabeled dot should be grayish"
+
+
+def test_render_annotation_overlay_no_annotations(tmp_path: Path) -> None:
+    """Empty annotation dict produces a copy of the source with no crash."""
+    source = tmp_path / "crop.png"
+    Image.new("RGB", (60, 60), (128, 128, 128)).save(source)
+
+    annotation: dict = {}
+    out = tmp_path / "empty_overlay.png"
+    render_annotation_overlay(source, annotation, out)
+
+    assert out.exists()
+    img = Image.open(out)
+    assert img.size == (60, 60)

@@ -10,7 +10,7 @@ import yaml
 
 from .datumaro_reader import load_datumaro, parse_keypoints_and_visibility
 from .verification.config import load_verification_config
-from .verification.cropper import annotation_to_crop_space, materialize_crop, plan_crop
+from .verification.cropper import annotation_to_crop_space, materialize_crop, plan_crop, render_annotation_overlay
 from .verification.engine import evaluate_object
 from .verification.report_csv import _safe_run_dir, _safe_run_timestamp, write_run_reports
 from .verification.report_json import serialize_object_result
@@ -233,6 +233,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
     warnings: list[str] = list(config_warnings)
     items = data.get("items") or []
     annotation_payloads: dict[tuple[str, str], dict[str, Any]] = {}
+    vlm_crop_paths: dict[tuple[str, str], Path] = {}  # annotated crops for VLM inference
 
     with NdjsonStreamWriter(ndjson_trace_path) as ndjson_writer:
         results = _StreamingResults(ndjson_writer)
@@ -367,6 +368,19 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                     warnings.extend(engine_outcome.warnings)
                     annotation_payloads[(sample_id, object_id)] = annotation_payload
                     results.append(engine_outcome.result)
+                    # Render annotation overlay for VLM — saves a copy of the crop
+                    # with bbox rect and color-coded keypoint dots drawn on it, so
+                    # the VLM can judge annotation placement purely by looking.
+                    vlm_crop_file = crop_file.with_stem(crop_file.stem + "_vlm")
+                    try:
+                        render_annotation_overlay(
+                            crop_image_path=crop_file,
+                            annotation_crop_space=annotation_payload,
+                            output_path=vlm_crop_file,
+                        )
+                    except Exception:  # pragma: no cover
+                        vlm_crop_file = crop_file  # fall back to clean crop on render error
+                    vlm_crop_paths[(sample_id, object_id)] = vlm_crop_file
                 except Exception as exc:  # pragma: no cover - defensive guard for runtime isolation
                     results.append(
                         _failure_result(
@@ -430,7 +444,13 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                         continue
 
                     try:
-                        with PILImage.open(result.crop_path) as loaded:
+                        # Use the annotated crop (with bbox/keypoints drawn) so the VLM
+                        # judges annotation quality purely by visual inspection.
+                        vlm_image_path = vlm_crop_paths.get(
+                            (result.sample_id, result.object_id),
+                            Path(result.crop_path),  # fall back to clean crop if no overlay
+                        )
+                        with PILImage.open(vlm_image_path) as loaded:
                             crop_img = loaded.convert("RGB")
                     except Exception as exc:
                         vlm_outcome = VlmObjectResult(

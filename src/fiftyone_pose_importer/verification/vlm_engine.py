@@ -15,12 +15,14 @@ from .vlm_types import VlmObjectResult, VlmRuleResult, VlmVerdict
 _FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.DOTALL)
 
 RULE_ANNOTATION_FIELDS: dict[str, list[str]] = {
-    "bbox_localization": ["bbox"],
-    "bbox_coverage": ["bbox", "attributes"],
+    # Vision rules: annotation is drawn on the image; no coordinate fields needed.
+    "bbox_localization": [],
+    "bbox_coverage": [],
+    "keypoint_position": [],
+    "occlusion_state": [],
+    # Attribute rules: require the attribute value from the annotation payload.
     "clamp_type": ["attributes"],
     "roll_count": ["attributes"],
-    "keypoint_position": ["keypoints", "visibility"],
-    "occlusion_state": ["keypoints", "visibility"],
 }
 
 
