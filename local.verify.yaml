@@ -1,0 +1,49 @@
+# Local filesystem paths only. Relative paths are resolved from this file's directory.
+image_dir: ./data/images
+datumaro_json: ./data/datumaro.json
+dataset_name: cvat_pose_dataset
+label_field: ground_truth
+
+verification:
+  output_dir: ./verification-runs
+  deterministic:
+    padding_px: 16
+    rules:
+      global:
+        detection: ["bbox_format"]
+        attribute: ["required_attributes"]
+        skeleton-count: []
+        visibility-format: ["visibility_codes"]
+      overrides:
+        clamp-2-arm:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 12
+        clamp-3-arm:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 16
+        roll-keypoints:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 4
+        clamp-mask:
+          skeleton-count: []
+        roll-mask:
+          skeleton-count: []
+  vlm:
+    enabled: true
+    model_name: qwen3-vl-2b-instruct-torch
+    thresholds:
+      pass_below: 0.20
+      review_below: 0.60
+    generation:
+      max_new_tokens: 256
+      timeout_seconds: 8.0
+    labels:
+      forklift:
+        enabled: true
+        rules: ["bbox_localization", "bbox_coverage", "clamp_type"]

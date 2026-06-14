@@ -83,21 +83,15 @@ def _parse_rule_block(raw_block: dict[str, Any] | None, warnings: list[str], sco
     for category in ("detection", "attribute", "skeleton-count", "visibility-format"):
         raw_value = _category_key(block, category)
         if raw_value is None:
+            # Key absent: inherit from fallback or use built-in defaults
             if fallback is not None:
                 categories[category] = getattr(fallback, category.replace("-", "_"))
                 continue
             raw_value = list(DEFAULT_RULES[category])
 
+        # Key explicitly present (even as []): parse literally; [] means no rules
         specs = _as_rule_specs(category, raw_value, warnings, scope)
-        if not specs:
-            if fallback is not None:
-                inherited = getattr(fallback, category.replace("-", "_"))
-                categories[category] = inherited
-            else:
-                default_specs = [RuleSpec(name=name) for name in DEFAULT_RULES[category]]
-                categories[category] = RuleCategoryConfig(rules=default_specs)
-        else:
-            categories[category] = RuleCategoryConfig(rules=specs)
+        categories[category] = RuleCategoryConfig(rules=specs)
 
     return DeterministicRuleConfig(
         detection=categories["detection"],
