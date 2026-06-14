@@ -63,7 +63,12 @@ verification:
 
   vlm:
     enabled: true
-    model_name: Qwen2.5-VL-7B-Instruct  # or qwen3-vl-4b-instruct-torch / qwen3-vl-8b-instruct-torch
+    model_name: Qwen/Qwen2.5-VL-7B-Instruct
+    zoo_model_source: https://github.com/harpreetsahota204/qwen2_5_vl
+    # Built-in zoo models (no zoo_model_source needed):
+    #   qwen3-vl-2b-instruct-torch
+    #   qwen3-vl-4b-instruct-torch
+    #   qwen3-vl-8b-instruct-torch
     thresholds:
       pass_below: 0.20            # risk ≤ 0.20 → PASS
       review_below: 0.60          # risk ≤ 0.60 → REVIEW, above → FAIL

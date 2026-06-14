@@ -430,6 +430,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
             adapter = _vlm_adapter if _vlm_adapter is not None else FiftyOneZooAdapter(
                 model_name=vlm_config.model_name,
                 max_new_tokens=vlm_config.generation.max_new_tokens,
+                zoo_model_source=vlm_config.zoo_model_source,
             )
 
             batch_size = vlm_config.generation.batch_size

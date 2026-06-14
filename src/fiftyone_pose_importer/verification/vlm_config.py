@@ -12,9 +12,14 @@ class VlmConfigError(ValueError):
 
 VALID_ZOO_MODEL_NAMES: frozenset[str] = frozenset(
     {
+        # Built-in FiftyOne zoo models
         "qwen3-vl-2b-instruct-torch",
         "qwen3-vl-4b-instruct-torch",
         "qwen3-vl-8b-instruct-torch",
+        # Community zoo model plugin (harpreetsahota204/qwen2_5_vl on GitHub)
+        "Qwen/Qwen2.5-VL-3B-Instruct",
+        "Qwen/Qwen2.5-VL-7B-Instruct",
+        "Qwen/Qwen2.5-VL-72B-Instruct",
     }
 )
 VALID_VLM_RULES: frozenset[str] = frozenset(
@@ -59,6 +64,7 @@ class VlmLabelConfig:
 @dataclass(frozen=True)
 class VlmConfig:
     model_name: str
+    zoo_model_source: str | None  # GitHub URL for community zoo plugin, e.g. "https://github.com/..."
     thresholds: VlmThresholds
     generation: VlmGeneration
     default_prompt_template: str
@@ -127,6 +133,10 @@ def load_vlm_config(raw: dict[str, Any] | None) -> tuple[VlmConfig, list[str]]:
     model_name = config.get("model_name")
     if not isinstance(model_name, str) or not model_name.strip():
         raise VlmConfigError("model_name is required and must be a non-empty string")
+
+    zoo_model_source = config.get("zoo_model_source")
+    if zoo_model_source is not None and not isinstance(zoo_model_source, str):
+        raise VlmConfigError("zoo_model_source must be a string URL or null")
 
     warnings: list[str] = []
     if model_name not in VALID_ZOO_MODEL_NAMES:
@@ -203,6 +213,7 @@ def load_vlm_config(raw: dict[str, Any] | None) -> tuple[VlmConfig, list[str]]:
     return (
         VlmConfig(
             model_name=model_name,
+            zoo_model_source=zoo_model_source,
             thresholds=thresholds,
             generation=generation,
             default_prompt_template=default_prompt_template,

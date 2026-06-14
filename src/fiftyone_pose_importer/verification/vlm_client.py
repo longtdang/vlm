@@ -23,14 +23,24 @@ class FiftyOneZooAdapter:
     changes (dependency pinned to ``<2.0.0`` in pyproject.toml).
     """
 
-    def __init__(self, model_name: str, max_new_tokens: int = 256) -> None:
+    def __init__(self, model_name: str, max_new_tokens: int = 256, zoo_model_source: str | None = None) -> None:
         self._model_name = model_name
         self._max_new_tokens = max_new_tokens
+        self._zoo_model_source = zoo_model_source
         self._zoo_model = None
 
     def _load_model(self) -> None:
         if self._zoo_model is None:
             import fiftyone.zoo as foz
+
+            if self._zoo_model_source:
+                # Download/register a community zoo model plugin from a GitHub URL.
+                # Idempotent — safe to call on every startup; fiftyone skips re-download
+                # if the plugin version is already installed.
+                foz.download_zoo_model(
+                    self._zoo_model_source,
+                    model_name=self._model_name,
+                )
 
             self._zoo_model = foz.load_zoo_model(
                 self._model_name,
