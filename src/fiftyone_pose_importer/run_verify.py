@@ -379,7 +379,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                         "bbox": list(bbox),
                         "attributes": annotation.get("attributes") if isinstance(annotation.get("attributes"), dict) else {},
                         "keypoints": keypoints,
-                        "visibility": crop.adjusted_visibility if crop.adjusted_visibility is not None else visibility,
+                        "visibility": crop.original_visibility if crop.original_visibility is not None else visibility,
                         "original_visibility": crop.original_visibility,
                         "polygon_points": polygon_points,
                         "out_of_frame_indices": crop.out_of_frame_point_indices,
