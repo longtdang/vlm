@@ -74,9 +74,9 @@ verification:
       pass_below: 0.20            # risk ≤ 0.20 → PASS
       review_below: 0.60          # risk ≤ 0.60 → REVIEW, above → FAIL
     generation:
-      max_new_tokens: 256
+      max_new_tokens: 128
       timeout_seconds: 300.0       # increased for local CPU/GPU inference; low values force REVIEW via adapter_timeout
-      batch_size: 2               # increase to 4–16 for higher GPU utilization (monitor VRAM)
+      batch_size: 1               # increase to 4–16 for higher GPU utilization (monitor VRAM)
 
     # DEFAULT PROMPT TEMPLATE
     # ─────────────────────────
@@ -142,31 +142,34 @@ verification:
           bbox_localization: |
             This crop shows one annotated object for label '{label}'.
             An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
-            Question: Is the orange-red box placed on the CORRECT type of object — a '{label}' —
-            and NOT on empty background, a roll alone, or a completely different object type?
+            A '{label}' is a FORKLIFT that is actively CARRYING A ROLL inside its clamp.
+            The clamp is the front attachment; the roll is the large cylinder the clamp is holding.
+            Question: Is the orange-red box placed on the CORRECT type of object — specifically a
+            forklift that has a roll in its clamp — and NOT on an empty forklift, a roll alone,
+            or empty background?
             Do NOT judge whether the box is tight or loose here. Only judge object identity.
             Scoring guide:
-              0.0–0.2 = the box is clearly on a correct '{label}' object
-              0.2–0.6 = the box is on the right object but placement is ambiguous or partially off
-              0.6–1.0 = the box is on the wrong object type, or mostly on empty background
+              0.0–0.2 = box is clearly on a forklift that has a roll in its clamp
+              0.2–0.6 = forklift is present but roll is unclear or placement is ambiguous
+              0.6–1.0 = wrong object (forklift with no roll, roll alone, or not a forklift)
             Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
-            {"error_probability": 0.05, "reason": "box is on the correct forklift"}
+            {"error_probability": 0.05, "reason": "box is on a forklift carrying a roll"}
           bbox_coverage: |
             This crop shows one annotated object for label '{label}'.
             An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
-            Question: Does the orange-red box TIGHTLY enclose the '{label}'?
-            A tight box has its edges close to the true object boundary, with no large empty space
-            inside and no significant part of the object cut off.
-            IMPORTANT: A box that is 1.5x or more the object's visual size — with large empty regions
-            inside — is a HIGH error even if the object is technically inside it.
+            A '{label}' is a forklift carrying a cylindrical roll in its clamp.
+            The bounding box must TIGHTLY enclose the ENTIRE object — both the forklift body AND
+            the roll it is holding — with no large empty space between the box edge and the object.
+            Question: Does the orange-red box tightly wrap around both the forklift and the roll?
+            IMPORTANT: A box much larger than the forklift+roll combined — with large empty areas
+            at the edges — is a HIGH error even if both objects are inside it.
             Scoring guide:
-              0.0–0.2 = box tightly covers the full object, edges close to object boundary
-              0.2–0.6 = box is slightly loose or a small part of the object is clipped
-              0.6–1.0 = box is much larger than the object (lots of empty space inside), OR
-                        a significant part of the object extends outside the box
+              0.0–0.2 = box tightly covers the full forklift + roll, edges close to boundary
+              0.2–0.6 = slightly loose or a small part of the forklift/roll is clipped
+              0.6–1.0 = large empty space at edges (box much bigger than the object), OR
+                        significant part of the forklift or roll extends outside the box
             Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
-            {"error_probability": 0.05, "reason": "box tightly covers the full forklift"}
-          clamp_type: |
+            {"error_probability": 0.05, "reason": "box tightly covers forklift and roll"} |
             Annotation data: {annotation_fields_json}
             The annotation above states the clamp type for label '{label}'.
             A "2-arm" clamp has exactly 2 gripping arms extending from its central hub.
@@ -208,28 +211,31 @@ verification:
           bbox_localization: |
             This crop shows one annotated object for label '{label}'.
             An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
-            Question: Is the orange-red box placed on the CORRECT type of object — a '{label}' —
-            and NOT on empty background or a completely different object type?
+            A '{label}' is a FORKLIFT WITHOUT a roll — the clamp at the front is EMPTY.
+            Question: Is the orange-red box placed on the CORRECT type of object — specifically a
+            forklift with an EMPTY clamp (no roll present) — and NOT on a forklift carrying a roll,
+            a roll alone, or empty background?
             Do NOT judge whether the box is tight or loose here. Only judge object identity.
             Scoring guide:
-              0.0–0.2 = the box is clearly on a correct '{label}' object
-              0.2–0.6 = the box is on the right object but placement is ambiguous or partially off
-              0.6–1.0 = the box is on the wrong object type, or mostly on empty background
+              0.0–0.2 = box is clearly on a forklift with an empty clamp (no roll)
+              0.2–0.6 = forklift is present but clamp occupancy is unclear
+              0.6–1.0 = wrong object (forklift with a roll, roll alone, or not a forklift)
             Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
-            {"error_probability": 0.05, "reason": "box is on the correct forklift"}
+            {"error_probability": 0.05, "reason": "box is on a forklift with empty clamp"}
           bbox_coverage: |
             This crop shows one annotated object for label '{label}'.
             An orange-red rectangle is drawn on the image — that is the bounding box being evaluated.
-            Question: Does the orange-red box TIGHTLY enclose the '{label}'?
-            A tight box has its edges close to the true object boundary, with no large empty space
-            inside and no significant part of the object cut off.
-            IMPORTANT: A box that is 1.5x or more the object's visual size — with large empty regions
-            inside — is a HIGH error even if the object is technically inside it.
+            A '{label}' is a forklift without a roll — just the vehicle body.
+            The bounding box must TIGHTLY enclose the full forklift, with edges close to the true
+            object boundary and no large empty space between the box edge and the forklift.
+            Question: Does the orange-red box tightly wrap the full forklift body?
+            IMPORTANT: A box much larger than the forklift — with large empty areas at the edges —
+            is a HIGH error even if the forklift is technically inside it.
             Scoring guide:
-              0.0–0.2 = box tightly covers the full object, edges close to object boundary
-              0.2–0.6 = box is slightly loose or a small part of the object is clipped
-              0.6–1.0 = box is much larger than the object (lots of empty space inside), OR
-                        a significant part of the object extends outside the box
+              0.0–0.2 = box tightly covers the full forklift, edges close to object boundary
+              0.2–0.6 = slightly loose or a small part of the forklift is clipped
+              0.6–1.0 = large empty space at edges (box much bigger than the forklift), OR
+                        significant part of the forklift extends outside the box
             Return ONLY this JSON (no markdown, no prose). Keep "reason" under 15 words.
             {"error_probability": 0.05, "reason": "box tightly covers the full forklift"}
       clamp-2-arm:
