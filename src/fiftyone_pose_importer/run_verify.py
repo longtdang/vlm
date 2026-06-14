@@ -206,7 +206,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
     else:
         raise ValueError("verification.output_dir must be a string path")
 
-    image_dir_raw = verification_root.get("image_dir")
+    image_dir_raw = verification_root.get("image_dir") or raw_config.get("image_dir")
     if image_dir_raw is None:
         image_root = None
     elif isinstance(image_dir_raw, str):
