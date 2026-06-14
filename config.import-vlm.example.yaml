@@ -230,19 +230,23 @@ verification:
         rules: ["keypoint_position", "occlusion_state"]
         prompts:
           keypoint_position: |
-            You are validating label '{label}' for rule '{rule}'.
+            You are verifying keypoint placement for the '{label}' object (rule: '{rule}').
             The image shows a crop that may contain multiple objects.
-            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
             Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoints are placed correctly on expected clamp landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
-            You are validating label '{label}' for rule '{rule}'.
+            You are verifying the occlusion annotation for the '{label}' object (rule: '{rule}').
             The image shows a crop that may contain multiple objects.
-            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
-            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether the dot colors correctly reflect what is visible vs occluded.
+            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
+            Dot color meaning:
+              green  = this part of the '{label}' structure is directly visible in the image
+              orange = this part of the '{label}' structure is hidden behind another object (e.g. a roll); the dot marks where that surface is, even though it is blocked
+              gray   = this keypoint is unlabeled
+            Important: an orange dot whose position falls on or overlaps a roll or another object is CORRECT — it marks a hidden surface of the '{label}'.
+            Judge whether each dot color matches the actual visibility of the '{label}' structure at that position.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       clamp-3-arm:
@@ -251,19 +255,23 @@ verification:
         rules: ["keypoint_position", "occlusion_state"]
         prompts:
           keypoint_position: |
-            You are validating label '{label}' for rule '{rule}'.
+            You are verifying keypoint placement for the '{label}' object (rule: '{rule}').
             The image shows a crop that may contain multiple objects.
-            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
             Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether keypoints are placed correctly on expected clamp landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
-            You are validating label '{label}' for rule '{rule}'.
+            You are verifying the occlusion annotation for the '{label}' object (rule: '{rule}').
             The image shows a crop that may contain multiple objects.
-            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
-            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether the dot colors correctly reflect what is visible vs occluded.
+            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
+            Dot color meaning:
+              green  = this part of the '{label}' structure is directly visible in the image
+              orange = this part of the '{label}' structure is hidden behind another object (e.g. a roll); the dot marks where that surface is, even though it is blocked
+              gray   = this keypoint is unlabeled
+            Important: an orange dot whose position falls on or overlaps a roll or another object is CORRECT — it marks a hidden surface of the '{label}'.
+            Judge whether each dot color matches the actual visibility of the '{label}' structure at that position.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       roll-keypoints:
@@ -272,19 +280,23 @@ verification:
         rules: ["keypoint_position", "occlusion_state"]
         prompts:
           keypoint_position: |
-            You are validating label '{label}' for rule '{rule}'.
+            You are verifying keypoint placement for the '{label}' object (rule: '{rule}').
             The image shows a crop that may contain multiple objects.
-            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
+            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
             Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
             Judge whether roll keypoints are placed correctly on expected landmarks.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
           occlusion_state: |
-            You are validating label '{label}' for rule '{rule}'.
+            You are verifying the occlusion annotation for the '{label}' object (rule: '{rule}').
             The image shows a crop that may contain multiple objects.
-            Colored dots mark keypoints on the object being evaluated — focus ONLY on those dots.
-            Dot colors: green = fully visible, orange = occluded, gray = unlabeled.
-            Judge whether the dot colors correctly reflect what is visible vs occluded.
+            Colored dots mark structural keypoints on the '{label}' object — focus ONLY on those dots, not on any text, stickers, or labels visible in the scene.
+            Dot color meaning:
+              green  = this part of the '{label}' structure is directly visible in the image
+              orange = this part of the '{label}' structure is hidden behind another object; the dot marks where that surface is, even though it is blocked
+              gray   = this keypoint is unlabeled
+            Important: an orange dot whose position falls on or overlaps another object is CORRECT — it marks a hidden surface of the '{label}'.
+            Judge whether each dot color matches the actual visibility of the '{label}' structure at that position.
             Return ONLY JSON:
             {"error_probability": <float 0..1>, "reason": "<brief reason>"}
       # mask/polygon labels — none of the 6 VLM rules apply (no manually-placed bbox,
