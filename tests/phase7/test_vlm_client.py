@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 from PIL import Image
 import importlib
 import pytest
@@ -11,6 +13,35 @@ MockVlmAdapter = vlm_client.MockVlmAdapter
 
 def _img() -> Image.Image:
     return Image.new("RGB", (1, 1), (128, 64, 32))
+
+
+def _make_fake_zoo_model(generate_return: str = "raw text from fake model", raises: Exception | None = None):
+    """Build a fake zoo model with the same interface as Qwen3VLModel post-load.
+
+    Uses pure MagicMock objects so torch is not required in the test environment.
+    fake_input_ids is a list to mirror the [in_ids, ...] zip-slicing in generate_text.
+    """
+    fake_input_ids = MagicMock()
+    fake_input_ids.__len__ = lambda self: 3
+
+    fake_out_ids = MagicMock()
+    fake_out_ids.__getitem__ = lambda self, key: MagicMock()
+
+    processor = MagicMock()
+    # apply_chat_template returns a dict; input_ids must be iterable for zip
+    processor.apply_chat_template.return_value = {"input_ids": [fake_input_ids]}
+    processor.batch_decode.return_value = [generate_return]
+
+    hf_model = MagicMock()
+    if raises is not None:
+        hf_model.generate.side_effect = raises
+    else:
+        hf_model.generate.return_value = [fake_out_ids]
+
+    zoo_model = MagicMock()
+    zoo_model._model = hf_model
+    zoo_model._processor = processor
+    return zoo_model, hf_model, processor
 
 
 def test_mock_vlm_adapter_default_response() -> None:
@@ -39,38 +70,33 @@ def test_mock_vlm_adapter_custom_default() -> None:
 
 
 def test_fiftyone_zoo_adapter_uses_injected_model_not_foz() -> None:
-    class _Config:
-        prompt = ""
+    zoo_model, hf_model, processor = _make_fake_zoo_model("raw text from fake model")
 
-    class FakeModel:
-        def __init__(self) -> None:
-            self.config = _Config()
-
-        def _generate_detections(self, images: list[Image.Image]) -> list[str]:
-            assert len(images) == 1
-            return ["raw text from fake model"]
-
-    fake_model = FakeModel()
     adapter = FiftyOneZooAdapter(model_name="qwen3-vl-2b-instruct-torch")
-    adapter._model = fake_model
+    adapter._zoo_model = zoo_model
 
-    assert adapter.generate_text(_img(), "my prompt") == "raw text from fake model"
-    assert fake_model.config.prompt == "my prompt"
+    result = adapter.generate_text(_img(), "my prompt")
+
+    assert result == "raw text from fake model"
+    processor.apply_chat_template.assert_called_once()
+    # Verify prompt was forwarded in the messages content
+    call_messages = processor.apply_chat_template.call_args.args[0]
+    prompt_parts = [
+        part.get("text")
+        for msg in call_messages
+        for part in msg.get("content", [])
+        if isinstance(part, dict) and "text" in part
+    ]
+    assert "my prompt" in prompt_parts
+    hf_model.generate.assert_called_once()
+    processor.batch_decode.assert_called_once()
 
 
 def test_fiftyone_zoo_adapter_propagates_model_exception() -> None:
-    class _Config:
-        prompt = ""
-
-    class FakeModel:
-        def __init__(self) -> None:
-            self.config = _Config()
-
-        def _generate_detections(self, images: list[Image.Image]) -> list[str]:
-            raise RuntimeError("inference failed")
+    zoo_model, _, _ = _make_fake_zoo_model(raises=RuntimeError("inference failed"))
 
     adapter = FiftyOneZooAdapter(model_name="qwen3-vl-2b-instruct-torch")
-    adapter._model = FakeModel()
+    adapter._zoo_model = zoo_model
 
     with pytest.raises(RuntimeError, match="inference failed"):
         adapter.generate_text(_img(), "prompt")
