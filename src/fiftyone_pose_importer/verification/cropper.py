@@ -61,6 +61,11 @@ def annotation_to_crop_space(
             [kx - ox, ky - oy] for kx, ky in result["keypoints"]
         ]
 
+    if isinstance(result.get("polygon_points"), list):
+        result["polygon_points"] = [
+            [px - ox, py - oy] for px, py in result["polygon_points"]
+        ]
+
     return result
 
 def _bbox_bounds(bbox: tuple[float, float, float, float], padding_px: int) -> tuple[int, int, int, int]:
@@ -199,6 +204,7 @@ _VIS_DEFAULT_COLOR = (200, 0, 200)  # magenta for unknown codes
 _KEYPOINT_RADIUS = 6                # dot radius in pixels
 _BBOX_COLOR = (255, 80, 0)          # orange-red for bbox rectangle
 _BBOX_WIDTH = 3                     # outline stroke width
+_POLYGON_COLOR = (80, 200, 255)     # cyan-blue for polygon outline
 
 
 def render_annotation_overlay(
@@ -208,12 +214,15 @@ def render_annotation_overlay(
 ) -> Path:
     """Render a copy of the crop image with annotation overlaid for VLM inspection.
 
-    Draws:
-    - Keypoints as filled circles, color-coded by visibility code:
-        green  (0,230,0)   — visible (code 2)
-        orange (255,165,0) — occluded (code 1)
-        gray   (140,140,140) — unlabeled (code 0)
-    - Bounding box as an orange-red rectangle outline.
+    Drawing mode is inferred from the annotation payload:
+    - **Polygon** (``polygon_points`` present and non-empty): draws a closed
+      polygon outline in cyan-blue. No bbox, no keypoint dots.
+    - **Skeleton** (``keypoints`` present and non-empty): draws color-coded
+      filled circles per keypoint. No bbox rectangle.
+      green  (0,230,0)   — visible (code 2)
+      orange (255,165,0) — occluded (code 1)
+      gray   (140,140,140) — unlabeled (code 0)
+    - **Bbox** (fallback): draws an orange-red rectangle outline.
 
     Annotation coordinates must already be in crop-space (use
     ``annotation_to_crop_space`` first). Only fields present and non-None
@@ -227,20 +236,22 @@ def render_annotation_overlay(
         img = src.convert("RGB").copy()
 
     draw = ImageDraw.Draw(img)
-    w, h = img.size
 
-    # Draw bounding box
-    bbox = annotation_crop_space.get("bbox")
-    if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
-        bx, by, bw, bh = (float(v) for v in bbox)
-        x0, y0, x1, y1 = bx, by, bx + bw, by + bh
-        for i in range(_BBOX_WIDTH):
-            draw.rectangle([x0 - i, y0 - i, x1 + i, y1 + i], outline=_BBOX_COLOR)
-
-    # Draw keypoints
+    polygon_points = annotation_crop_space.get("polygon_points")
     keypoints = annotation_crop_space.get("keypoints")
-    visibility = annotation_crop_space.get("visibility")
-    if isinstance(keypoints, list):
+
+    if isinstance(polygon_points, list) and len(polygon_points) >= 2:
+        # Polygon/segmentation mode: draw closed polygon outline
+        flat = [(float(p[0]), float(p[1])) for p in polygon_points if isinstance(p, (list, tuple)) and len(p) >= 2]
+        if len(flat) >= 2:
+            draw.polygon(flat, outline=_POLYGON_COLOR)
+            for _ in range(_BBOX_WIDTH - 1):
+                # Thicken by drawing again with a 1-px inset line approximation
+                draw.line(flat + [flat[0]], fill=_POLYGON_COLOR, width=_BBOX_WIDTH)
+
+    elif isinstance(keypoints, list) and len(keypoints) > 0:
+        # Skeleton mode: draw color-coded keypoint dots, no bbox
+        visibility = annotation_crop_space.get("visibility")
         for idx, kp in enumerate(keypoints):
             if not isinstance(kp, (list, tuple)) or len(kp) < 2:
                 continue
@@ -249,6 +260,15 @@ def render_annotation_overlay(
             color = _VIS_COLORS.get(int(vis_code) if isinstance(vis_code, (int, float)) else 2, _VIS_DEFAULT_COLOR)
             r = _KEYPOINT_RADIUS
             draw.ellipse([kx - r, ky - r, kx + r, ky + r], fill=color, outline=(0, 0, 0))
+
+    else:
+        # Bbox mode: draw orange-red rectangle outline
+        bbox = annotation_crop_space.get("bbox")
+        if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
+            bx, by, bw, bh = (float(v) for v in bbox)
+            x0, y0, x1, y1 = bx, by, bx + bw, by + bh
+            for i in range(_BBOX_WIDTH):
+                draw.rectangle([x0 - i, y0 - i, x1 + i, y1 + i], outline=_BBOX_COLOR)
 
     dest = Path(output_path)
     dest.parent.mkdir(parents=True, exist_ok=True)
