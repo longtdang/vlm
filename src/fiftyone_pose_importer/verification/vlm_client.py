@@ -28,7 +28,7 @@ class FiftyOneZooAdapter:
         self._max_new_tokens = max_new_tokens
         self._zoo_model = None
 
-    def generate_text(self, image: PILImage.Image, prompt: str) -> str:
+    def _load_model(self) -> None:
         if self._zoo_model is None:
             import fiftyone.zoo as foz
 
@@ -37,6 +37,18 @@ class FiftyOneZooAdapter:
                 max_new_tokens=self._max_new_tokens,
             )
 
+    def generate_text(self, image: PILImage.Image, prompt: str) -> str:
+        return self.generate_text_batch([image], [prompt])[0]
+
+    def generate_text_batch(self, images: list[PILImage.Image], prompts: list[str]) -> list[str]:
+        """Process a batch of (image, prompt) pairs in one forward pass.
+
+        Pads shorter sequences to the longest in the batch. All inputs must
+        share the same device as the model. Returns one decoded string per
+        input, preserving order.
+        """
+        self._load_model()
+
         # Access the underlying HuggingFace model and processor that
         # foz.load_zoo_model loads and stores on the zoo model object.
         # This uses the stable HuggingFace generate() API rather than any
@@ -44,22 +56,26 @@ class FiftyOneZooAdapter:
         hf_model = self._zoo_model._model
         processor = self._zoo_model._processor
 
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "image", "image": image},
-                    {"type": "text", "text": prompt},
-                ],
-            }
+        batch_messages = [
+            [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "image": image},
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ]
+            for image, prompt in zip(images, prompts)
         ]
 
         inputs = processor.apply_chat_template(
-            messages,
+            batch_messages,
             tokenize=True,
             add_generation_prompt=True,
             return_dict=True,
             return_tensors="pt",
+            padding=True,
         )
         # Move tensor values to the model's device; non-tensors (strings etc.)
         # are passed through unchanged via the hasattr guard.
@@ -74,14 +90,15 @@ class FiftyOneZooAdapter:
             do_sample=False,
         )
         generated_ids_trimmed = [
-            out_ids[len(in_ids) :]
+            out_ids[len(in_ids):]
             for in_ids, out_ids in zip(inputs["input_ids"], generated_ids)
         ]
         return processor.batch_decode(
             generated_ids_trimmed,
             skip_special_tokens=True,
             clean_up_tokenization_spaces=False,
-        )[0]
+        )
+
 
 
 class MockVlmAdapter:
@@ -104,3 +121,7 @@ class MockVlmAdapter:
             if key in prompt:
                 return resp
         return self._default
+
+    def generate_text_batch(self, images: list[PILImage.Image], prompts: list[str]) -> list[str]:
+        return [self.generate_text(image, prompt) for image, prompt in zip(images, prompts)]
+

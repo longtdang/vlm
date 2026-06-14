@@ -80,10 +80,12 @@ def test_fiftyone_zoo_adapter_uses_injected_model_not_foz() -> None:
     assert result == "raw text from fake model"
     processor.apply_chat_template.assert_called_once()
     # Verify prompt was forwarded in the messages content
+    # apply_chat_template now receives a list of conversations (batch format)
     call_messages = processor.apply_chat_template.call_args.args[0]
     prompt_parts = [
         part.get("text")
-        for msg in call_messages
+        for conversation in call_messages
+        for msg in conversation
         for part in msg.get("content", [])
         if isinstance(part, dict) and "text" in part
     ]

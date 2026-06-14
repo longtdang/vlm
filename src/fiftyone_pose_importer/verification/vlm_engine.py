@@ -111,48 +111,86 @@ def evaluate_vlm_object(
     rules = vlm_config.rules_for_label(result.label)
     thresholds = vlm_config.thresholds_for_label(result.label)
 
-    rule_results: list[VlmRuleResult] = []
     adapter_model = vlm_config.model_name
 
+    # Build all prompts upfront so we can dispatch as a batch when the adapter
+    # supports it. Batching (same image, N prompts in one generate() call)
+    # dramatically reduces CPU↔GPU round trips and increases GPU utilization.
+    prompts = []
     for rule in rules:
         per_label_template = vlm_config.prompt_for_label_rule(result.label, rule)
         template = per_label_template if per_label_template is not None else vlm_config.default_prompt_template
-        prompt = build_prompt(template, result.label, rule, annotation)
+        prompts.append(build_prompt(template, result.label, rule, annotation))
 
-        try:
-            raw_text = _call_with_timeout(
-                adapter.generate_text,
-                timeout_seconds=vlm_config.generation.timeout_seconds,
+    if not prompts:
+        return VlmObjectResult(
+            sample_id=result.sample_id,
+            object_id=result.object_id,
+            label=result.label,
+            vlm_status=VlmVerdict.REVIEW,
+            object_risk=None,
+            rule_results=[],
+            adapter_model=adapter_model,
+            failure_reason="no_rules_configured",
+            crop_path=result.crop_path,
+        )
+
+    # Dispatch: use batch API if available, fall back to sequential.
+    use_batch = hasattr(adapter, "generate_text_batch")
+    timeout = vlm_config.generation.timeout_seconds
+
+    try:
+        if use_batch:
+            raw_texts = _call_with_timeout(
+                lambda img, _prompt: adapter.generate_text_batch(  # type: ignore[attr-defined]
+                    [img] * len(prompts), prompts
+                ),
+                timeout_seconds=timeout,
                 image=crop_image,
-                prompt=prompt,
+                prompt="",  # unused; prompts passed via closure
             )
-            rule_results.append(parse_vlm_response(raw_text, rule))
-        except TimeoutError as exc:
-            return VlmObjectResult(
-                sample_id=result.sample_id,
-                object_id=result.object_id,
-                label=result.label,
-                vlm_status=VlmVerdict.REVIEW,
-                object_risk=None,
-                rule_results=rule_results,
-                adapter_model=adapter_model,
-                failure_reason=f"adapter_timeout:{exc}",
-                crop_path=result.crop_path,
-            )
-        except Exception as exc:
-            return VlmObjectResult(
-                sample_id=result.sample_id,
-                object_id=result.object_id,
-                label=result.label,
-                vlm_status=VlmVerdict.REVIEW,
-                object_risk=None,
-                rule_results=rule_results,
-                adapter_model=adapter_model,
-                failure_reason=f"adapter_error:{type(exc).__name__}:{exc}",
-                crop_path=result.crop_path,
-            )
+        else:
+            raw_texts = []
+            for prompt in prompts:
+                raw_texts.append(
+                    _call_with_timeout(
+                        adapter.generate_text,
+                        timeout_seconds=timeout,
+                        image=crop_image,
+                        prompt=prompt,
+                    )
+                )
+    except TimeoutError as exc:
+        return VlmObjectResult(
+            sample_id=result.sample_id,
+            object_id=result.object_id,
+            label=result.label,
+            vlm_status=VlmVerdict.REVIEW,
+            object_risk=None,
+            rule_results=[],
+            adapter_model=adapter_model,
+            failure_reason=f"adapter_timeout:{exc}",
+            crop_path=result.crop_path,
+        )
+    except Exception as exc:
+        return VlmObjectResult(
+            sample_id=result.sample_id,
+            object_id=result.object_id,
+            label=result.label,
+            vlm_status=VlmVerdict.REVIEW,
+            object_risk=None,
+            rule_results=[],
+            adapter_model=adapter_model,
+            failure_reason=f"adapter_error:{type(exc).__name__}:{exc}",
+            crop_path=result.crop_path,
+        )
 
-    valid_results = [rule_result for rule_result in rule_results if not rule_result.invalid_output]
+    rule_results: list[VlmRuleResult] = [
+        parse_vlm_response(raw_text, rule)
+        for raw_text, rule in zip(raw_texts, rules)
+    ]
+
+    valid_results = [r for r in rule_results if not r.invalid_output]
     if not valid_results:
         return VlmObjectResult(
             sample_id=result.sample_id,
@@ -166,7 +204,7 @@ def evaluate_vlm_object(
             crop_path=result.crop_path,
         )
 
-    object_risk = max((rule_result.error_probability or 0.0) for rule_result in valid_results)
+    object_risk = max((r.error_probability or 0.0) for r in valid_results)
     if object_risk <= thresholds.pass_below:
         vlm_status = VlmVerdict.PASS
     elif object_risk <= thresholds.review_below:
