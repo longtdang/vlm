@@ -45,6 +45,7 @@ class VlmThresholds:
 class VlmGeneration:
     max_new_tokens: int = 256
     timeout_seconds: float = 8.0
+    batch_size: int = 1
 
 
 @dataclass(frozen=True)
@@ -107,11 +108,14 @@ def _parse_generation(raw: dict[str, Any] | None) -> VlmGeneration:
         raise VlmConfigError("generation must be a mapping")
     max_new_tokens = block.get("max_new_tokens", 256)
     timeout_seconds = block.get("timeout_seconds", 8.0)
+    batch_size = block.get("batch_size", 1)
     if not isinstance(max_new_tokens, int) or max_new_tokens <= 0:
         raise VlmConfigError("generation.max_new_tokens must be a positive integer")
     if not isinstance(timeout_seconds, (int, float)) or float(timeout_seconds) <= 0:
         raise VlmConfigError("generation.timeout_seconds must be > 0")
-    return VlmGeneration(max_new_tokens=max_new_tokens, timeout_seconds=float(timeout_seconds))
+    if not isinstance(batch_size, int) or batch_size <= 0:
+        raise VlmConfigError("generation.batch_size must be a positive integer")
+    return VlmGeneration(max_new_tokens=max_new_tokens, timeout_seconds=float(timeout_seconds), batch_size=batch_size)
 
 
 def load_vlm_config(raw: dict[str, Any] | None) -> tuple[VlmConfig, list[str]]:

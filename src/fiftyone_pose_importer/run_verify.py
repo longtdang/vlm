@@ -390,7 +390,7 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
         from .verification.report_vlm import serialize_vlm_object_result, write_vlm_reports as write_vlm_run_reports
         from .verification.vlm_client import FiftyOneZooAdapter
         from .verification.vlm_config import VlmConfigError, load_vlm_config
-        from .verification.vlm_engine import evaluate_vlm_object
+        from .verification.vlm_engine import evaluate_vlm_batch
         from .verification.vlm_types import VlmObjectResult, VlmVerdict
 
         vlm_config_raw = verification_root.get("vlm") or {}
@@ -407,8 +407,19 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                 max_new_tokens=vlm_config.generation.max_new_tokens,
             )
 
+            batch_size = vlm_config.generation.batch_size
             vlm_ndjson_trace_path = run_dir / "vlm_trace.ndjson"
             with NdjsonStreamWriter(vlm_ndjson_trace_path, serializer=serialize_vlm_object_result) as vlm_ndjson_writer:
+                pending: list[tuple[Any, dict[str, Any], Any]] = []
+
+                def _flush_pending() -> None:
+                    if not pending:
+                        return
+                    for outcome in evaluate_vlm_batch(pending, adapter=adapter, vlm_config=vlm_config):
+                        vlm_results.append(outcome)
+                        vlm_ndjson_writer.write(outcome)
+                    pending.clear()
+
                 for result in results:
                     if result.verdict is not DeterministicVerdict.PASS:
                         continue
@@ -435,15 +446,12 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                         continue
 
                     annotation = annotation_payloads.get((result.sample_id, result.object_id), {})
-                    vlm_outcome = evaluate_vlm_object(
-                        result=result,
-                        annotation=annotation,
-                        crop_image=crop_img,
-                        adapter=adapter,
-                        vlm_config=vlm_config,
-                    )
-                    vlm_results.append(vlm_outcome)
-                    vlm_ndjson_writer.write(vlm_outcome)
+                    pending.append((result, annotation, crop_img))
+
+                    if len(pending) >= batch_size:
+                        _flush_pending()
+
+                _flush_pending()  # flush any remaining items
 
             vlm_artifact_paths = write_vlm_run_reports(
                 vlm_results, run_root=run_root, run_timestamp=safe_timestamp,
