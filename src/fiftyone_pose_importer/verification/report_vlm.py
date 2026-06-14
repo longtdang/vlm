@@ -114,12 +114,14 @@ def write_vlm_reports(
     *,
     run_root: Path,
     run_timestamp: str,
+    ndjson_path: Path | None = None,
 ) -> dict[str, Path]:
     run_dir = _safe_run_dir(run_root=run_root, run_timestamp=run_timestamp)
     run_dir.mkdir(parents=True, exist_ok=True)
 
     csv_path = write_vlm_csv(results, run_dir / "vlm_report.csv")
     json_path = write_vlm_json(results, run_dir / "vlm_report.json")
-    ndjson_path = write_vlm_ndjson(results, run_dir / "vlm_trace.ndjson")
+    if ndjson_path is None:
+        ndjson_path = write_vlm_ndjson(results, run_dir / "vlm_trace.ndjson")
 
     return {"vlm_csv": csv_path, "vlm_json": json_path, "vlm_ndjson": ndjson_path}

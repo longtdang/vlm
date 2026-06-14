@@ -382,12 +382,12 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
         ndjson_path=ndjson_trace_path,
     )
 
-    vlm_results = []
+    vlm_results: list[Any] = []
     vlm_artifact_paths: dict[str, Path] = {}
     if vlm_enabled:
         from PIL import Image as PILImage
 
-        from .verification.report_vlm import write_vlm_reports as write_vlm_run_reports
+        from .verification.report_vlm import serialize_vlm_object_result, write_vlm_reports as write_vlm_run_reports
         from .verification.vlm_client import FiftyOneZooAdapter
         from .verification.vlm_config import VlmConfigError, load_vlm_config
         from .verification.vlm_engine import evaluate_vlm_object
@@ -407,18 +407,19 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                 max_new_tokens=vlm_config.generation.max_new_tokens,
             )
 
-            for result in results:
-                if result.verdict is not DeterministicVerdict.PASS:
-                    continue
-                if not vlm_config.is_label_enabled(result.label):
-                    continue
+            vlm_ndjson_trace_path = run_dir / "vlm_trace.ndjson"
+            with NdjsonStreamWriter(vlm_ndjson_trace_path, serializer=serialize_vlm_object_result) as vlm_ndjson_writer:
+                for result in results:
+                    if result.verdict is not DeterministicVerdict.PASS:
+                        continue
+                    if not vlm_config.is_label_enabled(result.label):
+                        continue
 
-                try:
-                    with PILImage.open(result.crop_path) as loaded:
-                        crop_img = loaded.convert("RGB")
-                except Exception as exc:
-                    vlm_results.append(
-                        VlmObjectResult(
+                    try:
+                        with PILImage.open(result.crop_path) as loaded:
+                            crop_img = loaded.convert("RGB")
+                    except Exception as exc:
+                        vlm_outcome = VlmObjectResult(
                             sample_id=result.sample_id,
                             object_id=result.object_id,
                             label=result.label,
@@ -429,21 +430,24 @@ def run_verify(config_path: str, _vlm_adapter: "VlmAdapter | None" = None) -> tu
                             failure_reason=f"crop_load_error:{type(exc).__name__}",
                             crop_path=result.crop_path,
                         )
-                    )
-                    continue
+                        vlm_results.append(vlm_outcome)
+                        vlm_ndjson_writer.write(vlm_outcome)
+                        continue
 
-                annotation = annotation_payloads.get((result.sample_id, result.object_id), {})
-                vlm_outcome = evaluate_vlm_object(
-                    result=result,
-                    annotation=annotation,
-                    crop_image=crop_img,
-                    adapter=adapter,
-                    vlm_config=vlm_config,
-                )
-                vlm_results.append(vlm_outcome)
+                    annotation = annotation_payloads.get((result.sample_id, result.object_id), {})
+                    vlm_outcome = evaluate_vlm_object(
+                        result=result,
+                        annotation=annotation,
+                        crop_image=crop_img,
+                        adapter=adapter,
+                        vlm_config=vlm_config,
+                    )
+                    vlm_results.append(vlm_outcome)
+                    vlm_ndjson_writer.write(vlm_outcome)
 
             vlm_artifact_paths = write_vlm_run_reports(
-                vlm_results, run_root=run_root, run_timestamp=safe_timestamp
+                vlm_results, run_root=run_root, run_timestamp=safe_timestamp,
+                ndjson_path=vlm_ndjson_trace_path,
             )
 
     object_records = []
