@@ -93,7 +93,10 @@ def _call_with_timeout(fn, *, timeout_seconds: float, image: PILImage.Image, pro
         try:
             return future.result(timeout=timeout_seconds)
         except concurrent.futures.TimeoutError as exc:
-            future.cancel()
+            # future.cancel() is a no-op on already-running futures in Python's
+            # concurrent.futures — the underlying thread continues until completion.
+            # GPU/CPU resources remain in use until the thread finishes naturally.
+            # True cancellation would require subprocess/multiprocessing isolation.
             raise TimeoutError(f"after {timeout_seconds}s") from exc
 
 
