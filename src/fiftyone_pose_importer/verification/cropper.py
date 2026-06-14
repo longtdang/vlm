@@ -251,7 +251,10 @@ def render_annotation_overlay(
 
     elif isinstance(keypoints, list) and len(keypoints) > 0:
         # Skeleton mode: draw color-coded keypoint dots, no bbox
+        from PIL import ImageFont
         visibility = annotation_crop_space.get("visibility")
+        point_names = annotation_crop_space.get("point_names")
+        font = ImageFont.load_default()
         for idx, kp in enumerate(keypoints):
             if not isinstance(kp, (list, tuple)) or len(kp) < 2:
                 continue
@@ -260,6 +263,13 @@ def render_annotation_overlay(
             color = _VIS_COLORS.get(int(vis_code) if isinstance(vis_code, (int, float)) else 2, _VIS_DEFAULT_COLOR)
             r = _KEYPOINT_RADIUS
             draw.ellipse([kx - r, ky - r, kx + r, ky + r], fill=color, outline=(0, 0, 0))
+            if isinstance(point_names, list) and idx < len(point_names):
+                label = str(point_names[idx])
+                label_x, label_y = kx - r, ky - r - 11  # 11 px above dot top: 9 px font + 2 px gap
+                # Black shadow for contrast on any background
+                draw.text((label_x + 1, label_y + 1), label, fill=(0, 0, 0), font=font)
+                # White foreground
+                draw.text((label_x, label_y), label, fill=(255, 255, 255), font=font)
 
     else:
         # Bbox mode: draw orange-red rectangle outline

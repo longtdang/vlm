@@ -278,3 +278,70 @@ def test_render_annotation_overlay_no_annotations(tmp_path: Path) -> None:
     assert out.exists()
     img = Image.open(out)
     assert img.size == (60, 60)
+
+
+def test_render_annotation_overlay_keypoints_with_point_names(tmp_path: Path) -> None:
+    """Point names are rendered as text labels above each keypoint dot."""
+    source = tmp_path / "crop.png"
+    # White canvas so any non-white pixel == something was drawn
+    Image.new("RGB", (200, 200), (255, 255, 255)).save(source)
+
+    annotation = {
+        "keypoints": [[50.0, 100.0], [150.0, 100.0]],
+        "visibility": [2, 2],
+        "point_names": ["nose", "left_eye"],
+        "polygon_points": None,
+        "bbox": None,
+    }
+    out = tmp_path / "labeled.png"
+    render_annotation_overlay(source, annotation, out)
+
+    img = Image.open(out)
+    # Pixels directly above the first dot (kx=50, ky=100 - radius - label height)
+    # must differ from the white background — text was drawn there.
+    label_area_pixels = [img.getpixel((x, y)) for x in range(40, 70) for y in range(75, 95)]
+    non_white = [p for p in label_area_pixels if p != (255, 255, 255)]
+    assert len(non_white) > 0, "Expected text pixels above the first keypoint dot"
+
+
+def test_render_annotation_overlay_keypoints_no_point_names(tmp_path: Path) -> None:
+    """Omitting point_names produces dots only — no crash, no regression."""
+    source = tmp_path / "crop.png"
+    Image.new("RGB", (100, 100), (0, 0, 0)).save(source)
+
+    annotation = {
+        "keypoints": [[30.0, 50.0]],
+        "visibility": [2],
+        # point_names intentionally absent
+        "polygon_points": None,
+        "bbox": None,
+    }
+    out = tmp_path / "no_names.png"
+    render_annotation_overlay(source, annotation, out)
+
+    assert out.exists()
+    img = Image.open(out)
+    # Dot at (30, 50) should be green (visible)
+    assert img.getpixel((30, 50))[1] > 100, "dot should still be drawn green"
+
+
+def test_render_annotation_overlay_point_names_shorter_than_keypoints(tmp_path: Path) -> None:
+    """If point_names has fewer entries than keypoints, label only the first N dots."""
+    source = tmp_path / "crop.png"
+    Image.new("RGB", (200, 200), (255, 255, 255)).save(source)
+
+    annotation = {
+        "keypoints": [[50.0, 100.0], [150.0, 100.0]],
+        "visibility": [2, 2],
+        "point_names": ["nose"],   # only one name for two keypoints
+        "polygon_points": None,
+        "bbox": None,
+    }
+    out = tmp_path / "partial.png"
+    render_annotation_overlay(source, annotation, out)   # must not raise
+
+    assert out.exists()
+    img = Image.open(out)
+    # Both dots drawn
+    assert img.getpixel((50, 100))[1] > 100
+    assert img.getpixel((150, 100))[1] > 100
