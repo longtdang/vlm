@@ -1,2 +1,17 @@
 __pycache__/
 *.pyc
+
+# Local datasets and run artifacts
+data/
+verification-runs/
+graphify-out/
+
+# Local config/summary outputs
+local.verify.yaml
+*.summary.json
+
+# Tooling/generated caches
+.scratch_datumaro/
+src/*.egg-info/
+.planning/graphs/
+.planning/research/.cache/

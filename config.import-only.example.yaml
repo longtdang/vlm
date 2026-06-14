@@ -83,16 +83,21 @@ verification:
       # Remove or add label blocks as needed.
       overrides:
         # Example: different skeleton types with different keypoint counts
-        # clamp-2-arm:
-        #   skeleton-count:
-        #     - name: keypoint_count
-        #       params:
-        #         expected: 12
-        # clamp-3-arm:
-        #   skeleton-count:
-        #     - name: keypoint_count
-        #       params:
-        #         expected: 16
+        clamp-2-arm:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 12
+        clamp-3-arm:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 16
+        roll-keypoints:
+          skeleton-count:
+            - name: keypoint_count
+              params:
+                expected: 4
         # Polygon labels — disable skeleton-count (variable point count)
         # clamp-mask:
         #   skeleton-count: []
