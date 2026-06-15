@@ -64,9 +64,101 @@ DEFAULT_PROMPTS: dict[str, str] = {
     ),
 }
 
-# Per-label prompt overrides (future use — not yet consulted by _apply_vlm):
+# Per-label merged prompts — one prompt per label covering all applicable checks.
+# Prompts may contain {label} and {annotation_fields_json} placeholders.
+# {annotation_fields_json} triggers per-sample attribute injection in _apply_vlm.
 LABEL_PROMPTS: dict[str, str] = {
-    # "forklift-with-roll": "...",
+    "forklift-with-roll": (
+        "You are validating annotation quality for label '{label}'.\n"
+        "The image shows a crop with an orange-red bounding box drawn on it"
+        " — focus ONLY on that annotated object.\n"
+        "Annotation fields:\n"
+        "{annotation_fields_json}\n"
+        "Evaluate ALL of the following checks and return ONE overall error probability:\n"
+        "1. Bbox localization — does the bounding box tightly localize the forklift?\n"
+        "2. Bbox coverage — the bounding box must cover the forklift body, the clamp assembly,"
+        " AND all paper rolls currently being carried by the clamp."
+        " Penalize if any of these are clipped.\n"
+        "3. Clamp type — does the clamp-type attribute value match the clamp visually"
+        " present in the crop?\n"
+        "4. Roll count — does the roll-count attribute value match the number of rolls"
+        " visible in the crop?\n"
+        "Return ONLY JSON:\n"
+        '{"error_probability": <float 0..1>, "reason": "<brief summary of any issues found>"}'
+    ),
+    "forklift-no-roll": (
+        "You are validating annotation quality for label '{label}'.\n"
+        "The image shows a crop with an orange-red bounding box drawn on it"
+        " — focus ONLY on that annotated object.\n"
+        "Evaluate ALL of the following checks and return ONE overall error probability:\n"
+        "1. Bbox localization — does the bounding box tightly localize the forklift?\n"
+        "2. Bbox coverage — the bounding box must cover the forklift body and clamp assembly"
+        " only (no rolls are being carried for this label)."
+        " Penalize major clipping or excess background.\n"
+        "3. Label correctness — if the forklift is visibly carrying paper rolls,"
+        " the label is likely wrong; assign high error probability in that case.\n"
+        "Return ONLY JSON:\n"
+        '{"error_probability": <float 0..1>, "reason": "<brief summary of any issues found>"}'
+    ),
+    "clamp-2-arm": (
+        "You are validating annotation quality for label '{label}'.\n"
+        "The image shows a crop with colored keypoint dots marking structural points"
+        " on the '{label}' clamp.\n"
+        "Focus ONLY on those dots — ignore any text, stickers, or labels visible in the scene.\n"
+        "The keypoint coordinates themselves are assumed to be correct."
+        " Do NOT evaluate keypoint position.\n"
+        "Only evaluate whether the visibility state (visible, occluded, unlabeled) matches the image.\n"
+        "Dot color meaning:\n"
+        "  green  = this part of the clamp structure is directly visible in the image\n"
+        "  orange = this part of the clamp structure is hidden behind another object (e.g. a roll);"
+        " the dot marks where that surface is, even though it is blocked\n"
+        "  gray   = this keypoint is unlabeled\n"
+        "Important: an orange dot overlapping a roll or another object is CORRECT"
+        " — it marks a hidden surface of the '{label}'.\n"
+        "Judge whether each dot color matches the actual occlusion state of the"
+        " '{label}' structure at that position.\n"
+        "Return ONLY JSON:\n"
+        '{"error_probability": <float 0..1>, "reason": "<brief reason>"}'
+    ),
+    "clamp-3-arm": (
+        "You are validating annotation quality for label '{label}'.\n"
+        "The image shows a crop with colored keypoint dots marking structural points"
+        " on the '{label}' clamp.\n"
+        "Focus ONLY on those dots — ignore any text, stickers, or labels visible in the scene.\n"
+        "The keypoint coordinates themselves are assumed to be correct."
+        " Do NOT evaluate keypoint position.\n"
+        "Only evaluate whether the visibility state (visible, occluded, unlabeled) matches the image.\n"
+        "Dot color meaning:\n"
+        "  green  = this part of the clamp structure is directly visible in the image\n"
+        "  orange = this part of the clamp structure is hidden behind another object (e.g. a roll);"
+        " the dot marks where that surface is, even though it is blocked\n"
+        "  gray   = this keypoint is unlabeled\n"
+        "Important: an orange dot overlapping a roll or another object is CORRECT"
+        " — it marks a hidden surface of the '{label}'.\n"
+        "Judge whether each dot color matches the actual occlusion state of the"
+        " '{label}' structure at that position.\n"
+        "Return ONLY JSON:\n"
+        '{"error_probability": <float 0..1>, "reason": "<brief reason>"}'
+    ),
+    "roll-keypoints": (
+        "You are validating annotation quality for label '{label}'.\n"
+        "The image shows a crop with colored keypoint dots marking structural points on the roll.\n"
+        "Focus ONLY on those dots.\n"
+        "The keypoint coordinates themselves are assumed to be correct."
+        " Do NOT evaluate keypoint position.\n"
+        "Only evaluate whether the visibility state (visible, occluded, unlabeled) matches the image.\n"
+        "Dot color meaning:\n"
+        "  green  = this part of the roll structure is directly visible in the image\n"
+        "  orange = this part of the roll structure is hidden behind another object;"
+        " the dot marks where that surface is, even though it is blocked\n"
+        "  gray   = this keypoint is unlabeled\n"
+        "Important: an orange dot overlapping another object is CORRECT"
+        " — it marks a hidden surface of the '{label}'.\n"
+        "Judge whether each dot color matches the actual visibility of the"
+        " roll structure at that position.\n"
+        "Return ONLY JSON:\n"
+        '{"error_probability": <float 0..1>, "reason": "<brief reason>"}'
+    ),
 }
 
 _SKELETON_ANN_TYPES = {"points", "skeleton"}
