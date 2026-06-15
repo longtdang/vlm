@@ -132,7 +132,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--image-dir", required=True, help="Directory containing source images")
     parser.add_argument("--output-dir", required=True, help="Output directory for crops and report")
     parser.add_argument("--dataset-name", default="crop_validate", help="FiftyOne dataset base name")
-    parser.add_argument("--model", default="Qwen/Qwen2.5-VL-7B-Instruct", help="Qwen2.5-VL model checkpoint")
+    parser.add_argument("--model", default="Qwen/Qwen2.5-VL-3B-Instruct", help="Qwen2.5-VL model checkpoint")
     parser.add_argument("--plugin-source", default=PLUGIN_URL, help="FiftyOne zoo plugin URL")
     parser.add_argument("--padding-px", type=int, default=DEFAULT_PADDING_PX, help="Crop padding in pixels")
     parser.add_argument("--pass-threshold", type=float, default=0.20, help="Risk below this → PASS")
@@ -218,6 +218,7 @@ from scripts.crop_validate import (
     _is_skeleton_type,
     _label_lookup,
     _safe_token,
+    _to_field_name,
 )
 
 
@@ -321,6 +322,29 @@ class TestSafeToken:
 
     def test_empty_becomes_unknown(self) -> None:
         assert _safe_token("") == "unknown"
+
+
+class TestToFieldName:
+    def test_roll_keypoints(self) -> None:
+        assert _to_field_name("roll-keypoints") == "keypoints_roll_keypoints"
+
+    def test_clamp_2_arm(self) -> None:
+        assert _to_field_name("clamp-2-arm") == "keypoints_clamp_2_arm"
+
+    def test_clamp_3_arm(self) -> None:
+        assert _to_field_name("clamp-3-arm") == "keypoints_clamp_3_arm"
+
+    def test_uppercase_lowercased(self) -> None:
+        assert _to_field_name("MyLabel") == "keypoints_mylabel"
+
+    def test_spaces_normalized(self) -> None:
+        assert _to_field_name("my label") == "keypoints_my_label"
+
+    def test_empty_becomes_unknown(self) -> None:
+        assert _to_field_name("") == "keypoints_unknown"
+
+    def test_leading_trailing_separators_stripped(self) -> None:
+        assert _to_field_name("-arm-") == "keypoints_arm"
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -396,6 +420,18 @@ def _safe_token(value: str) -> str:
     return cleaned or "unknown"
 
 
+def _to_field_name(label_name: str) -> str:
+    """Convert a label name to a FiftyOne keypoints field name.
+
+    Each distinct skeleton label maps to its own field so FiftyOne can
+    enforce a consistent keypoint schema (fixed point count) per field.
+    e.g. "clamp-2-arm" → "keypoints_clamp_2_arm"
+         "roll-keypoints" → "keypoints_roll_keypoints"
+    """
+    slug = re.sub(r"[^a-z0-9]+", "_", label_name.lower()).strip("_")
+    return f"keypoints_{slug}" if slug else "keypoints_unknown"
+
+
 def _get_polygon_points(annotation: dict[str, Any]) -> list[list[float]] | None:
     """Extract polygon/polyline/mask points as [[x, y], ...] pairs."""
     ann_type = annotation.get("type")
@@ -425,7 +461,7 @@ Expected: all tests PASS.
 
 ```bash
 git add scripts/crop_validate.py tests/crop_validate/__init__.py tests/crop_validate/test_helpers.py
-git commit -m "feat: add annotation parsing helpers with tests"
+git commit -m "feat: add annotation parsing helpers including _to_field_name with tests"
 ```
 
 ---
@@ -709,7 +745,7 @@ class TestSkeletonSample:
             label_id=2,
             contract=contract,
         )
-        kp_field = "keypoints_label_2"
+        kp_field = "keypoints_clamp_2_arm"
         assert kp_field in sample.field_names
         kp = sample[kp_field].keypoints[0]
         # visible: [40/400, 30/300] = [0.1, 0.1]
@@ -720,7 +756,7 @@ class TestSkeletonSample:
         assert math.isnan(kp.points[2][0])
         assert math.isnan(kp.points[2][1])
 
-    def test_skeleton_field_name_uses_label_id(self) -> None:
+    def test_skeleton_field_name_uses_label_name(self) -> None:
         contract = SkeletonContract(labels=["a", "b"], edges=[])
         crop_plan = _make_crop_plan(output_size=(100, 100), policy="skeleton_preserve_canvas")
         sample = _to_fo_sample(
@@ -734,8 +770,8 @@ class TestSkeletonSample:
             label_id=5,
             contract=contract,
         )
-        assert "keypoints_label_5" in sample.field_names
-        assert "keypoints_label_0" not in sample.field_names
+        assert "keypoints_clamp_3_arm" in sample.field_names
+        assert "keypoints_clamp_2_arm" not in sample.field_names
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -796,7 +832,10 @@ def _to_fo_sample(
     elif ann_type == "skeleton":
         keypoints = crop_space_ann.get("keypoints") or []
         visibility = crop_space_ann.get("visibility") or []
-        field_name = f"keypoints_label_{label_id}" if isinstance(label_id, int) else "keypoints_label_unknown"
+        # Use the label name (slugified) as the field name so each skeleton type
+        # (roll-keypoints, clamp-2-arm, clamp-3-arm) gets its own field with a
+        # consistent keypoint count — required by FiftyOne's schema enforcement.
+        field_name = _to_field_name(label)
         fo_points = []
         for idx, (kx, ky) in enumerate(keypoints):
             vis = visibility[idx] if idx < len(visibility) else 2
@@ -978,8 +1017,8 @@ def _build_dataset(args: argparse.Namespace) -> fo.Dataset:
                 skipped += 1
                 continue
 
-            if is_skeleton and contract is not None and isinstance(label_id, int):
-                field_name = f"keypoints_label_{label_id}"
+            if is_skeleton and contract is not None:
+                field_name = _to_field_name(label)
                 routed_contracts[field_name] = contract
 
             sample = _to_fo_sample(
@@ -1138,6 +1177,8 @@ git commit -m "feat: implement VLM stage with Qwen2.5-VL plugin and response par
 - Modify: `scripts/crop_validate.py` (replace `_write_report` stub)
 - Create: `tests/crop_validate/test_report.py`
 
+Report structure: one `## <frame_name>` section per source image, rows sorted by risk descending within each frame. Frames sorted alphabetically. Summary table at top with verdict counts.
+
 - [ ] **Step 1: Write failing tests**
 
 Create `tests/crop_validate/test_report.py`:
@@ -1153,24 +1194,29 @@ from scripts.crop_validate import _write_report
 
 
 def _make_dataset_with_verdicts(tmp_path: Path) -> fo.Dataset:
-    """Build a minimal in-memory FiftyOne dataset with vlm_verdict fields."""
+    """Build a minimal in-memory FiftyOne dataset with vlm_verdict fields.
+
+    Two frames so we can test frame-based grouping:
+      frame_001.jpg → FAIL 0.92, REVIEW 0.45
+      frame_002.jpg → FAIL 0.75, PASS 0.05, PASS 0.10
+    """
     import uuid
     dataset = fo.Dataset(f"test_report_{uuid.uuid4().hex[:8]}")
 
-    for i, (verdict, confidence, reason, label) in enumerate([
-        ("FAIL",   0.92, "bbox clips edge", "forklift-with-roll"),
-        ("FAIL",   0.75, "wrong placement", "clamp-2-arm"),
-        ("REVIEW", 0.45, "partially correct", "forklift-no-roll"),
-        ("PASS",   0.05, "looks good", "clamp-3-arm"),
-        ("PASS",   0.10, "well placed", "forklift-with-roll"),
-    ]):
-        # Create a tiny 1x1 PNG so FiftyOne accepts the filepath
+    rows = [
+        ("frame_001.jpg", "FAIL",   0.92, "bbox clips edge",   "forklift-with-roll"),
+        ("frame_001.jpg", "REVIEW", 0.45, "partially correct", "clamp-2-arm"),
+        ("frame_002.jpg", "FAIL",   0.75, "wrong placement",   "clamp-2-arm"),
+        ("frame_002.jpg", "PASS",   0.05, "looks good",        "clamp-3-arm"),
+        ("frame_002.jpg", "PASS",   0.10, "well placed",       "forklift-with-roll"),
+    ]
+    for i, (source_image, verdict, confidence, reason, label) in enumerate(rows):
         img_path = tmp_path / f"crop_{i}.png"
         from PIL import Image
         Image.new("RGB", (10, 10), color=(0, 0, 0)).save(img_path)
 
         sample = fo.Sample(filepath=str(img_path))
-        sample["source_image"] = f"frame_{i:03d}.jpg"
+        sample["source_image"] = source_image
         sample["source_ann_id"] = str(i + 100)
         sample["annotation_label"] = label
         sample["annotation_type"] = "detection"
@@ -1201,15 +1247,28 @@ class TestWriteReport:
         assert "PASS" in content
         dataset.delete()
 
-    def test_fail_section_before_review_before_pass(self, tmp_path: Path) -> None:
+    def test_frame_sections_are_present(self, tmp_path: Path) -> None:
+        """Report has one section per source frame, not per verdict."""
         dataset = _make_dataset_with_verdicts(tmp_path)
         report_path = tmp_path / "report.md"
         _write_report(dataset, report_path, dataset.name)
         content = report_path.read_text()
-        fail_pos = content.index("## ❌ FAIL")
-        review_pos = content.index("## ⚠️ REVIEW")
-        pass_pos = content.index("## ✅ PASS")
-        assert fail_pos < review_pos < pass_pos
+        assert "## frame_001.jpg" in content
+        assert "## frame_002.jpg" in content
+        # Must NOT have old-style verdict section headers
+        assert "## ❌ FAIL" not in content
+        assert "## ⚠️ REVIEW" not in content
+        assert "## ✅ PASS" not in content
+        dataset.delete()
+
+    def test_frames_sorted_alphabetically(self, tmp_path: Path) -> None:
+        dataset = _make_dataset_with_verdicts(tmp_path)
+        report_path = tmp_path / "report.md"
+        _write_report(dataset, report_path, dataset.name)
+        content = report_path.read_text()
+        pos_001 = content.index("## frame_001.jpg")
+        pos_002 = content.index("## frame_002.jpg")
+        assert pos_001 < pos_002
         dataset.delete()
 
     def test_rows_contain_source_image_and_reason(self, tmp_path: Path) -> None:
@@ -1217,19 +1276,33 @@ class TestWriteReport:
         report_path = tmp_path / "report.md"
         _write_report(dataset, report_path, dataset.name)
         content = report_path.read_text()
-        assert "frame_000.jpg" in content
+        assert "frame_001.jpg" in content
         assert "bbox clips edge" in content
         dataset.delete()
 
-    def test_fail_rows_sorted_by_risk_descending(self, tmp_path: Path) -> None:
+    def test_rows_within_frame_sorted_by_risk_descending(self, tmp_path: Path) -> None:
+        """Within frame_002.jpg, FAIL 0.75 must appear before PASS 0.10."""
         dataset = _make_dataset_with_verdicts(tmp_path)
         report_path = tmp_path / "report.md"
         _write_report(dataset, report_path, dataset.name)
         content = report_path.read_text()
-        # 0.92 must appear before 0.75 in the FAIL section
-        idx_92 = content.index("0.92")
-        idx_75 = content.index("0.75")
-        assert idx_92 < idx_75
+        frame_002_start = content.index("## frame_002.jpg")
+        frame_002_section = content[frame_002_start:]
+        idx_75 = frame_002_section.index("0.75")
+        idx_10 = frame_002_section.index("0.10")
+        assert idx_75 < idx_10
+        dataset.delete()
+
+    def test_verdict_inline_in_row(self, tmp_path: Path) -> None:
+        """Verdict and risk appear as columns within each frame's table, not section headers."""
+        dataset = _make_dataset_with_verdicts(tmp_path)
+        report_path = tmp_path / "report.md"
+        _write_report(dataset, report_path, dataset.name)
+        content = report_path.read_text()
+        # Each row shows the verdict inline
+        assert "❌ FAIL" in content
+        assert "⚠️ REVIEW" in content
+        assert "✅ PASS" in content
         dataset.delete()
 ```
 
@@ -1246,9 +1319,16 @@ Expected: FAIL (stub `_write_report` does nothing, so file not created).
 Replace the stub with:
 ```python
 def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> None:
-    """Write a Markdown report from FiftyOne dataset vlm_verdict fields."""
+    """Write a Markdown report grouped by source frame, sorted by risk within each frame.
 
-    # Collect all sample data
+    Structure:
+      ## Summary          ← verdict counts
+      ## frame_001.jpg    ← all annotations from this frame, sorted by risk desc
+      ## frame_002.jpg
+      ...
+    """
+    _VERDICT_ICON: dict[str, str] = {"FAIL": "❌", "REVIEW": "⚠️", "PASS": "✅"}
+
     rows: list[dict[str, Any]] = []
     for sample in dataset.iter_samples():
         verdict_field = sample.get_field("vlm_verdict")
@@ -1256,18 +1336,19 @@ def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> 
         confidence = verdict_field.confidence if verdict_field is not None else 0.0
         rows.append({
             "crop_file": Path(sample.filepath).name,
-            "source_image": sample.get_field("source_image") or "",
+            "source_image": sample.get_field("source_image") or "unknown",
             "ann_id": sample.get_field("source_ann_id") or "",
             "label": sample.get_field("annotation_label") or "",
+            "ann_type": sample.get_field("annotation_type") or "",
             "risk": confidence if confidence is not None else 0.0,
             "verdict": verdict,
             "reason": sample.get_field("vlm_reason") or "",
         })
 
-    fail_rows = sorted([r for r in rows if r["verdict"] == "FAIL"], key=lambda r: -r["risk"])
-    review_rows = sorted([r for r in rows if r["verdict"] == "REVIEW"], key=lambda r: -r["risk"])
-    pass_rows = sorted([r for r in rows if r["verdict"] == "PASS"], key=lambda r: -r["risk"])
     total = len(rows)
+    fail_count = sum(1 for r in rows if r["verdict"] == "FAIL")
+    review_count = sum(1 for r in rows if r["verdict"] == "REVIEW")
+    pass_count = sum(1 for r in rows if r["verdict"] == "PASS")
 
     def _pct(n: int) -> str:
         return f"{round(100 * n / total)}%" if total > 0 else "0%"
@@ -1279,33 +1360,33 @@ def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> 
         f"Total crops: {total}",
         "",
         "## Summary",
-        "| Verdict | Count |    % |",
-        "|---------|------:|-----:|",
-        f"| FAIL    | {len(fail_rows):>5} | {_pct(len(fail_rows)):>4} |",
-        f"| REVIEW  | {len(review_rows):>5} | {_pct(len(review_rows)):>4} |",
-        f"| PASS    | {len(pass_rows):>5} | {_pct(len(pass_rows)):>4} |",
+        "| Verdict   | Count |    % |",
+        "|-----------|------:|-----:|",
+        f"| ❌ FAIL   | {fail_count:>5} | {_pct(fail_count):>4} |",
+        f"| ⚠️ REVIEW | {review_count:>5} | {_pct(review_count):>4} |",
+        f"| ✅ PASS   | {pass_count:>5} | {_pct(pass_count):>4} |",
         "",
     ]
 
-    def _table_section(title: str, section_rows: list[dict[str, Any]]) -> list[str]:
-        section_lines = [
-            title,
-            "| # | Crop File | Source Image | Ann ID | Label | Risk | VLM Reason |",
-            "|---|-----------|--------------|--------|-------|-----:|------------|",
-        ]
-        for idx, row in enumerate(section_rows, 1):
-            risk_str = f"{row['risk']:.2f}" if row["risk"] is not None else "N/A"
-            reason = row["reason"].replace("|", "\\|")
-            section_lines.append(
-                f"| {idx} | {row['crop_file']} | {row['source_image']} | "
-                f"{row['ann_id']} | {row['label']} | {risk_str} | {reason} |"
-            )
-        section_lines.append("")
-        return section_lines
+    # Group rows by source frame; sort frame names alphabetically
+    by_frame: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_frame.setdefault(row["source_image"], []).append(row)
 
-    lines += _table_section(f"## ❌ FAIL ({len(fail_rows)})", fail_rows)
-    lines += _table_section(f"## ⚠️ REVIEW ({len(review_rows)})", review_rows)
-    lines += _table_section(f"## ✅ PASS ({len(pass_rows)})", pass_rows)
+    for frame_name in sorted(by_frame.keys()):
+        frame_rows = sorted(by_frame[frame_name], key=lambda r: -r["risk"])
+        lines.append(f"## {frame_name} ({len(frame_rows)} annotations)")
+        lines.append("| # | Crop File | Ann ID | Label | Type | Verdict | Risk | VLM Reason |")
+        lines.append("|---|-----------|--------|-------|------|---------|-----:|------------|")
+        for idx, row in enumerate(frame_rows, 1):
+            risk_str = f"{row['risk']:.2f}"
+            reason = row["reason"].replace("|", "\\|")
+            icon = _VERDICT_ICON.get(row["verdict"], "")
+            lines.append(
+                f"| {idx} | {row['crop_file']} | {row['ann_id']} | {row['label']} | "
+                f"{row['ann_type']} | {icon} {row['verdict']} | {risk_str} | {reason} |"
+            )
+        lines.append("")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines), encoding="utf-8")
@@ -1323,7 +1404,7 @@ Expected: all PASS.
 
 ```bash
 git add scripts/crop_validate.py tests/crop_validate/test_report.py
-git commit -m "feat: implement Markdown report generator with tests"
+git commit -m "feat: implement frame-grouped Markdown report with risk sorting per frame"
 ```
 
 ---
@@ -1409,7 +1490,7 @@ def test_no_vlm_builds_crops_and_report(
         image_dir=str(image_dir),
         output_dir=str(output_dir),
         dataset_name="test_integration",
-        model="Qwen/Qwen2.5-VL-7B-Instruct",
+        model="Qwen/Qwen2.5-VL-3B-Instruct",
         plugin_source="https://github.com/harpreetsahota204/qwen2_5_vl",
         padding_px=8,
         pass_threshold=0.20,
@@ -1574,11 +1655,11 @@ git commit -m "feat: complete crop_validate script — crops, FiftyOne dataset, 
 - [x] §Pipeline [3] FiftyOne dataset: `_to_fo_sample`, `_build_dataset`, skeleton field naming
 - [x] §Pipeline [4] VLM: `_apply_vlm` with `foz.register_zoo_model_source` + `foz.load_zoo_model` + `apply_model` per type
 - [x] §Pipeline [5] Report: `_write_report` with FAIL→REVIEW→PASS sections
-- [x] §FiftyOne Sample Schema: back-reference fields, normalized coords, skeleton `keypoints_label_<id>`
+- [x] §FiftyOne Sample Schema: back-reference fields, normalized coords, skeleton `keypoints_{label_slug}` (e.g. `keypoints_clamp_2_arm`, `keypoints_clamp_3_arm`, `keypoints_roll_keypoints`) — one field per distinct skeleton label so FiftyOne can enforce a consistent keypoint count per field
 - [x] §VLM Prompt Design: `DEFAULT_PROMPTS` + `LABEL_PROMPTS` dicts
 - [x] §VQA Grouping: `dataset.match(F("annotation_type") == ann_type)` loop in `_apply_vlm`
 - [x] §VQA Response Parsing: `_parse_vlm_response` + `_ep_to_verdict` + fallback to REVIEW
-- [x] §Markdown Report: all sections, sorting, risk column
+- [x] §Markdown Report: summary table + per-frame sections sorted alphabetically, rows sorted by risk desc within each frame, verdict inline as column (not section header)
 - [x] §CLI flags: all flags in `_parse_args`
 - [x] §Dataset name collision: timestamp suffix + `--overwrite-dataset`
 - [x] §`--no-vlm` flag: skips `_apply_vlm` in `main()`
