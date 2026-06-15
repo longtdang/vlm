@@ -64,7 +64,7 @@ DEFAULT_PROMPTS: dict[str, str] = {
     ),
 }
 
-# Per-label overrides — add entries here to customize prompts per label:
+# Per-label prompt overrides (future use — not yet consulted by _apply_vlm):
 LABEL_PROMPTS: dict[str, str] = {
     # "forklift-with-roll": "...",
 }
@@ -311,7 +311,8 @@ def _build_dataset(args: argparse.Namespace) -> fo.Dataset:
                 skipped += 1
                 continue
 
-            ann_id = str(annotation.get("id") or f"ann-{ann_idx}")
+            ann_id_raw = annotation.get("id")
+            ann_id = str(ann_id_raw) if ann_id_raw is not None else f"ann-{ann_idx}"
             label_id = annotation.get("label_id")
             label = (
                 label_names.get(label_id, str(annotation.get("label") or "unknown"))
@@ -467,7 +468,9 @@ def _apply_vlm(
         raw_str = str(raw) if raw is not None else ""
         ep, reason = _parse_vlm_response(raw_str)
         verdict = _ep_to_verdict(ep, pass_threshold, review_threshold)
-        confidence = ep if ep is not None else 0.0
+        # Use 0.5 for parse failures so they sort above PASSes in the report
+        # and are clearly visible, not buried at the bottom.
+        confidence = ep if ep is not None else 0.5
         sample["vlm_verdict"] = fo.Classification(label=verdict, confidence=confidence)
         sample["vlm_reason"] = reason
         sample.save()
