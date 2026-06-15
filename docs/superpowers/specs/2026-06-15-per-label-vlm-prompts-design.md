@@ -97,7 +97,8 @@ Annotation fields:
 {annotation_fields_json}
 Evaluate ALL of the following checks and return ONE overall error probability:
 1. Bbox localization — does the bounding box tightly localize the forklift?
-2. Bbox coverage — does the bbox cover the full forklift without major clipping or excess background?
+2. Bbox coverage — the bounding box must cover the forklift body, the clamp assembly, AND all
+   paper rolls currently being carried by the clamp. Penalize if any of these are clipped.
 3. Clamp type — does the clamp-type attribute value match the clamp visually present in the crop?
 4. Roll count — does the roll-count attribute value match the number of rolls visible in the crop?
 Return ONLY JSON:
@@ -111,7 +112,10 @@ You are validating annotation quality for label '{label}'.
 The image shows a crop with an orange-red bounding box drawn on it — focus ONLY on that annotated object.
 Evaluate ALL of the following checks and return ONE overall error probability:
 1. Bbox localization — does the bounding box tightly localize the forklift?
-2. Bbox coverage — does the bbox cover the full forklift without major clipping or excess background?
+2. Bbox coverage — the bounding box must cover the forklift body and clamp assembly only (no rolls
+   are being carried for this label). Penalize major clipping or excess background.
+3. Label correctness — if the forklift is visibly carrying paper rolls, the label is likely wrong;
+   assign high error probability in that case.
 Return ONLY JSON:
 {"error_probability": <float 0..1>, "reason": "<brief summary of any issues found>"}
 ```
@@ -122,6 +126,8 @@ Return ONLY JSON:
 You are validating annotation quality for label '{label}'.
 The image shows a crop with colored keypoint dots marking structural points on the '{label}' clamp.
 Focus ONLY on those dots — ignore any text, stickers, or labels visible in the scene.
+The keypoint coordinates themselves are assumed to be correct. Do NOT evaluate keypoint position.
+Only evaluate whether the visibility state (visible, occluded, unlabeled) matches the image.
 Dot color meaning:
   green  = this part of the clamp structure is directly visible in the image
   orange = this part of the clamp structure is hidden behind another object (e.g. a roll);
@@ -143,6 +149,8 @@ Same structure as `clamp-2-arm` (identical prompt text — `{label}` fills in th
 You are validating annotation quality for label '{label}'.
 The image shows a crop with colored keypoint dots marking structural points on the roll.
 Focus ONLY on those dots.
+The keypoint coordinates themselves are assumed to be correct. Do NOT evaluate keypoint position.
+Only evaluate whether the visibility state (visible, occluded, unlabeled) matches the image.
 Dot color meaning:
   green  = this part of the roll structure is directly visible in the image
   orange = this part of the roll structure is hidden behind another object;
