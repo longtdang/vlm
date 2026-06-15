@@ -716,7 +716,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--image-dir", required=True, help="Directory containing source images")
     parser.add_argument("--output-dir", required=True, help="Output directory for crops and report")
     parser.add_argument("--dataset-name", default="crop_validate", help="FiftyOne dataset base name")
-    parser.add_argument("--model", default="Qwen/Qwen2.5-VL-3B-Instruct", help="Qwen2.5-VL model checkpoint")
+    parser.add_argument("--model", default="Qwen/Qwen2.5-VL-7B-Instruct", help="Qwen2.5-VL model checkpoint")
     parser.add_argument("--plugin-source", default=PLUGIN_URL, help="FiftyOne zoo plugin URL")
     parser.add_argument("--padding-px", type=int, default=DEFAULT_PADDING_PX, help="Crop padding in pixels")
     parser.add_argument("--pass-threshold", type=float, default=0.20, help="Risk below this → PASS")
