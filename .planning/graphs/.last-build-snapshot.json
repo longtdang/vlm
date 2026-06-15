@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "timestamp": "2026-06-14T06:22:43.378Z",
+  "timestamp": "2026-06-14T13:50:07.621Z",
   "nodes": [
     {
       "label": "__init__.py",
@@ -219,7 +219,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader",
-      "community": 3,
+      "community": 1,
       "norm_label": "datumaro_reader.py"
     },
     {
@@ -229,7 +229,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader_load_datumaro",
-      "community": 3,
+      "community": 1,
       "norm_label": "load_datumaro()"
     },
     {
@@ -239,7 +239,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_datumaro_reader_py_path",
-      "community": 3,
+      "community": 1,
       "norm_label": "path"
     },
     {
@@ -249,7 +249,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_datumaro_reader_py_any",
-      "community": 3,
+      "community": 1,
       "norm_label": "any"
     },
     {
@@ -259,7 +259,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader_parse_keypoints_and_visibility",
-      "community": 3,
+      "community": 1,
       "norm_label": "parse_keypoints_and_visibility()"
     },
     {
@@ -269,7 +269,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader_rationale_17",
-      "community": 3,
+      "community": 1,
       "norm_label": "parse keypoint coordinates and visibility values from a datumaro annotation."
     },
     {
@@ -836,7 +836,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/run_verify.py",
-      "source_location": "L496",
+      "source_location": "L523",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_run_verify_main",
       "community": 1,
@@ -1019,78 +1019,128 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "verification_cropper",
-      "community": 0,
+      "community": 87,
       "norm_label": "cropper.py"
     },
     {
       "label": "CropPlan",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "verification_cropper_cropplan",
-      "community": 0,
+      "community": 87,
       "norm_label": "cropplan"
+    },
+    {
+      "label": "annotation_to_crop_space()",
+      "file_type": "code",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "verification_cropper_annotation_to_crop_space",
+      "community": 87,
+      "norm_label": "annotation_to_crop_space()"
+    },
+    {
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "src_fiftyone_pose_importer_verification_cropper_py_any",
+      "community": 87,
+      "norm_label": "any"
     },
     {
       "label": "_bbox_bounds()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
-      "source_location": "L26",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "verification_cropper_bbox_bounds",
-      "community": 0,
+      "community": 87,
       "norm_label": "_bbox_bounds()"
     },
     {
       "label": "_clip_bounds()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
-      "source_location": "L36",
+      "source_location": "L81",
       "_origin": "ast",
       "id": "verification_cropper_clip_bounds",
-      "community": 0,
+      "community": 87,
       "norm_label": "_clip_bounds()"
     },
     {
       "label": "_mark_out_of_frame_as_occluded()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
-      "source_location": "L41",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "verification_cropper_mark_out_of_frame_as_occluded",
-      "community": 0,
+      "community": 87,
       "norm_label": "_mark_out_of_frame_as_occluded()"
     },
     {
       "label": "plan_crop()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
-      "source_location": "L65",
+      "source_location": "L110",
       "_origin": "ast",
       "id": "verification_cropper_plan_crop",
-      "community": 0,
+      "community": 87,
       "norm_label": "plan_crop()"
     },
     {
       "label": "materialize_crop()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
-      "source_location": "L125",
+      "source_location": "L170",
       "_origin": "ast",
       "id": "verification_cropper_materialize_crop",
-      "community": 0,
+      "community": 87,
       "norm_label": "materialize_crop()"
     },
     {
       "label": "Path",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
-      "source_location": "L125",
+      "source_location": "L170",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_verification_cropper_py_path",
-      "community": 0,
+      "community": 87,
       "norm_label": "path"
+    },
+    {
+      "label": "render_annotation_overlay()",
+      "file_type": "code",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L210",
+      "_origin": "ast",
+      "id": "verification_cropper_render_annotation_overlay",
+      "community": 87,
+      "norm_label": "render_annotation_overlay()"
+    },
+    {
+      "label": "Translate bbox and keypoint coordinates from original image space to crop image",
+      "file_type": "rationale",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "verification_cropper_rationale_31",
+      "community": 87,
+      "norm_label": "translate bbox and keypoint coordinates from original image space to crop image"
+    },
+    {
+      "label": "Render a copy of the crop image with annotation overlaid for VLM inspection.",
+      "file_type": "rationale",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L215",
+      "_origin": "ast",
+      "id": "verification_cropper_rationale_215",
+      "community": 87,
+      "norm_label": "render a copy of the crop image with annotation overlaid for vlm inspection."
     },
     {
       "label": "engine.py",
@@ -1713,10 +1763,20 @@
       "norm_label": "evaluate_visibility_codes()"
     },
     {
+      "label": "evaluate_out_of_frame_occluded()",
+      "file_type": "code",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L123",
+      "_origin": "ast",
+      "id": "verification_rules_evaluate_out_of_frame_occluded",
+      "community": 0,
+      "norm_label": "evaluate_out_of_frame_occluded()"
+    },
+    {
       "label": "evaluate_rule()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
-      "source_location": "L134",
+      "source_location": "L162",
       "_origin": "ast",
       "id": "verification_rules_evaluate_rule",
       "community": 0,
@@ -1726,7 +1786,7 @@
       "label": "RuleCategory",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
-      "source_location": "L134",
+      "source_location": "L162",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_verification_rules_py_rulecategory",
       "community": 0,
@@ -1736,11 +1796,21 @@
       "label": "RuleResult",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
-      "source_location": "L134",
+      "source_location": "L162",
       "_origin": "ast",
       "id": "ruleresult",
       "community": 0,
       "norm_label": "ruleresult"
+    },
+    {
+      "label": "Keypoints outside the original image frame must be marked occluded (visibility=1",
+      "file_type": "rationale",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L124",
+      "_origin": "ast",
+      "id": "verification_rules_rationale_124",
+      "community": 0,
+      "norm_label": "keypoints outside the original image frame must be marked occluded (visibility=1"
     },
     {
       "label": "types.py",
@@ -1839,7 +1909,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "verification_types_objectverificationresult",
-      "community": 0,
+      "community": 1,
       "norm_label": "objectverificationresult"
     },
     {
@@ -1916,7 +1986,7 @@
       "label": "._load_model()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "verification_vlm_client_fiftyonezooadapter_load_model",
       "community": 6,
@@ -1926,7 +1996,7 @@
       "label": ".generate_text()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L40",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "verification_vlm_client_fiftyonezooadapter_generate_text",
       "community": 6,
@@ -1936,7 +2006,7 @@
       "label": ".generate_text_batch()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L43",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "verification_vlm_client_fiftyonezooadapter_generate_text_batch",
       "community": 6,
@@ -1946,27 +2016,27 @@
       "label": "MockVlmAdapter",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L104",
+      "source_location": "L120",
       "_origin": "ast",
       "id": "verification_vlm_client_mockvlmadapter",
-      "community": 1,
+      "community": 6,
       "norm_label": "mockvlmadapter"
     },
     {
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L111",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "verification_vlm_client_mockvlmadapter_init",
-      "community": 1,
+      "community": 6,
       "norm_label": ".__init__()"
     },
     {
       "label": ".generate_text()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L119",
+      "source_location": "L135",
       "_origin": "ast",
       "id": "verification_vlm_client_mockvlmadapter_generate_text",
       "community": 6,
@@ -1976,7 +2046,7 @@
       "label": ".generate_text_batch()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L125",
+      "source_location": "L141",
       "_origin": "ast",
       "id": "verification_vlm_client_mockvlmadapter_generate_text_batch",
       "community": 6,
@@ -1996,9 +2066,9 @@
       "label": "Process a batch of (image, prompt) pairs in one forward pass.          Pads shor",
       "file_type": "rationale",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L44",
+      "source_location": "L60",
       "_origin": "ast",
-      "id": "verification_vlm_client_rationale_44",
+      "id": "verification_vlm_client_rationale_60",
       "community": 6,
       "norm_label": "process a batch of (image, prompt) pairs in one forward pass.          pads shor"
     },
@@ -2006,10 +2076,10 @@
       "label": "Deterministic mock for CI tests.      Returns a configured response when key sub",
       "file_type": "rationale",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L105",
+      "source_location": "L121",
       "_origin": "ast",
-      "id": "verification_vlm_client_rationale_105",
-      "community": 1,
+      "id": "verification_vlm_client_rationale_121",
+      "community": 6,
       "norm_label": "deterministic mock for ci tests.      returns a configured response when key sub"
     },
     {
@@ -2036,7 +2106,7 @@
       "label": "VlmThresholds",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L39",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmthresholds",
       "community": 2,
@@ -2046,7 +2116,7 @@
       "label": "VlmGeneration",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L45",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmgeneration",
       "community": 2,
@@ -2056,7 +2126,7 @@
       "label": "VlmLabelConfig",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L52",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmlabelconfig",
       "community": 2,
@@ -2066,7 +2136,7 @@
       "label": "VlmConfig",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L60",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmconfig",
       "community": 2,
@@ -2076,7 +2146,7 @@
       "label": ".is_label_enabled()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L67",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmconfig_is_label_enabled",
       "community": 2,
@@ -2086,7 +2156,7 @@
       "label": ".rules_for_label()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L71",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmconfig_rules_for_label",
       "community": 2,
@@ -2096,7 +2166,7 @@
       "label": ".thresholds_for_label()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L77",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmconfig_thresholds_for_label",
       "community": 2,
@@ -2106,7 +2176,7 @@
       "label": ".prompt_for_label_rule()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L83",
+      "source_location": "L89",
       "_origin": "ast",
       "id": "verification_vlm_config_vlmconfig_prompt_for_label_rule",
       "community": 2,
@@ -2116,7 +2186,7 @@
       "label": "_parse_thresholds()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L90",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "verification_vlm_config_parse_thresholds",
       "community": 2,
@@ -2126,7 +2196,7 @@
       "label": "Any",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L90",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_verification_vlm_config_py_any",
       "community": 2,
@@ -2136,7 +2206,7 @@
       "label": "_parse_generation()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L105",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "verification_vlm_config_parse_generation",
       "community": 2,
@@ -2146,7 +2216,7 @@
       "label": "load_vlm_config()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_config.py",
-      "source_location": "L121",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "verification_vlm_config_load_vlm_config",
       "community": 2,
@@ -2166,7 +2236,7 @@
       "label": "_is_meaningful()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L27",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "verification_vlm_engine_is_meaningful",
       "community": 2,
@@ -2176,7 +2246,7 @@
       "label": "Any",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L27",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_verification_vlm_engine_py_any",
       "community": 2,
@@ -2186,7 +2256,7 @@
       "label": "build_prompt()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L35",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "verification_vlm_engine_build_prompt",
       "community": 2,
@@ -2196,7 +2266,7 @@
       "label": "parse_vlm_response()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L50",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "verification_vlm_engine_parse_vlm_response",
       "community": 2,
@@ -2206,7 +2276,7 @@
       "label": "VlmRuleResult",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L50",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "vlmruleresult",
       "community": 2,
@@ -2216,7 +2286,7 @@
       "label": "_call_with_timeout()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L90",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "verification_vlm_engine_call_with_timeout",
       "community": 2,
@@ -2226,7 +2296,7 @@
       "label": "Image",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L90",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_verification_vlm_engine_py_image",
       "community": 2,
@@ -2236,7 +2306,7 @@
       "label": "_finalize_vlm_result()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L103",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "verification_vlm_engine_finalize_vlm_result",
       "community": 2,
@@ -2246,7 +2316,7 @@
       "label": "ObjectVerificationResult",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L103",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_verification_vlm_engine_py_objectverificationresult",
       "community": 2,
@@ -2256,7 +2326,7 @@
       "label": "VlmConfig",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L103",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "vlmconfig",
       "community": 2,
@@ -2266,7 +2336,7 @@
       "label": "VlmObjectResult",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L103",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_verification_vlm_engine_py_vlmobjectresult",
       "community": 2,
@@ -2276,7 +2346,7 @@
       "label": "_error_result()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L147",
+      "source_location": "L149",
       "_origin": "ast",
       "id": "verification_vlm_engine_error_result",
       "community": 2,
@@ -2286,7 +2356,7 @@
       "label": "evaluate_vlm_batch()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L166",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "verification_vlm_engine_evaluate_vlm_batch",
       "community": 2,
@@ -2296,7 +2366,7 @@
       "label": "VlmAdapter",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L166",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "vlmadapter",
       "community": 2,
@@ -2306,7 +2376,7 @@
       "label": "evaluate_vlm_object()",
       "file_type": "code",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L251",
+      "source_location": "L253",
       "_origin": "ast",
       "id": "verification_vlm_engine_evaluate_vlm_object",
       "community": 2,
@@ -2316,9 +2386,9 @@
       "label": "Compute verdict and risk from already-evaluated rule results.",
       "file_type": "rationale",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L108",
+      "source_location": "L110",
       "_origin": "ast",
-      "id": "verification_vlm_engine_rationale_108",
+      "id": "verification_vlm_engine_rationale_110",
       "community": 2,
       "norm_label": "compute verdict and risk from already-evaluated rule results."
     },
@@ -2326,9 +2396,9 @@
       "label": "Evaluate a batch of objects in as few generate() calls as possible.      All eli",
       "file_type": "rationale",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L172",
+      "source_location": "L174",
       "_origin": "ast",
-      "id": "verification_vlm_engine_rationale_172",
+      "id": "verification_vlm_engine_rationale_174",
       "community": 2,
       "norm_label": "evaluate a batch of objects in as few generate() calls as possible.      all eli"
     },
@@ -2336,9 +2406,9 @@
       "label": "Evaluate a single object. Delegates to evaluate_vlm_batch.",
       "file_type": "rationale",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L259",
+      "source_location": "L261",
       "_origin": "ast",
-      "id": "verification_vlm_engine_rationale_259",
+      "id": "verification_vlm_engine_rationale_261",
       "community": 2,
       "norm_label": "evaluate a single object. delegates to evaluate_vlm_batch."
     },
@@ -3079,88 +3149,208 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "phase6_test_cropper",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_cropper.py"
+    },
+    {
+      "label": "test_annotation_to_crop_space_skeleton()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_annotation_to_crop_space_skeleton",
+      "community": 87,
+      "norm_label": "test_annotation_to_crop_space_skeleton()"
+    },
+    {
+      "label": "test_annotation_to_crop_space_non_skeleton()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_annotation_to_crop_space_non_skeleton",
+      "community": 87,
+      "norm_label": "test_annotation_to_crop_space_non_skeleton()"
+    },
+    {
+      "label": "test_annotation_to_crop_space_failed_plan_returns_unchanged()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L57",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_annotation_to_crop_space_failed_plan_returns_unchanged",
+      "community": 87,
+      "norm_label": "test_annotation_to_crop_space_failed_plan_returns_unchanged()"
+    },
+    {
+      "label": "test_annotation_to_crop_space_polygon_points()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_annotation_to_crop_space_polygon_points",
+      "community": 87,
+      "norm_label": "test_annotation_to_crop_space_polygon_points()"
     },
     {
       "label": "test_skeleton_preserves_padded_canvas_with_out_of_image_fill()",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L10",
+      "source_location": "L89",
       "_origin": "ast",
       "id": "phase6_test_cropper_test_skeleton_preserves_padded_canvas_with_out_of_image_fill",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_skeleton_preserves_padded_canvas_with_out_of_image_fill()"
     },
     {
       "label": "test_non_skeleton_clips_crop_to_image_bounds()",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L27",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "phase6_test_cropper_test_non_skeleton_clips_crop_to_image_bounds",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_non_skeleton_clips_crop_to_image_bounds()"
     },
     {
       "label": "test_invalid_bbox_is_deterministic_fail()",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L44",
+      "source_location": "L123",
       "_origin": "ast",
       "id": "phase6_test_cropper_test_invalid_bbox_is_deterministic_fail",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_invalid_bbox_is_deterministic_fail()"
     },
     {
       "label": "test_padding_px_is_consumed_from_config()",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L57",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "phase6_test_cropper_test_padding_px_is_consumed_from_config",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_padding_px_is_consumed_from_config()"
     },
     {
       "label": "test_out_of_frame_skeleton_points_are_marked_occluded()",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L71",
+      "source_location": "L150",
       "_origin": "ast",
       "id": "phase6_test_cropper_test_out_of_frame_skeleton_points_are_marked_occluded",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_out_of_frame_skeleton_points_are_marked_occluded()"
     },
     {
       "label": "test_materialize_crop_skeleton_padded_canvas()",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L86",
+      "source_location": "L165",
       "_origin": "ast",
       "id": "phase6_test_cropper_test_materialize_crop_skeleton_padded_canvas",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_materialize_crop_skeleton_padded_canvas()"
     },
     {
       "label": "Path",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L86",
+      "source_location": "L165",
       "_origin": "ast",
       "id": "tests_phase6_test_cropper_py_path",
-      "community": 0,
+      "community": 87,
       "norm_label": "path"
     },
     {
       "label": "test_materialize_crop_non_skeleton_clipped()",
       "file_type": "code",
       "source_file": "tests/phase6/test_cropper.py",
-      "source_location": "L108",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "phase6_test_cropper_test_materialize_crop_non_skeleton_clipped",
-      "community": 0,
+      "community": 87,
       "norm_label": "test_materialize_crop_non_skeleton_clipped()"
+    },
+    {
+      "label": "test_render_annotation_overlay_bbox_only()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L209",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_render_annotation_overlay_bbox_only",
+      "community": 87,
+      "norm_label": "test_render_annotation_overlay_bbox_only()"
+    },
+    {
+      "label": "test_render_annotation_overlay_keypoints_color_coded()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L224",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_render_annotation_overlay_keypoints_color_coded",
+      "community": 87,
+      "norm_label": "test_render_annotation_overlay_keypoints_color_coded()"
+    },
+    {
+      "label": "test_render_annotation_overlay_polygon()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L248",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_render_annotation_overlay_polygon",
+      "community": 87,
+      "norm_label": "test_render_annotation_overlay_polygon()"
+    },
+    {
+      "label": "test_render_annotation_overlay_no_annotations()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L269",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_test_render_annotation_overlay_no_annotations",
+      "community": 87,
+      "norm_label": "test_render_annotation_overlay_no_annotations()"
+    },
+    {
+      "label": "Bbox-only annotation renders orange-red rectangle outline.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L210",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_rationale_210",
+      "community": 87,
+      "norm_label": "bbox-only annotation renders orange-red rectangle outline."
+    },
+    {
+      "label": "Skeleton annotation draws color-coded keypoint dots, no bbox.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L225",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_rationale_225",
+      "community": 87,
+      "norm_label": "skeleton annotation draws color-coded keypoint dots, no bbox."
+    },
+    {
+      "label": "Polygon annotation draws cyan-blue outline, no keypoint dots.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L249",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_rationale_249",
+      "community": 87,
+      "norm_label": "polygon annotation draws cyan-blue outline, no keypoint dots."
+    },
+    {
+      "label": "Empty annotation dict produces a copy of the source with no crash.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L270",
+      "_origin": "ast",
+      "id": "phase6_test_cropper_rationale_270",
+      "community": 87,
+      "norm_label": "empty annotation dict produces a copy of the source with no crash."
     },
     {
       "label": "test_reporting.py",
@@ -3281,6 +3471,116 @@
       "id": "phase6_test_rules_engine_test_per_label_override_rules_are_applied",
       "community": 0,
       "norm_label": "test_per_label_override_rules_are_applied()"
+    },
+    {
+      "label": "_skeleton_annotation_with_out_of_frame()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L141",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame",
+      "community": 0,
+      "norm_label": "_skeleton_annotation_with_out_of_frame()"
+    },
+    {
+      "label": "test_out_of_frame_points_visible_fails()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L152",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails",
+      "community": 0,
+      "norm_label": "test_out_of_frame_points_visible_fails()"
+    },
+    {
+      "label": "test_out_of_frame_points_occluded_passes()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L166",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes",
+      "community": 0,
+      "norm_label": "test_out_of_frame_points_occluded_passes()"
+    },
+    {
+      "label": "test_out_of_frame_unlabeled_passes()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L179",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes",
+      "community": 0,
+      "norm_label": "test_out_of_frame_unlabeled_passes()"
+    },
+    {
+      "label": "test_no_out_of_frame_points_passes()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L192",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_test_no_out_of_frame_points_passes",
+      "community": 0,
+      "norm_label": "test_no_out_of_frame_points_passes()"
+    },
+    {
+      "label": "test_out_of_frame_indices_missing_passes()",
+      "file_type": "code",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L205",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes",
+      "community": 0,
+      "norm_label": "test_out_of_frame_indices_missing_passes()"
+    },
+    {
+      "label": "A keypoint outside the frame marked v=2 (visible) must fail.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L153",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_rationale_153",
+      "community": 0,
+      "norm_label": "a keypoint outside the frame marked v=2 (visible) must fail."
+    },
+    {
+      "label": "A keypoint outside the frame correctly marked v=1 (occluded) should pass.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L167",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_rationale_167",
+      "community": 0,
+      "norm_label": "a keypoint outside the frame correctly marked v=1 (occluded) should pass."
+    },
+    {
+      "label": "A keypoint outside the frame marked v=0 (unlabeled) is not a visible violation.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L180",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_rationale_180",
+      "community": 0,
+      "norm_label": "a keypoint outside the frame marked v=0 (unlabeled) is not a visible violation."
+    },
+    {
+      "label": "When no out-of-frame indices are present the rule is a no-op.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L193",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_rationale_193",
+      "community": 0,
+      "norm_label": "when no out-of-frame indices are present the rule is a no-op."
+    },
+    {
+      "label": "Annotations without out_of_frame_indices (bbox/polygon types) skip silently.",
+      "file_type": "rationale",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L206",
+      "_origin": "ast",
+      "id": "phase6_test_rules_engine_rationale_206",
+      "community": 0,
+      "norm_label": "annotations without out_of_frame_indices (bbox/polygon types) skip silently."
     },
     {
       "label": "test_run_verify.py",
@@ -3529,7 +3829,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "phase6_test_verification_types",
-      "community": 87,
+      "community": 0,
       "norm_label": "test_verification_types.py"
     },
     {
@@ -3539,7 +3839,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "phase6_test_verification_types_test_deterministic_verdict_is_pass_fail_only",
-      "community": 87,
+      "community": 0,
       "norm_label": "test_deterministic_verdict_is_pass_fail_only()"
     },
     {
@@ -3549,7 +3849,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "phase6_test_verification_types_test_object_result_requires_crop_path_and_failure_reasons",
-      "community": 87,
+      "community": 0,
       "norm_label": "test_object_result_requires_crop_path_and_failure_reasons()"
     },
     {
@@ -3559,7 +3859,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "phase6_test_verification_types_test_rule_config_requires_four_deterministic_categories",
-      "community": 87,
+      "community": 0,
       "norm_label": "test_rule_config_requires_four_deterministic_categories()"
     },
     {
@@ -3709,7 +4009,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_run_verify_vlm.py"
     },
     {
@@ -3719,7 +4019,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_write_datumaro_vlm",
-      "community": 1,
+      "community": 6,
       "norm_label": "_write_datumaro_vlm()"
     },
     {
@@ -3729,7 +4029,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "tests_phase7_test_run_verify_vlm_py_path",
-      "community": 1,
+      "community": 6,
       "norm_label": "path"
     },
     {
@@ -3739,7 +4039,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_write_vlm_config",
-      "community": 1,
+      "community": 6,
       "norm_label": "_write_vlm_config()"
     },
     {
@@ -3749,7 +4049,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_vlm_pipeline_produces_three_vlm_artifacts",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_vlm_pipeline_produces_three_vlm_artifacts()"
     },
     {
@@ -3759,7 +4059,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_vlm_artifacts_in_same_run_dir_as_deterministic",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_vlm_artifacts_in_same_run_dir_as_deterministic()"
     },
     {
@@ -3769,7 +4069,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_deterministic_fail_objects_excluded_from_vlm",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_deterministic_fail_objects_excluded_from_vlm()"
     },
     {
@@ -3779,7 +4079,7 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_label_not_in_vlm_scope_excluded",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_label_not_in_vlm_scope_excluded()"
     },
     {
@@ -3789,7 +4089,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_vlm_counts_in_summary",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_vlm_counts_in_summary()"
     },
     {
@@ -3799,7 +4099,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_vlm_disabled_produces_no_vlm_artifacts",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_vlm_disabled_produces_no_vlm_artifacts()"
     },
     {
@@ -3809,7 +4109,7 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_vlm_high_ep_produces_fail_verdict",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_vlm_high_ep_produces_fail_verdict()"
     },
     {
@@ -3819,7 +4119,7 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "phase7_test_run_verify_vlm_test_review_queue_in_vlm_json_is_ordered",
-      "community": 1,
+      "community": 6,
       "norm_label": "test_review_queue_in_vlm_json_is_ordered()"
     },
     {
@@ -4069,7 +4369,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "tests_phase7_test_vlm_engine_py_deterministicverdict",
-      "community": 0,
+      "community": 2,
       "norm_label": "deterministicverdict"
     },
     {
@@ -4079,7 +4379,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "tests_phase7_test_vlm_engine_py_objectverificationresult",
-      "community": 0,
+      "community": 2,
       "norm_label": "objectverificationresult"
     },
     {
@@ -4109,7 +4409,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "tests_phase7_test_vlm_engine_py_image",
-      "community": 0,
+      "community": 2,
       "norm_label": "image"
     },
     {
@@ -4136,7 +4436,7 @@
       "label": "test_build_prompt_filters_annotation_fields_by_rule()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L79",
+      "source_location": "L80",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_build_prompt_filters_annotation_fields_by_rule",
       "community": 2,
@@ -4146,7 +4446,7 @@
       "label": "test_parse_vlm_response_valid_json()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L95",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_parse_vlm_response_valid_json",
       "community": 2,
@@ -4156,7 +4456,7 @@
       "label": "test_parse_vlm_response_integer_zero_is_valid()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L103",
+      "source_location": "L110",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_parse_vlm_response_integer_zero_is_valid",
       "community": 2,
@@ -4166,7 +4466,7 @@
       "label": "test_parse_vlm_response_fence_wrapped_json()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L109",
+      "source_location": "L116",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_parse_vlm_response_fence_wrapped_json",
       "community": 2,
@@ -4176,7 +4476,7 @@
       "label": "test_parse_vlm_response_not_json()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L116",
+      "source_location": "L123",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_parse_vlm_response_not_json",
       "community": 2,
@@ -4186,7 +4486,7 @@
       "label": "test_parse_vlm_response_out_of_range()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L123",
+      "source_location": "L130",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_parse_vlm_response_out_of_range",
       "community": 2,
@@ -4196,7 +4496,7 @@
       "label": "test_parse_vlm_response_missing_ep()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L128",
+      "source_location": "L135",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_parse_vlm_response_missing_ep",
       "community": 2,
@@ -4206,7 +4506,7 @@
       "label": "test_evaluate_vlm_object_pass_verdict()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L133",
+      "source_location": "L140",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_pass_verdict",
       "community": 2,
@@ -4216,7 +4516,7 @@
       "label": "test_evaluate_vlm_object_review_threshold()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L153",
+      "source_location": "L160",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_review_threshold",
       "community": 2,
@@ -4226,7 +4526,7 @@
       "label": "test_evaluate_vlm_object_fail_threshold()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L168",
+      "source_location": "L175",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_fail_threshold",
       "community": 2,
@@ -4236,7 +4536,7 @@
       "label": "test_evaluate_vlm_object_adapter_error_returns_review()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L182",
+      "source_location": "L189",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_adapter_error_returns_review",
       "community": 2,
@@ -4246,7 +4546,7 @@
       "label": "test_evaluate_vlm_object_timeout_review()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L201",
+      "source_location": "L208",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_timeout_review",
       "community": 2,
@@ -4256,7 +4556,7 @@
       "label": "test_evaluate_vlm_object_all_invalid_output_returns_review()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L221",
+      "source_location": "L228",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_all_invalid_output_returns_review",
       "community": 2,
@@ -4266,7 +4566,7 @@
       "label": "test_evaluate_vlm_object_per_label_threshold()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L235",
+      "source_location": "L242",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_per_label_threshold",
       "community": 2,
@@ -4276,7 +4576,7 @@
       "label": "test_evaluate_vlm_object_prompt_template_override()",
       "file_type": "code",
       "source_file": "tests/phase7/test_vlm_engine.py",
-      "source_location": "L259",
+      "source_location": "L266",
       "_origin": "ast",
       "id": "phase7_test_vlm_engine_test_evaluate_vlm_object_prompt_template_override",
       "community": 2,
@@ -5710,6 +6010,146 @@
       "_origin": "ast",
       "id": "debug_report_format_ann_id_only_resolution",
       "community": 58,
+      "norm_label": "resolution"
+    },
+    {
+      "label": "vlm-occlusion-contradiction.md",
+      "file_type": "document",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "resolved_vlm_occlusion_contradiction",
+      "community": 88,
+      "norm_label": "vlm-occlusion-contradiction.md"
+    },
+    {
+      "label": "Symptoms",
+      "file_type": "document",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "resolved_vlm_occlusion_contradiction_symptoms",
+      "community": 88,
+      "norm_label": "symptoms"
+    },
+    {
+      "label": "Known Facts",
+      "file_type": "document",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "resolved_vlm_occlusion_contradiction_known_facts",
+      "community": 88,
+      "norm_label": "known facts"
+    },
+    {
+      "label": "Annotation (index 9, skeleton, label_id=4 = clamp-2-arm)",
+      "file_type": "document",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "resolved_vlm_occlusion_contradiction_annotation_index_9_skeleton_label_id_4_clamp_2_arm",
+      "community": 88,
+      "norm_label": "annotation (index 9, skeleton, label_id=4 = clamp-2-arm)"
+    },
+    {
+      "label": "Crop image",
+      "file_type": "document",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "resolved_vlm_occlusion_contradiction_crop_image",
+      "community": 88,
+      "norm_label": "crop image"
+    },
+    {
+      "label": "VLM contradiction",
+      "file_type": "document",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "resolved_vlm_occlusion_contradiction_vlm_contradiction",
+      "community": 88,
+      "norm_label": "vlm contradiction"
+    },
+    {
+      "label": "Current Focus",
+      "file_type": "document",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "resolved_vlm_occlusion_contradiction_current_focus",
+      "community": 88,
+      "norm_label": "current focus"
+    },
+    {
+      "label": "vlm-keypoint-visibility.md",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility",
+      "community": 89,
+      "norm_label": "vlm-keypoint-visibility.md"
+    },
+    {
+      "label": "Debug Session: vlm-keypoint-visibility",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "community": 89,
+      "norm_label": "debug session: vlm-keypoint-visibility"
+    },
+    {
+      "label": "Symptoms",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_symptoms",
+      "community": 89,
+      "norm_label": "symptoms"
+    },
+    {
+      "label": "Current Focus",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_current_focus",
+      "community": 89,
+      "norm_label": "current focus"
+    },
+    {
+      "label": "Evidence",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_evidence",
+      "community": 89,
+      "norm_label": "evidence"
+    },
+    {
+      "label": "Eliminated",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_eliminated",
+      "community": 89,
+      "norm_label": "eliminated"
+    },
+    {
+      "label": "Resolution",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_resolution",
+      "community": 89,
       "norm_label": "resolution"
     },
     {
@@ -13778,6 +14218,17 @@
       "weight": 1,
       "confidence_score": 1,
       "source": "fiftyone_pose_importer_run_verify",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/run_verify.py",
+      "source_location": "L13",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "fiftyone_pose_importer_run_verify",
       "target": "verification_cropper_materialize_crop"
     },
     {
@@ -13790,6 +14241,17 @@
       "confidence_score": 1,
       "source": "fiftyone_pose_importer_run_verify",
       "target": "verification_cropper_plan_crop"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/run_verify.py",
+      "source_location": "L13",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "fiftyone_pose_importer_run_verify",
+      "target": "verification_cropper_render_annotation_overlay"
     },
     {
       "relation": "imports_from",
@@ -13908,9 +14370,9 @@
       "source_file": "src/fiftyone_pose_importer/run_verify.py",
       "source_location": "L390",
       "weight": 1,
+      "confidence_score": 1,
       "source": "fiftyone_pose_importer_run_verify",
-      "target": "verification_report_vlm_serialize_vlm_object_result",
-      "confidence_score": 1
+      "target": "verification_report_vlm_serialize_vlm_object_result"
     },
     {
       "relation": "imports",
@@ -14018,9 +14480,9 @@
       "source_file": "src/fiftyone_pose_importer/run_verify.py",
       "source_location": "L393",
       "weight": 1,
+      "confidence_score": 1,
       "source": "fiftyone_pose_importer_run_verify",
-      "target": "verification_vlm_engine_evaluate_vlm_batch",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_evaluate_vlm_batch"
     },
     {
       "relation": "imports",
@@ -14444,6 +14906,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/run_verify.py",
+      "source_location": "L369",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "fiftyone_pose_importer_run_verify_run_verify",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/run_verify.py",
       "source_location": "L336",
       "weight": 1,
       "confidence_score": 1,
@@ -14460,6 +14933,17 @@
       "confidence_score": 1,
       "source": "fiftyone_pose_importer_run_verify_run_verify",
       "target": "verification_cropper_plan_crop"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/run_verify.py",
+      "source_location": "L384",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "fiftyone_pose_importer_run_verify_run_verify",
+      "target": "verification_cropper_render_annotation_overlay"
     },
     {
       "relation": "calls",
@@ -14567,9 +15051,9 @@
       "source_file": "src/fiftyone_pose_importer/run_verify.py",
       "source_location": "L418",
       "weight": 1,
+      "confidence_score": 1,
       "source": "fiftyone_pose_importer_run_verify_run_verify",
-      "target": "verification_vlm_engine_evaluate_vlm_batch",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_evaluate_vlm_batch"
     },
     {
       "relation": "calls",
@@ -15550,6 +16034,61 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L194",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_no_out_of_frame_points_passes",
+      "target": "verification_config_load_verification_config"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L207",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes",
+      "target": "verification_config_load_verification_config"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L168",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes",
+      "target": "verification_config_load_verification_config"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L154",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails",
+      "target": "verification_config_load_verification_config"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L181",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes",
+      "target": "verification_config_load_verification_config"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L110",
       "weight": 1,
       "source": "phase6_test_rules_engine_test_per_label_override_rules_are_applied",
@@ -15625,6 +16164,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L27",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
       "source_location": "L26",
       "weight": 1,
       "confidence_score": 1,
@@ -15682,6 +16231,16 @@
       "target": "verification_cropper_plan_crop"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L210",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper",
+      "target": "verification_cropper_render_annotation_overlay"
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -15702,6 +16261,17 @@
       "confidence_score": 1,
       "source": "verification_cropper",
       "target": "verification_types_deterministicverdict"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L27",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper_annotation_to_crop_space",
+      "target": "verification_cropper_cropplan"
     },
     {
       "relation": "uses",
@@ -15738,6 +16308,92 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L67",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_failed_plan_returns_unchanged",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L52",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_non_skeleton",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L85",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_polygon_points",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L32",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_skeleton",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L27",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper_annotation_to_crop_space",
+      "target": "src_fiftyone_pose_importer_verification_cropper_py_any"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L31",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper_rationale_31",
+      "target": "verification_cropper_annotation_to_crop_space"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "src_fiftyone_pose_importer_verification_cropper_py_any",
+      "target": "verification_types_deterministicverdict"
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L210",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper_render_annotation_overlay",
+      "target": "src_fiftyone_pose_importer_verification_cropper_py_any"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
       "source_location": "L90",
@@ -15767,6 +16423,50 @@
       "confidence_score": 1,
       "source": "verification_cropper_plan_crop",
       "target": "verification_cropper_mark_out_of_frame_as_occluded"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L58",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_failed_plan_returns_unchanged",
+      "target": "verification_cropper_plan_crop"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L39",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_non_skeleton",
+      "target": "verification_cropper_plan_crop"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L73",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_polygon_points",
+      "target": "verification_cropper_plan_crop"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L19",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_annotation_to_crop_space_skeleton",
+      "target": "verification_cropper_plan_crop"
     },
     {
       "relation": "calls",
@@ -15887,6 +16587,71 @@
       "confidence_score": 0.5,
       "source": "src_fiftyone_pose_importer_verification_cropper_py_path",
       "target": "verification_types_deterministicverdict"
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L210",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper_render_annotation_overlay",
+      "target": "src_fiftyone_pose_importer_verification_cropper_py_path"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L216",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_bbox_only",
+      "target": "verification_cropper_render_annotation_overlay"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L236",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_keypoints_color_coded",
+      "target": "verification_cropper_render_annotation_overlay"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L276",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_no_annotations",
+      "target": "verification_cropper_render_annotation_overlay"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L260",
+      "weight": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_polygon",
+      "target": "verification_cropper_render_annotation_overlay"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/cropper.py",
+      "source_location": "L215",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_cropper_rationale_215",
+      "target": "verification_cropper_render_annotation_overlay"
     },
     {
       "relation": "contains",
@@ -16230,6 +16995,61 @@
       "source_location": "L37",
       "weight": 1,
       "source": "phase6_test_rules_engine_test_any_failed_rule_forces_object_fail",
+      "target": "verification_engine_evaluate_object"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L198",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_no_out_of_frame_points_passes",
+      "target": "verification_engine_evaluate_object"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L211",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes",
+      "target": "verification_engine_evaluate_object"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L172",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes",
+      "target": "verification_engine_evaluate_object"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L158",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails",
+      "target": "verification_engine_evaluate_object"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L185",
+      "weight": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes",
       "target": "verification_engine_evaluate_object"
     },
     {
@@ -17189,9 +18009,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/report_ndjson.py",
       "source_location": "L41",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_report_ndjson_ndjsonstreamwriter_init",
-      "target": "src_fiftyone_pose_importer_verification_report_ndjson_py_any",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_report_ndjson_py_any"
     },
     {
       "relation": "uses",
@@ -17199,9 +18019,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/report_ndjson.py",
       "source_location": "L9",
       "weight": 0.8,
+      "confidence_score": 0.5,
       "source": "src_fiftyone_pose_importer_verification_report_ndjson_py_any",
-      "target": "verification_types_objectverificationresult",
-      "confidence_score": 0.5
+      "target": "verification_types_objectverificationresult"
     },
     {
       "relation": "references",
@@ -17210,9 +18030,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/report_ndjson.py",
       "source_location": "L58",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_report_ndjson_ndjsonstreamwriter_write",
-      "target": "src_fiftyone_pose_importer_verification_report_ndjson_py_any",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_report_ndjson_py_any"
     },
     {
       "relation": "references",
@@ -17792,6 +18612,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L123",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_rules",
+      "target": "verification_rules_evaluate_out_of_frame_occluded"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L41",
       "weight": 1,
       "confidence_score": 1,
@@ -17924,6 +18754,17 @@
       "weight": 1,
       "confidence_score": 1,
       "source": "verification_rules_evaluate_keypoint_count",
+      "target": "verification_rules_unevaluableruleerror"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L138",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_rules_evaluate_out_of_frame_occluded",
       "target": "verification_rules_unevaluableruleerror"
     },
     {
@@ -18131,6 +18972,17 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L123",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_rules_evaluate_out_of_frame_occluded",
+      "target": "src_fiftyone_pose_importer_verification_rules_py_any"
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L41",
       "weight": 1,
       "confidence_score": 1,
@@ -18270,6 +19122,17 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L123",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_rules_evaluate_out_of_frame_occluded",
+      "target": "src_fiftyone_pose_importer_verification_rules_py_rulespec"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L41",
       "weight": 1,
       "confidence_score": 1,
@@ -18387,6 +19250,17 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L123",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_rules_evaluate_out_of_frame_occluded",
+      "target": "src_fiftyone_pose_importer_verification_rules_py_deterministicverdict"
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L41",
       "weight": 1,
       "confidence_score": 1,
@@ -18414,6 +19288,16 @@
       "confidence_score": 1,
       "source": "verification_rules_evaluate_visibility_codes",
       "target": "src_fiftyone_pose_importer_verification_rules_py_deterministicverdict"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/fiftyone_pose_importer/verification/rules.py",
+      "source_location": "L124",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "verification_rules_rationale_124",
+      "target": "verification_rules_evaluate_out_of_frame_occluded"
     },
     {
       "relation": "references",
@@ -19104,9 +19988,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L43",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_fiftyonezooadapter_generate_text_batch",
-      "target": "src_fiftyone_pose_importer_verification_vlm_client_py_image",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_client_py_image"
     },
     {
       "relation": "references",
@@ -19126,9 +20010,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L125",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_mockvlmadapter_generate_text_batch",
-      "target": "src_fiftyone_pose_importer_verification_vlm_client_py_image",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_client_py_image"
     },
     {
       "relation": "calls",
@@ -19168,9 +20052,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L43",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_fiftyonezooadapter",
-      "target": "verification_vlm_client_fiftyonezooadapter_generate_text_batch",
-      "confidence_score": 1
+      "target": "verification_vlm_client_fiftyonezooadapter_generate_text_batch"
     },
     {
       "relation": "method",
@@ -19188,9 +20072,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L31",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_fiftyonezooadapter",
-      "target": "verification_vlm_client_fiftyonezooadapter_load_model",
-      "confidence_score": 1
+      "target": "verification_vlm_client_fiftyonezooadapter_load_model"
     },
     {
       "relation": "rationale_for",
@@ -19209,9 +20093,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L50",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_fiftyonezooadapter_generate_text_batch",
-      "target": "verification_vlm_client_fiftyonezooadapter_load_model",
-      "confidence_score": 1
+      "target": "verification_vlm_client_fiftyonezooadapter_load_model"
     },
     {
       "relation": "calls",
@@ -19220,19 +20104,19 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L41",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_fiftyonezooadapter_generate_text",
-      "target": "verification_vlm_client_mockvlmadapter_generate_text_batch",
-      "confidence_score": 1
+      "target": "verification_vlm_client_mockvlmadapter_generate_text_batch"
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L44",
+      "source_location": "L60",
       "weight": 1,
-      "source": "verification_vlm_client_rationale_44",
-      "target": "verification_vlm_client_fiftyonezooadapter_generate_text_batch",
-      "confidence_score": 1
+      "confidence_score": 1,
+      "source": "verification_vlm_client_rationale_60",
+      "target": "verification_vlm_client_fiftyonezooadapter_generate_text_batch"
     },
     {
       "relation": "calls",
@@ -19466,9 +20350,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L125",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_mockvlmadapter",
-      "target": "verification_vlm_client_mockvlmadapter_generate_text_batch",
-      "confidence_score": 1
+      "target": "verification_vlm_client_mockvlmadapter_generate_text_batch"
     },
     {
       "relation": "method",
@@ -19484,11 +20368,11 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
-      "source_location": "L105",
+      "source_location": "L121",
       "weight": 1,
-      "source": "verification_vlm_client_rationale_105",
-      "target": "verification_vlm_client_mockvlmadapter",
-      "confidence_score": 1
+      "confidence_score": 1,
+      "source": "verification_vlm_client_rationale_121",
+      "target": "verification_vlm_client_mockvlmadapter"
     },
     {
       "relation": "calls",
@@ -19497,9 +20381,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L126",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_client_mockvlmadapter_generate_text_batch",
-      "target": "verification_vlm_client_mockvlmadapter_generate_text",
-      "confidence_score": 1
+      "target": "verification_vlm_client_mockvlmadapter_generate_text"
     },
     {
       "relation": "contains",
@@ -20096,9 +20980,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L147",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine",
-      "target": "verification_vlm_engine_error_result",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_error_result"
     },
     {
       "relation": "contains",
@@ -20106,9 +20990,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L166",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine",
-      "target": "verification_vlm_engine_evaluate_vlm_batch",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_evaluate_vlm_batch"
     },
     {
       "relation": "contains",
@@ -20126,9 +21010,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L103",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine",
-      "target": "verification_vlm_engine_finalize_vlm_result",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_finalize_vlm_result"
     },
     {
       "relation": "contains",
@@ -20264,9 +21148,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L166",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_any",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_any"
     },
     {
       "relation": "references",
@@ -20308,9 +21192,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L196",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "verification_vlm_engine_build_prompt",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_build_prompt"
     },
     {
       "relation": "calls",
@@ -20396,9 +21280,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L243",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "verification_vlm_engine_parse_vlm_response",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_parse_vlm_response"
     },
     {
       "relation": "calls",
@@ -20440,9 +21324,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L147",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_error_result",
-      "target": "vlmruleresult",
-      "confidence_score": 1
+      "target": "vlmruleresult"
     },
     {
       "relation": "references",
@@ -20451,9 +21335,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L103",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_finalize_vlm_result",
-      "target": "vlmruleresult",
-      "confidence_score": 1
+      "target": "vlmruleresult"
     },
     {
       "relation": "uses",
@@ -20503,9 +21387,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L221",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "verification_vlm_engine_call_with_timeout",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_call_with_timeout"
     },
     {
       "relation": "calls",
@@ -20555,9 +21439,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L166",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_image",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_image"
     },
     {
       "relation": "references",
@@ -20577,9 +21461,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L246",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "verification_vlm_engine_finalize_vlm_result",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_finalize_vlm_result"
     },
     {
       "relation": "references",
@@ -20588,9 +21472,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L103",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_finalize_vlm_result",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_objectverificationresult",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_objectverificationresult"
     },
     {
       "relation": "references",
@@ -20599,9 +21483,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L103",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_finalize_vlm_result",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_vlmobjectresult",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_vlmobjectresult"
     },
     {
       "relation": "calls",
@@ -20610,9 +21494,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L113",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_finalize_vlm_result",
-      "target": "verification_vlm_types_vlmobjectresult",
-      "confidence_score": 1
+      "target": "verification_vlm_types_vlmobjectresult"
     },
     {
       "relation": "references",
@@ -20621,19 +21505,19 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L103",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_finalize_vlm_result",
-      "target": "vlmconfig",
-      "confidence_score": 1
+      "target": "vlmconfig"
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L108",
+      "source_location": "L110",
       "weight": 1,
-      "source": "verification_vlm_engine_rationale_108",
-      "target": "verification_vlm_engine_finalize_vlm_result",
-      "confidence_score": 1
+      "confidence_score": 1,
+      "source": "verification_vlm_engine_rationale_110",
+      "target": "verification_vlm_engine_finalize_vlm_result"
     },
     {
       "relation": "uses",
@@ -20672,9 +21556,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L147",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_error_result",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_objectverificationresult",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_objectverificationresult"
     },
     {
       "relation": "references",
@@ -20683,9 +21567,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L166",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_objectverificationresult",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_objectverificationresult"
     },
     {
       "relation": "references",
@@ -20705,9 +21589,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L166",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "vlmconfig",
-      "confidence_score": 1
+      "target": "vlmconfig"
     },
     {
       "relation": "references",
@@ -20787,9 +21671,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L147",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_error_result",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_vlmobjectresult",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_vlmobjectresult"
     },
     {
       "relation": "references",
@@ -20798,9 +21682,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L166",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_vlmobjectresult",
-      "confidence_score": 1
+      "target": "src_fiftyone_pose_importer_verification_vlm_engine_py_vlmobjectresult"
     },
     {
       "relation": "references",
@@ -20820,9 +21704,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L153",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_error_result",
-      "target": "verification_vlm_types_vlmobjectresult",
-      "confidence_score": 1
+      "target": "verification_vlm_types_vlmobjectresult"
     },
     {
       "relation": "calls",
@@ -20831,9 +21715,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L201",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "verification_vlm_engine_error_result",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_error_result"
     },
     {
       "relation": "references",
@@ -20842,9 +21726,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L166",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_batch",
-      "target": "vlmadapter",
-      "confidence_score": 1
+      "target": "vlmadapter"
     },
     {
       "relation": "calls",
@@ -20853,19 +21737,19 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
       "source_location": "L260",
       "weight": 1,
+      "confidence_score": 1,
       "source": "verification_vlm_engine_evaluate_vlm_object",
-      "target": "verification_vlm_engine_evaluate_vlm_batch",
-      "confidence_score": 1
+      "target": "verification_vlm_engine_evaluate_vlm_batch"
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L172",
+      "source_location": "L174",
       "weight": 1,
-      "source": "verification_vlm_engine_rationale_172",
-      "target": "verification_vlm_engine_evaluate_vlm_batch",
-      "confidence_score": 1
+      "confidence_score": 1,
+      "source": "verification_vlm_engine_rationale_174",
+      "target": "verification_vlm_engine_evaluate_vlm_batch"
     },
     {
       "relation": "references",
@@ -21011,11 +21895,11 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/fiftyone_pose_importer/verification/vlm_engine.py",
-      "source_location": "L259",
+      "source_location": "L261",
       "weight": 1,
-      "source": "verification_vlm_engine_rationale_259",
-      "target": "verification_vlm_engine_evaluate_vlm_object",
-      "confidence_score": 1
+      "confidence_score": 1,
+      "source": "verification_vlm_engine_rationale_261",
+      "target": "verification_vlm_engine_evaluate_vlm_object"
     },
     {
       "relation": "contains",
@@ -22337,6 +23221,46 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L57",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_annotation_to_crop_space_failed_plan_returns_unchanged"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L38",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_annotation_to_crop_space_non_skeleton"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L72",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_annotation_to_crop_space_polygon_points"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L18",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_annotation_to_crop_space_skeleton"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
       "source_location": "L44",
       "weight": 1,
       "confidence_score": 1,
@@ -22397,6 +23321,46 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L209",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_bbox_only"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L224",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_keypoints_color_coded"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L269",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_no_annotations"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L248",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_polygon"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
       "source_location": "L10",
       "weight": 1,
       "confidence_score": 1,
@@ -22424,6 +23388,90 @@
       "confidence_score": 1,
       "source": "phase6_test_cropper_test_materialize_crop_non_skeleton_clipped",
       "target": "tests_phase6_test_cropper_py_path"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L209",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_bbox_only",
+      "target": "tests_phase6_test_cropper_py_path"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L224",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_keypoints_color_coded",
+      "target": "tests_phase6_test_cropper_py_path"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L269",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_no_annotations",
+      "target": "tests_phase6_test_cropper_py_path"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L248",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_test_render_annotation_overlay_polygon",
+      "target": "tests_phase6_test_cropper_py_path"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L210",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_rationale_210",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_bbox_only"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L225",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_rationale_225",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_keypoints_color_coded"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L249",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_rationale_249",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_polygon"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_cropper.py",
+      "source_location": "L270",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_cropper_rationale_270",
+      "target": "phase6_test_cropper_test_render_annotation_overlay_no_annotations"
     },
     {
       "relation": "contains",
@@ -22514,11 +23562,71 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L141",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine",
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L17",
       "weight": 1,
       "confidence_score": 1,
       "source": "phase6_test_rules_engine",
       "target": "phase6_test_rules_engine_test_any_failed_rule_forces_object_fail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L192",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine",
+      "target": "phase6_test_rules_engine_test_no_out_of_frame_points_passes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L205",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine",
+      "target": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L166",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine",
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L152",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine",
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L179",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine",
+      "target": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes"
     },
     {
       "relation": "contains",
@@ -22603,6 +23711,100 @@
       "confidence_score": 1,
       "source": "phase6_test_rules_engine_test_unknown_rule_names_are_warning_only_and_skipped",
       "target": "phase6_test_rules_engine_valid_annotation"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L197",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_test_no_out_of_frame_points_passes",
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L171",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes",
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L157",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails",
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L184",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes",
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L153",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_rationale_153",
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L167",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_rationale_167",
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L180",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_rationale_180",
+      "target": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L193",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_rationale_193",
+      "target": "phase6_test_rules_engine_test_no_out_of_frame_points_passes"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/phase6/test_rules_engine.py",
+      "source_location": "L206",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "phase6_test_rules_engine_rationale_206",
+      "target": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes"
     },
     {
       "relation": "contains",
@@ -25735,6 +26937,126 @@
       "confidence_score": 1,
       "source": "debug_report_format_ann_id_only_debug_session_report_format_ann_id_only",
       "target": "debug_report_format_ann_id_only_symptoms"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L37",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "resolved_vlm_occlusion_contradiction",
+      "target": "resolved_vlm_occlusion_contradiction_current_focus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L16",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "resolved_vlm_occlusion_contradiction",
+      "target": "resolved_vlm_occlusion_contradiction_known_facts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L9",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "resolved_vlm_occlusion_contradiction",
+      "target": "resolved_vlm_occlusion_contradiction_symptoms"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L18",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "resolved_vlm_occlusion_contradiction_known_facts",
+      "target": "resolved_vlm_occlusion_contradiction_annotation_index_9_skeleton_label_id_4_clamp_2_arm"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L26",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "resolved_vlm_occlusion_contradiction_known_facts",
+      "target": "resolved_vlm_occlusion_contradiction_crop_image"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
+      "source_location": "L32",
+      "weight": 1,
+      "confidence_score": 1,
+      "source": "resolved_vlm_occlusion_contradiction_known_facts",
+      "target": "resolved_vlm_occlusion_contradiction_vlm_contradiction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L8",
+      "weight": 1,
+      "source": "debug_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "confidence_score": 1
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L18",
+      "weight": 1,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_current_focus",
+      "confidence_score": 1
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L38",
+      "weight": 1,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_eliminated",
+      "confidence_score": 1
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L25",
+      "weight": 1,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_evidence",
+      "confidence_score": 1
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L43",
+      "weight": 1,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_resolution",
+      "confidence_score": 1
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L10",
+      "weight": 1,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_symptoms",
+      "confidence_score": 1
     },
     {
       "relation": "contains",

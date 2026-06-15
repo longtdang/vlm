@@ -220,7 +220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader",
-      "community": 3,
+      "community": 1,
       "norm_label": "datumaro_reader.py"
     },
     {
@@ -230,7 +230,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader_load_datumaro",
-      "community": 3,
+      "community": 1,
       "norm_label": "load_datumaro()"
     },
     {
@@ -240,7 +240,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_datumaro_reader_py_path",
-      "community": 3,
+      "community": 1,
       "norm_label": "path"
     },
     {
@@ -250,7 +250,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_fiftyone_pose_importer_datumaro_reader_py_any",
-      "community": 3,
+      "community": 1,
       "norm_label": "any"
     },
     {
@@ -260,7 +260,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader_parse_keypoints_and_visibility",
-      "community": 3,
+      "community": 1,
       "norm_label": "parse_keypoints_and_visibility()"
     },
     {
@@ -270,7 +270,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "fiftyone_pose_importer_datumaro_reader_rationale_17",
-      "community": 3,
+      "community": 1,
       "norm_label": "parse keypoint coordinates and visibility values from a datumaro annotation."
     },
     {
@@ -3400,7 +3400,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "tests_phase6_test_reporting_py_path",
-      "community": 1,
+      "community": 0,
       "norm_label": "path"
     },
     {
@@ -6082,6 +6082,76 @@
       "id": "resolved_vlm_occlusion_contradiction_current_focus",
       "community": 88,
       "norm_label": "current focus"
+    },
+    {
+      "label": "vlm-keypoint-visibility.md",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility",
+      "community": 89,
+      "norm_label": "vlm-keypoint-visibility.md"
+    },
+    {
+      "label": "Debug Session: vlm-keypoint-visibility",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "community": 89,
+      "norm_label": "debug session: vlm-keypoint-visibility"
+    },
+    {
+      "label": "Symptoms",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_symptoms",
+      "community": 89,
+      "norm_label": "symptoms"
+    },
+    {
+      "label": "Current Focus",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_current_focus",
+      "community": 89,
+      "norm_label": "current focus"
+    },
+    {
+      "label": "Evidence",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_evidence",
+      "community": 89,
+      "norm_label": "evidence"
+    },
+    {
+      "label": "Eliminated",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_eliminated",
+      "community": 89,
+      "norm_label": "eliminated"
+    },
+    {
+      "label": "Resolution",
+      "file_type": "document",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "debug_vlm_keypoint_visibility_resolution",
+      "community": 89,
+      "norm_label": "resolution"
     },
     {
       "label": "v1.0-REQUIREMENTS.md",
@@ -18545,9 +18615,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_rules",
-      "target": "verification_rules_evaluate_out_of_frame_occluded",
-      "confidence_score": 1.0
+      "target": "verification_rules_evaluate_out_of_frame_occluded"
     },
     {
       "relation": "contains",
@@ -18694,9 +18764,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_rules_evaluate_out_of_frame_occluded",
-      "target": "verification_rules_unevaluableruleerror",
-      "confidence_score": 1.0
+      "target": "verification_rules_unevaluableruleerror"
     },
     {
       "relation": "calls",
@@ -18905,9 +18975,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_rules_evaluate_out_of_frame_occluded",
-      "target": "src_fiftyone_pose_importer_verification_rules_py_any",
-      "confidence_score": 1.0
+      "target": "src_fiftyone_pose_importer_verification_rules_py_any"
     },
     {
       "relation": "references",
@@ -19055,9 +19125,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_rules_evaluate_out_of_frame_occluded",
-      "target": "src_fiftyone_pose_importer_verification_rules_py_rulespec",
-      "confidence_score": 1.0
+      "target": "src_fiftyone_pose_importer_verification_rules_py_rulespec"
     },
     {
       "relation": "references",
@@ -19183,9 +19253,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_rules_evaluate_out_of_frame_occluded",
-      "target": "src_fiftyone_pose_importer_verification_rules_py_deterministicverdict",
-      "confidence_score": 1.0
+      "target": "src_fiftyone_pose_importer_verification_rules_py_deterministicverdict"
     },
     {
       "relation": "references",
@@ -19226,9 +19296,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/rules.py",
       "source_location": "L124",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_rules_rationale_124",
-      "target": "verification_rules_evaluate_out_of_frame_occluded",
-      "confidence_score": 1.0
+      "target": "verification_rules_evaluate_out_of_frame_occluded"
     },
     {
       "relation": "references",
@@ -20045,9 +20115,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_vlm_client_rationale_60",
-      "target": "verification_vlm_client_fiftyonezooadapter_generate_text_batch",
-      "confidence_score": 1.0
+      "target": "verification_vlm_client_fiftyonezooadapter_generate_text_batch"
     },
     {
       "relation": "calls",
@@ -20301,9 +20371,9 @@
       "source_file": "src/fiftyone_pose_importer/verification/vlm_client.py",
       "source_location": "L121",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verification_vlm_client_rationale_121",
-      "target": "verification_vlm_client_mockvlmadapter",
-      "confidence_score": 1.0
+      "target": "verification_vlm_client_mockvlmadapter"
     },
     {
       "relation": "calls",
@@ -23495,9 +23565,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L141",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine",
-      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
     },
     {
       "relation": "contains",
@@ -23515,9 +23585,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L192",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine",
-      "target": "phase6_test_rules_engine_test_no_out_of_frame_points_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_no_out_of_frame_points_passes"
     },
     {
       "relation": "contains",
@@ -23525,9 +23595,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L205",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine",
-      "target": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes"
     },
     {
       "relation": "contains",
@@ -23535,9 +23605,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L166",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine",
-      "target": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes"
     },
     {
       "relation": "contains",
@@ -23545,9 +23615,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L152",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine",
-      "target": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails"
     },
     {
       "relation": "contains",
@@ -23555,9 +23625,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L179",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine",
-      "target": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes"
     },
     {
       "relation": "contains",
@@ -23650,9 +23720,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L197",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_test_no_out_of_frame_points_passes",
-      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
     },
     {
       "relation": "calls",
@@ -23661,9 +23731,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L171",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes",
-      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
     },
     {
       "relation": "calls",
@@ -23672,9 +23742,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L157",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails",
-      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
     },
     {
       "relation": "calls",
@@ -23683,9 +23753,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L184",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes",
-      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_skeleton_annotation_with_out_of_frame"
     },
     {
       "relation": "rationale_for",
@@ -23693,9 +23763,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L153",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_rationale_153",
-      "target": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_visible_fails"
     },
     {
       "relation": "rationale_for",
@@ -23703,9 +23773,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L167",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_rationale_167",
-      "target": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_points_occluded_passes"
     },
     {
       "relation": "rationale_for",
@@ -23713,9 +23783,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L180",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_rationale_180",
-      "target": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_unlabeled_passes"
     },
     {
       "relation": "rationale_for",
@@ -23723,9 +23793,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L193",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_rationale_193",
-      "target": "phase6_test_rules_engine_test_no_out_of_frame_points_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_no_out_of_frame_points_passes"
     },
     {
       "relation": "rationale_for",
@@ -23733,9 +23803,9 @@
       "source_file": "tests/phase6/test_rules_engine.py",
       "source_location": "L206",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "phase6_test_rules_engine_rationale_206",
-      "target": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes",
-      "confidence_score": 1.0
+      "target": "phase6_test_rules_engine_test_out_of_frame_indices_missing_passes"
     },
     {
       "relation": "contains",
@@ -26875,9 +26945,9 @@
       "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "resolved_vlm_occlusion_contradiction",
-      "target": "resolved_vlm_occlusion_contradiction_current_focus",
-      "confidence_score": 1.0
+      "target": "resolved_vlm_occlusion_contradiction_current_focus"
     },
     {
       "relation": "contains",
@@ -26885,9 +26955,9 @@
       "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "resolved_vlm_occlusion_contradiction",
-      "target": "resolved_vlm_occlusion_contradiction_known_facts",
-      "confidence_score": 1.0
+      "target": "resolved_vlm_occlusion_contradiction_known_facts"
     },
     {
       "relation": "contains",
@@ -26895,9 +26965,9 @@
       "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "resolved_vlm_occlusion_contradiction",
-      "target": "resolved_vlm_occlusion_contradiction_symptoms",
-      "confidence_score": 1.0
+      "target": "resolved_vlm_occlusion_contradiction_symptoms"
     },
     {
       "relation": "contains",
@@ -26905,9 +26975,9 @@
       "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "resolved_vlm_occlusion_contradiction_known_facts",
-      "target": "resolved_vlm_occlusion_contradiction_annotation_index_9_skeleton_label_id_4_clamp_2_arm",
-      "confidence_score": 1.0
+      "target": "resolved_vlm_occlusion_contradiction_annotation_index_9_skeleton_label_id_4_clamp_2_arm"
     },
     {
       "relation": "contains",
@@ -26915,9 +26985,9 @@
       "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "resolved_vlm_occlusion_contradiction_known_facts",
-      "target": "resolved_vlm_occlusion_contradiction_crop_image",
-      "confidence_score": 1.0
+      "target": "resolved_vlm_occlusion_contradiction_crop_image"
     },
     {
       "relation": "contains",
@@ -26925,8 +26995,68 @@
       "source_file": ".planning/debug/resolved/vlm-occlusion-contradiction.md",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "resolved_vlm_occlusion_contradiction_known_facts",
-      "target": "resolved_vlm_occlusion_contradiction_vlm_contradiction",
+      "target": "resolved_vlm_occlusion_contradiction_vlm_contradiction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "debug_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_current_focus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_eliminated",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_evidence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_resolution",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".planning/debug/vlm-keypoint-visibility.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "debug_vlm_keypoint_visibility_debug_session_vlm_keypoint_visibility",
+      "target": "debug_vlm_keypoint_visibility_symptoms",
       "confidence_score": 1.0
     },
     {
@@ -32261,5 +32391,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ed7e2adc841cbb7c638e1e27ed626314ac45a263"
+  "built_at_commit": "2a56586fa741bfead6f51cc0ced9b2113544650a"
 }

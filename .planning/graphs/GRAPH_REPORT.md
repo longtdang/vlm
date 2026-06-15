@@ -1,16 +1,16 @@
 # Graph Report - vlm  (2026-06-14)
 
 ## Corpus Check
-- 112 files · ~76,158 words
+- 113 files · ~76,902 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1190 nodes · 1960 edges · 89 communities (82 shown, 7 thin omitted)
+- 1197 nodes · 1966 edges · 90 communities (83 shown, 7 thin omitted)
 - Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 294 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ed7e2adc`
+- Built from commit: `2a56586f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -97,6 +97,7 @@
 - [[_COMMUNITY_Community 79|Community 79]]
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `run_verify()` - 50 edges
@@ -125,23 +126,23 @@
 ## Import Cycles
 - None detected.
 
-## Communities (89 total, 7 thin omitted)
+## Communities (90 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
-Nodes (63): DeterministicRuleConfig, Enum, A keypoint outside the frame marked v=2 (visible) must fail., A keypoint outside the frame correctly marked v=1 (occluded) should pass., A keypoint outside the frame marked v=0 (unlabeled) is not a visible violation., When no out-of-frame indices are present the rule is a no-op., Annotations without out_of_frame_indices (bbox/polygon types) skip silently., _skeleton_annotation_with_out_of_frame() (+55 more)
+Nodes (64): DeterministicRuleConfig, Enum, A keypoint outside the frame marked v=2 (visible) must fail., A keypoint outside the frame correctly marked v=1 (occluded) should pass., A keypoint outside the frame marked v=0 (unlabeled) is not a visible violation., When no out-of-frame indices are present the rule is a no-op., Annotations without out_of_frame_indices (bbox/polygon types) skip silently., _skeleton_annotation_with_out_of_frame() (+56 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (60): BaseException, _crop_output_path(), _derive_bbox_from_annotation(), _failure_result(), _image_size(), _is_within(), _label_lookup(), _load_raw_config() (+52 more)
+Cohesion: 0.07
+Nodes (64): BaseException, load_datumaro(), parse_keypoints_and_visibility(), Parse keypoint coordinates and visibility values from a Datumaro annotation., _crop_output_path(), _derive_bbox_from_annotation(), _failure_result(), _image_size() (+56 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
 Nodes (66): test_load_vlm_config_default_prompt_template_override(), test_load_vlm_config_defaults(), test_load_vlm_config_invalid_thresholds_raises(), test_load_vlm_config_per_label_enabled_flag(), test_load_vlm_config_per_label_prompt_override(), test_load_vlm_config_per_label_rules(), test_load_vlm_config_per_label_threshold_override(), test_load_vlm_config_raises_on_missing_model_name() (+58 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.09
-Nodes (49): Dataset, main(), _main_legacy_import(), _main_with_subcommands(), _run_import_command(), _run_verify_command(), load_datumaro(), parse_keypoints_and_visibility() (+41 more)
+Cohesion: 0.10
+Nodes (44): Dataset, main(), _main_legacy_import(), _main_with_subcommands(), _run_import_command(), _run_verify_command(), build_image_index(), normalize_stem() (+36 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.04
@@ -427,8 +428,12 @@ Nodes (32): Bbox-only annotation renders orange-red rectangle outline., Skeleton
 Cohesion: 0.29
 Nodes (6): Annotation (index 9, skeleton, label_id=4 = clamp-2-arm), Crop image, Current Focus, Known Facts, Symptoms, VLM contradiction
 
+### Community 89 - "Community 89"
+Cohesion: 0.29
+Nodes (6): Current Focus, Debug Session: vlm-keypoint-visibility, Eliminated, Evidence, Resolution, Symptoms
+
 ## Knowledge Gaps
-- **567 isolated node(s):** `ResolvedConfig`, `Path`, `Path`, `ObjectVerificationResult`, `Path` (+562 more)
+- **572 isolated node(s):** `ResolvedConfig`, `Path`, `Path`, `ObjectVerificationResult`, `Path` (+567 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -436,7 +441,7 @@ Nodes (6): Annotation (index 9, skeleton, label_id=4 = clamp-2-arm), Crop image,
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `run_verify()` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 6`, `Community 11`, `Community 87`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+  _High betweenness centrality (0.031) - this node is a cross-community bridge._
 - **Why does `load_vlm_config()` connect `Community 2` to `Community 1`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Why does `evaluate_vlm_object()` connect `Community 2` to `Community 1`?**
