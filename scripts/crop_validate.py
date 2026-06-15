@@ -493,8 +493,10 @@ def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> 
     _VERDICT_ICON: dict[str, str] = {"FAIL": "❌", "REVIEW": "⚠️", "PASS": "✅"}
 
     rows: list[dict[str, Any]] = []
+    has_vlm = "vlm_verdict" in dataset.get_field_schema()
+    has_vlm_reason = "vlm_reason" in dataset.get_field_schema()
     for sample in dataset.iter_samples():
-        verdict_field = sample.get_field("vlm_verdict")
+        verdict_field = sample.get_field("vlm_verdict") if has_vlm else None
         verdict = verdict_field.label if verdict_field is not None else "REVIEW"
         confidence = verdict_field.confidence if verdict_field is not None else 0.0
         rows.append({
@@ -505,7 +507,7 @@ def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> 
             "ann_type": sample.get_field("annotation_type") or "",
             "risk": confidence if confidence is not None else 0.0,
             "verdict": verdict,
-            "reason": sample.get_field("vlm_reason") or "",
+            "reason": (sample.get_field("vlm_reason") if has_vlm_reason else None) or "",
         })
 
     total = len(rows)
