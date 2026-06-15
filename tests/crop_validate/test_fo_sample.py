@@ -147,3 +147,37 @@ class TestSkeletonSample:
         )
         assert "keypoints_clamp_3_arm" in sample.field_names
         assert "keypoints_clamp_2_arm" not in sample.field_names
+
+
+class TestAnnotationAttributes:
+    def test_attributes_stored_on_sample(self) -> None:
+        crop_plan = _make_crop_plan(output_size=(100, 100))
+        attrs = {"clamp-type": "3-arm", "roll-count": 2.0, "occluded": False}
+        sample = _to_fo_sample(
+            crop_overlay_path=Path("/tmp/crop.png"),
+            crop_plan=crop_plan,
+            crop_space_ann={"bbox": [0.0, 0.0, 50.0, 50.0]},
+            label="forklift-with-roll",
+            ann_type="detection",
+            source_image="img.jpg",
+            ann_id="1",
+            label_id=None,
+            contract=None,
+            attributes=attrs,
+        )
+        assert sample["annotation_attributes"] == attrs
+
+    def test_attributes_defaults_to_empty_dict_when_omitted(self) -> None:
+        crop_plan = _make_crop_plan(output_size=(100, 100))
+        sample = _to_fo_sample(
+            crop_overlay_path=Path("/tmp/crop.png"),
+            crop_plan=crop_plan,
+            crop_space_ann={"bbox": [0.0, 0.0, 50.0, 50.0]},
+            label="forklift-no-roll",
+            ann_type="detection",
+            source_image="img.jpg",
+            ann_id="2",
+            label_id=None,
+            contract=None,
+        )
+        assert sample["annotation_attributes"] == {}

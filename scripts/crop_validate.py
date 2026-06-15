@@ -204,6 +204,7 @@ def _to_fo_sample(
     ann_id: str,
     label_id: int | None,
     contract: SkeletonContract | None,
+    attributes: dict[str, Any] | None = None,
 ) -> fo.Sample:
     """Build a FiftyOne Sample for one annotation crop.
 
@@ -215,6 +216,7 @@ def _to_fo_sample(
     sample["source_ann_id"] = ann_id
     sample["annotation_label"] = label
     sample["annotation_type"] = ann_type
+    sample["annotation_attributes"] = attributes if attributes is not None else {}
 
     W, H = crop_plan.output_size  # crop pixel dimensions
 
@@ -413,6 +415,7 @@ def _build_dataset(args: argparse.Namespace) -> fo.Dataset:
                 ann_id=ann_id,
                 label_id=label_id if isinstance(label_id, int) else None,
                 contract=contract,
+                attributes=annotation.get("attributes") or {},
             )
             samples.append(sample)
 
