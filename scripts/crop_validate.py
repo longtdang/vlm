@@ -482,7 +482,77 @@ def _apply_vlm(
 
 
 def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> None:
-    pass  # implemented in Task 7
+    """Write a Markdown report grouped by source frame, sorted by risk within each frame.
+
+    Structure:
+      ## Summary          ← verdict counts
+      ## frame_001.jpg    ← all annotations from this frame, sorted by risk desc
+      ## frame_002.jpg
+      ...
+    """
+    _VERDICT_ICON: dict[str, str] = {"FAIL": "❌", "REVIEW": "⚠️", "PASS": "✅"}
+
+    rows: list[dict[str, Any]] = []
+    for sample in dataset.iter_samples():
+        verdict_field = sample.get_field("vlm_verdict")
+        verdict = verdict_field.label if verdict_field is not None else "REVIEW"
+        confidence = verdict_field.confidence if verdict_field is not None else 0.0
+        rows.append({
+            "crop_file": Path(sample.filepath).name,
+            "source_image": sample.get_field("source_image") or "unknown",
+            "ann_id": sample.get_field("source_ann_id") or "",
+            "label": sample.get_field("annotation_label") or "",
+            "ann_type": sample.get_field("annotation_type") or "",
+            "risk": confidence if confidence is not None else 0.0,
+            "verdict": verdict,
+            "reason": sample.get_field("vlm_reason") or "",
+        })
+
+    total = len(rows)
+    fail_count = sum(1 for r in rows if r["verdict"] == "FAIL")
+    review_count = sum(1 for r in rows if r["verdict"] == "REVIEW")
+    pass_count = sum(1 for r in rows if r["verdict"] == "PASS")
+
+    def _pct(n: int) -> str:
+        return f"{round(100 * n / total)}%" if total > 0 else "0%"
+
+    lines: list[str] = [
+        "# Crop Annotation Validation Report",
+        f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        f"Dataset: {dataset_name}",
+        f"Total crops: {total}",
+        "",
+        "## Summary",
+        "| Verdict   | Count |    % |",
+        "|-----------|------:|-----:|",
+        f"| ❌ FAIL   | {fail_count:>5} | {_pct(fail_count):>4} |",
+        f"| ⚠️ REVIEW | {review_count:>5} | {_pct(review_count):>4} |",
+        f"| ✅ PASS   | {pass_count:>5} | {_pct(pass_count):>4} |",
+        "",
+    ]
+
+    # Group rows by source frame; sort frame names alphabetically
+    by_frame: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_frame.setdefault(row["source_image"], []).append(row)
+
+    for frame_name in sorted(by_frame.keys()):
+        frame_rows = sorted(by_frame[frame_name], key=lambda r: -r["risk"])
+        lines.append(f"## {frame_name} ({len(frame_rows)} annotations)")
+        lines.append("| # | Crop File | Ann ID | Label | Type | Verdict | Risk | VLM Reason |")
+        lines.append("|---|-----------|--------|-------|------|---------|-----:|------------|")
+        for idx, row in enumerate(frame_rows, 1):
+            risk_str = f"{row['risk']:.2f}"
+            reason = row["reason"].replace("|", "\\|")
+            icon = _VERDICT_ICON.get(row["verdict"], "")
+            lines.append(
+                f"| {idx} | {row['crop_file']} | {row['ann_id']} | {row['label']} | "
+                f"{row['ann_type']} | {icon} {row['verdict']} | {risk_str} | {reason} |"
+            )
+        lines.append("")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
