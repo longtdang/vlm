@@ -542,19 +542,46 @@ def _apply_vlm(
     model = foz.load_zoo_model(model_name)
     model.operation = "vqa"
 
-    # Group samples by annotation_type and run apply_model once per type.
-    # model.prompt is a global property — we set one prompt per type group.
-    # Prompts use "{label}" as a placeholder; at type-level we fill it with
-    # the type name (e.g. "detection"). For per-label prompts, group by
-    # annotation_label instead and use LABEL_PROMPTS.get(label) overrides.
-    for ann_type in ("detection", "segmentation", "skeleton"):
-        view = dataset.match(F("annotation_type") == ann_type)
+    # Route by annotation_label using LABEL_PROMPTS.
+    # Labels with {annotation_fields_json} in their prompt get per-sample
+    # attribute injection (each annotation has different attribute values).
+    # All other known labels are batched in a single apply_model call.
+    # Any label not in LABEL_PROMPTS falls back to DEFAULT_PROMPTS[ann_type].
+    processed_labels: set[str] = set()
+    for label, prompt_template in LABEL_PROMPTS.items():
+        view = dataset.match(F("annotation_label") == label)
         if len(view) == 0:
             continue
-        prompt_template = DEFAULT_PROMPTS[ann_type]
-        model.prompt = prompt_template.replace("{label}", ann_type)
-        print(f"[crop_validate] Running VQA for {len(view)} '{ann_type}' samples…")
-        view.apply_model(model, label_field="vlm_raw_response")
+        processed_labels.add(label)
+        if "{annotation_fields_json}" in prompt_template:
+            print(f"[crop_validate] Running per-sample VQA for {len(view)} '{label}' samples…")
+            for sample in view.iter_samples(progress=True):
+                attrs = sample.get_field("annotation_attributes") or {}
+                fields_json = json.dumps({"attributes": attrs}, indent=2)
+                model.prompt = (
+                    prompt_template
+                    .replace("{label}", label)
+                    .replace("{annotation_fields_json}", fields_json)
+                )
+                dataset.select([sample.id]).apply_model(model, label_field="vlm_raw_response")
+                sample.reload()
+        else:
+            model.prompt = prompt_template.replace("{label}", label)
+            print(f"[crop_validate] Running VQA for {len(view)} '{label}' samples…")
+            view.apply_model(model, label_field="vlm_raw_response")
+
+    # Fallback: labels not covered by LABEL_PROMPTS use DEFAULT_PROMPTS[ann_type]
+    if processed_labels:
+        remaining = dataset.match(~F("annotation_label").is_in(list(processed_labels)))
+    else:
+        remaining = dataset
+    for ann_type in ("detection", "segmentation", "skeleton"):
+        type_view = remaining.match(F("annotation_type") == ann_type)
+        if len(type_view) == 0:
+            continue
+        model.prompt = DEFAULT_PROMPTS[ann_type].replace("{label}", ann_type)
+        print(f"[crop_validate] Running VQA for {len(type_view)} '{ann_type}' fallback samples…")
+        type_view.apply_model(model, label_field="vlm_raw_response")
 
     # Parse raw VQA responses and write fo.Classification to vlm_verdict
     updated = 0
