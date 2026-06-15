@@ -435,7 +435,50 @@ def _apply_vlm(
     pass_threshold: float,
     review_threshold: float,
 ) -> None:
-    pass  # implemented in Task 6
+    """Apply Qwen2.5-VL VQA to each crop, parse responses, write vlm_verdict field."""
+    print(f"[crop_validate] Registering plugin source: {plugin_source}")
+    try:
+        foz.register_zoo_model_source(plugin_source)
+    except Exception:
+        pass  # already registered — idempotent
+
+    print(f"[crop_validate] Loading model: {model_name}")
+    model = foz.load_zoo_model(model_name)
+    model.operation = "vqa"
+
+    # Group samples by annotation_type and run apply_model once per type.
+    # model.prompt is a global property — we set one prompt per type group.
+    # Prompts use "{label}" as a placeholder; at type-level we fill it with
+    # the type name (e.g. "detection"). For per-label prompts, group by
+    # annotation_label instead and use LABEL_PROMPTS.get(label) overrides.
+    for ann_type in ("detection", "segmentation", "skeleton"):
+        view = dataset.match(F("annotation_type") == ann_type)
+        if len(view) == 0:
+            continue
+        prompt_template = DEFAULT_PROMPTS[ann_type]
+        model.prompt = prompt_template.replace("{label}", ann_type)
+        print(f"[crop_validate] Running VQA for {len(view)} '{ann_type}' samples…")
+        view.apply_model(model, label_field="vlm_raw_response")
+
+    # Parse raw VQA responses and write fo.Classification to vlm_verdict
+    updated = 0
+    for sample in dataset.iter_samples(progress=True):
+        raw = sample.get_field("vlm_raw_response")
+        raw_str = str(raw) if raw is not None else ""
+        ep, reason = _parse_vlm_response(raw_str)
+        verdict = _ep_to_verdict(ep, pass_threshold, review_threshold)
+        confidence = ep if ep is not None else 0.0
+        sample["vlm_verdict"] = fo.Classification(label=verdict, confidence=confidence)
+        sample["vlm_reason"] = reason
+        sample.save()
+        updated += 1
+
+    # Clean up intermediate field
+    if "vlm_raw_response" in dataset.get_field_schema():
+        dataset.delete_sample_field("vlm_raw_response")
+        dataset.save()
+
+    print(f"[crop_validate] VLM stage complete: {updated} samples evaluated")
 
 
 def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> None:
