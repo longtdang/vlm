@@ -304,7 +304,6 @@ def _build_dataset(args: argparse.Namespace) -> fo.Dataset:
             continue
 
         source_image = Path(image_path).name
-        sample_id = str(item.get("id") or "unknown")
         annotations = item.get("annotations") or []
 
         for ann_idx, annotation in enumerate(annotations):
@@ -417,12 +416,11 @@ def _build_dataset(args: argparse.Namespace) -> fo.Dataset:
             samples.append(sample)
 
     # Set skeleton metadata on dataset
-    for field_name, contract in routed_contracts.items():
-        skeletons = dict(getattr(dataset, "skeletons", {}) or {})
-        skeletons[field_name] = fo.KeypointSkeleton(
-            labels=contract.labels, edges=contract.edges
-        )
-        dataset.skeletons = skeletons
+    if routed_contracts:
+        dataset.skeletons = {
+            field_name: fo.KeypointSkeleton(labels=c.labels, edges=c.edges)
+            for field_name, c in routed_contracts.items()
+        }
 
     dataset.add_samples(samples)
     dataset.save()
