@@ -465,7 +465,13 @@ def _apply_vlm(
     updated = 0
     for sample in dataset.iter_samples(progress=True):
         raw = sample.get_field("vlm_raw_response")
-        raw_str = str(raw) if raw is not None else ""
+        # apply_model stores VQA text in fo.Classification.label, not as a plain string.
+        if isinstance(raw, fo.Classification):
+            raw_str = raw.label or ""
+        elif raw is not None:
+            raw_str = str(raw)
+        else:
+            raw_str = ""
         ep, reason = _parse_vlm_response(raw_str)
         verdict = _ep_to_verdict(ep, pass_threshold, review_threshold)
         # Use 0.5 for parse failures so they sort above PASSes in the report
