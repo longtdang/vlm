@@ -75,11 +75,11 @@ _NON_SKELETON_ANN_TYPES = {"polygon", "bbox", "mask", "ellipse", "polyline"}
 
 def _annotation_type(datumaro_type: str | None) -> str:
     """Map Datumaro annotation type string to our three-way type: detection/segmentation/skeleton."""
-    if datumaro_type == "polygon":
+    if datumaro_type in {"polygon", "polyline", "mask"}:
         return "segmentation"
     if datumaro_type in _SKELETON_ANN_TYPES:
         return "skeleton"
-    return "detection"  # bbox, mask, ellipse, polyline, unknown, None
+    return "detection"  # bbox, ellipse, unknown, None
 
 
 def _is_skeleton_type(datumaro_type: str | None) -> bool:

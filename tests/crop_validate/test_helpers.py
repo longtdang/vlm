@@ -4,6 +4,7 @@ import pytest
 from scripts.crop_validate import (
     _annotation_type,
     _derive_bbox,
+    _get_polygon_points,
     _is_skeleton_type,
     _label_lookup,
     _safe_token,
@@ -17,6 +18,12 @@ class TestAnnotationType:
 
     def test_polygon_is_segmentation(self) -> None:
         assert _annotation_type("polygon") == "segmentation"
+
+    def test_mask_is_segmentation(self) -> None:
+        assert _annotation_type("mask") == "segmentation"
+
+    def test_polyline_is_segmentation(self) -> None:
+        assert _annotation_type("polyline") == "segmentation"
 
     def test_skeleton_is_skeleton(self) -> None:
         assert _annotation_type("skeleton") == "skeleton"
@@ -137,3 +144,32 @@ class TestToFieldName:
 
     def test_leading_trailing_separators_stripped(self) -> None:
         assert _to_field_name("-arm-") == "keypoints_arm"
+
+
+class TestGetPolygonPoints:
+    def test_polygon_returns_pairs(self) -> None:
+        ann = {"type": "polygon", "points": [0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0]}
+        result = _get_polygon_points(ann)
+        assert result == [[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0]]
+
+    def test_polyline_returns_pairs(self) -> None:
+        ann = {"type": "polyline", "points": [0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0]}
+        result = _get_polygon_points(ann)
+        assert result == [[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0]]
+
+    def test_mask_returns_pairs(self) -> None:
+        ann = {"type": "mask", "points": [0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0]}
+        result = _get_polygon_points(ann)
+        assert result == [[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0]]
+
+    def test_bbox_returns_none(self) -> None:
+        ann = {"type": "bbox", "points": [0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0]}
+        assert _get_polygon_points(ann) is None
+
+    def test_too_few_points_returns_none(self) -> None:
+        ann = {"type": "polygon", "points": [0.0, 0.0]}
+        assert _get_polygon_points(ann) is None
+
+    def test_empty_points_returns_none(self) -> None:
+        ann = {"type": "polygon", "points": []}
+        assert _get_polygon_points(ann) is None
