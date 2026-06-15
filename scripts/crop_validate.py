@@ -160,6 +160,39 @@ def _get_polygon_points(annotation: dict[str, Any]) -> list[list[float]] | None:
         return None
 
 
+def _parse_vlm_response(raw: str) -> tuple[float | None, str]:
+    """Parse VLM text output into (error_probability, reason).
+
+    Returns (None, "parse_failed") on any parse failure.
+    """
+    stripped = raw.strip()
+    match = _FENCE_RE.search(stripped)
+    if match:
+        stripped = match.group(1).strip()
+    try:
+        parsed = json.loads(stripped)
+    except (json.JSONDecodeError, ValueError):
+        return None, "parse_failed"
+
+    ep = parsed.get("error_probability")
+    if not isinstance(ep, (int, float)) or not (0.0 <= float(ep) <= 1.0):
+        return None, "parse_failed"
+
+    reason = str(parsed.get("reason", ""))
+    return float(ep), reason
+
+
+def _ep_to_verdict(ep: float | None, pass_threshold: float, review_threshold: float) -> str:
+    """Map error_probability to PASS/REVIEW/FAIL verdict string."""
+    if ep is None:
+        return "REVIEW"
+    if ep < pass_threshold:
+        return "PASS"
+    if ep < review_threshold:
+        return "REVIEW"
+    return "FAIL"
+
+
 def main() -> None:
     args = _parse_args()
     print(f"[crop_validate] Starting — output dir: {args.output_dir}")
