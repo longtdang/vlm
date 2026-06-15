@@ -564,7 +564,6 @@ def _apply_vlm(
                     .replace("{annotation_fields_json}", fields_json)
                 )
                 dataset.select([sample.id]).apply_model(model, label_field="vlm_raw_response")
-                sample.reload()
         else:
             model.prompt = prompt_template.replace("{label}", label)
             print(f"[crop_validate] Running VQA for {len(view)} '{label}' samples…")
