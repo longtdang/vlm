@@ -73,6 +73,93 @@ _SKELETON_ANN_TYPES = {"points", "skeleton"}
 _NON_SKELETON_ANN_TYPES = {"polygon", "bbox", "mask", "ellipse", "polyline"}
 
 
+def _annotation_type(datumaro_type: str | None) -> str:
+    """Map Datumaro annotation type string to our three-way type: detection/segmentation/skeleton."""
+    if datumaro_type == "polygon":
+        return "segmentation"
+    if datumaro_type in _SKELETON_ANN_TYPES:
+        return "skeleton"
+    return "detection"  # bbox, mask, ellipse, polyline, unknown, None
+
+
+def _is_skeleton_type(datumaro_type: str | None) -> bool:
+    return datumaro_type in _SKELETON_ANN_TYPES
+
+
+def _derive_bbox(annotation: dict[str, Any]) -> tuple[float, float, float, float] | None:
+    """Return (x, y, w, h) bbox — from bbox field if present, else derived from points."""
+    raw = annotation.get("bbox")
+    if isinstance(raw, list) and len(raw) == 4:
+        try:
+            return float(raw[0]), float(raw[1]), float(raw[2]), float(raw[3])
+        except (TypeError, ValueError):
+            pass
+
+    ann_type = annotation.get("type")
+    points_raw = annotation.get("points")
+    if not isinstance(points_raw, list) or not points_raw:
+        return None
+    try:
+        if ann_type == "skeleton" and len(points_raw) >= 3 and len(points_raw) % 3 == 0:
+            xs = [float(points_raw[i]) for i in range(0, len(points_raw), 3)]
+            ys = [float(points_raw[i + 1]) for i in range(0, len(points_raw), 3)]
+        elif len(points_raw) >= 2 and len(points_raw) % 2 == 0:
+            xs = [float(points_raw[i]) for i in range(0, len(points_raw), 2)]
+            ys = [float(points_raw[i + 1]) for i in range(0, len(points_raw), 2)]
+        else:
+            return None
+    except (TypeError, ValueError):
+        return None
+    if not xs:
+        return None
+    return min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
+
+
+def _label_lookup(data: dict[str, Any]) -> dict[int, str]:
+    labels_raw = ((data.get("categories") or {}).get("label") or {}).get("labels") or []
+    lookup: dict[int, str] = {}
+    for index, raw in enumerate(labels_raw):
+        if isinstance(raw, dict):
+            lookup[index] = str(raw.get("name") or f"label-{index}")
+        else:
+            lookup[index] = f"label-{index}"
+    return lookup
+
+
+def _safe_token(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("._")
+    return cleaned or "unknown"
+
+
+def _to_field_name(label_name: str) -> str:
+    """Convert a label name to a FiftyOne keypoints field name.
+
+    Each distinct skeleton label maps to its own field so FiftyOne can
+    enforce a consistent keypoint schema (fixed point count) per field.
+    e.g. "clamp-2-arm" → "keypoints_clamp_2_arm"
+         "roll-keypoints" → "keypoints_roll_keypoints"
+    """
+    slug = re.sub(r"[^a-z0-9]+", "_", label_name.lower()).strip("_")
+    return f"keypoints_{slug}" if slug else "keypoints_unknown"
+
+
+def _get_polygon_points(annotation: dict[str, Any]) -> list[list[float]] | None:
+    """Extract polygon/polyline/mask points as [[x, y], ...] pairs."""
+    ann_type = annotation.get("type")
+    if ann_type not in {"polygon", "polyline", "mask"}:
+        return None
+    raw_pts = annotation.get("points")
+    if not isinstance(raw_pts, list) or len(raw_pts) < 4:
+        return None
+    try:
+        return [
+            [float(raw_pts[i]), float(raw_pts[i + 1])]
+            for i in range(0, len(raw_pts) - 1, 2)
+        ]
+    except (TypeError, ValueError):
+        return None
+
+
 def main() -> None:
     args = _parse_args()
     print(f"[crop_validate] Starting — output dir: {args.output_dir}")
