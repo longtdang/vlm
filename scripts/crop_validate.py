@@ -262,9 +262,207 @@ def _to_fo_sample(
     return sample
 
 
+def _build_dataset(args: argparse.Namespace) -> fo.Dataset:
+    """Parse Datumaro JSON, crop each annotation, build FiftyOne dataset."""
+    datumaro_path = Path(args.datumaro_json).resolve()
+    image_dir = Path(args.image_dir).resolve()
+    output_dir = Path(args.output_dir).resolve()
+    crops_dir = output_dir / "crops"
+    crops_dir.mkdir(parents=True, exist_ok=True)
+
+    data = load_datumaro(datumaro_path)
+    items: list[dict[str, Any]] = data["items"]
+    label_names = _label_lookup(data)
+
+    image_index, _ = build_image_index(image_dir)
+    matches, _, _, _ = build_matches(image_index, items)
+
+    try:
+        skeleton_bundle: SkeletonContractBundle | None = extract_skeleton_contract_bundle(data)
+    except Exception:
+        skeleton_bundle = None
+
+    # Resolve dataset name (avoid collision with timestamp suffix)
+    dataset_name = args.dataset_name
+    if not args.overwrite_dataset:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        dataset_name = f"{args.dataset_name}_{timestamp}"
+    elif fo.dataset_exists(dataset_name):
+        fo.delete_dataset(dataset_name)
+
+    dataset = fo.Dataset(dataset_name)
+    routed_contracts: dict[str, SkeletonContract] = {}
+    samples: list[fo.Sample] = []
+    skipped = 0
+
+    for image_path, item in matches:
+        image_meta = (item.get("image") or {}).get("size") or []
+        width = int(image_meta[1]) if len(image_meta) >= 2 else None
+        height = int(image_meta[0]) if len(image_meta) >= 2 else None
+        if width is None or height is None or width <= 0 or height <= 0:
+            skipped += 1
+            continue
+
+        source_image = Path(image_path).name
+        sample_id = str(item.get("id") or "unknown")
+        annotations = item.get("annotations") or []
+
+        for ann_idx, annotation in enumerate(annotations):
+            if not isinstance(annotation, dict):
+                skipped += 1
+                continue
+
+            ann_id = str(annotation.get("id") or f"ann-{ann_idx}")
+            label_id = annotation.get("label_id")
+            label = (
+                label_names.get(label_id, str(annotation.get("label") or "unknown"))
+                if isinstance(label_id, int)
+                else str(annotation.get("label") or "unknown")
+            )
+            ann_type_raw = annotation.get("type")
+            ann_type = _annotation_type(ann_type_raw)
+            is_skeleton = _is_skeleton_type(ann_type_raw)
+
+            # Derive bbox
+            bbox = _derive_bbox(annotation)
+            if bbox is None:
+                print(f"[crop_validate] skip ann_id={ann_id}: no bbox", file=sys.stderr)
+                skipped += 1
+                continue
+
+            # Parse keypoints/visibility for skeleton types
+            keypoints: list[list[float]] = []
+            visibility: list[int] = []
+            if is_skeleton:
+                try:
+                    keypoints, visibility, _, _ = parse_keypoints_and_visibility(annotation)
+                except ValueError as exc:
+                    print(f"[crop_validate] skip ann_id={ann_id}: {exc}", file=sys.stderr)
+                    skipped += 1
+                    continue
+
+            crop = plan_crop(
+                image_width=width,
+                image_height=height,
+                bbox=bbox,
+                padding_px=args.padding_px,
+                is_skeleton=is_skeleton,
+                keypoints=[(p[0], p[1]) for p in keypoints] if keypoints else None,
+                visibility=visibility if visibility else None,
+            )
+            if crop.verdict is DeterministicVerdict.FAIL:
+                print(f"[crop_validate] skip ann_id={ann_id}: {crop.reason}", file=sys.stderr)
+                skipped += 1
+                continue
+
+            # Resolve polygon points for segmentation
+            polygon_points = _get_polygon_points(annotation)
+
+            # Resolve skeleton point names
+            skeleton_labels: list[str] | None = None
+            contract: SkeletonContract | None = None
+            if is_skeleton and skeleton_bundle is not None:
+                if isinstance(label_id, int):
+                    contract = skeleton_bundle.by_label_id.get(label_id)
+                if contract is None:
+                    contract = skeleton_bundle.default
+                if contract is not None:
+                    skeleton_labels = contract.labels
+
+            annotation_payload: dict[str, Any] = {
+                "bbox": list(bbox),
+                "attributes": annotation.get("attributes") if isinstance(annotation.get("attributes"), dict) else {},
+                "keypoints": keypoints or None,
+                "visibility": crop.adjusted_visibility,
+                "original_visibility": crop.original_visibility,
+                "point_names": skeleton_labels,
+                "polygon_points": polygon_points,
+            }
+            crop_space_ann = annotation_to_crop_space(annotation_payload, crop)
+
+            # Filename: <orig_stem>__ann_<id>__<label>.png
+            orig_stem = _safe_token(Path(image_path).stem)
+            safe_label = _safe_token(label)
+            safe_ann_id = _safe_token(ann_id)
+            crop_filename = f"{orig_stem}__ann_{safe_ann_id}__{safe_label}.png"
+            overlay_path = crops_dir / crop_filename
+
+            try:
+                materialize_crop(source_image_path=image_path, crop_plan=crop, output_path=overlay_path)
+                render_annotation_overlay(
+                    crop_image_path=overlay_path,
+                    annotation_crop_space=crop_space_ann,
+                    output_path=overlay_path,
+                )
+            except Exception as exc:
+                print(f"[crop_validate] skip ann_id={ann_id}: crop error {exc}", file=sys.stderr)
+                skipped += 1
+                continue
+
+            if is_skeleton and contract is not None:
+                field_name = _to_field_name(label)
+                routed_contracts[field_name] = contract
+
+            sample = _to_fo_sample(
+                crop_overlay_path=overlay_path,
+                crop_plan=crop,
+                crop_space_ann=crop_space_ann,
+                label=label,
+                ann_type=ann_type,
+                source_image=source_image,
+                ann_id=ann_id,
+                label_id=label_id if isinstance(label_id, int) else None,
+                contract=contract,
+            )
+            samples.append(sample)
+
+    # Set skeleton metadata on dataset
+    for field_name, contract in routed_contracts.items():
+        skeletons = dict(getattr(dataset, "skeletons", {}) or {})
+        skeletons[field_name] = fo.KeypointSkeleton(
+            labels=contract.labels, edges=contract.edges
+        )
+        dataset.skeletons = skeletons
+
+    dataset.add_samples(samples)
+    dataset.save()
+    print(f"[crop_validate] Built dataset '{dataset_name}': {len(samples)} crops, {skipped} skipped")
+    return dataset
+
+
+def _apply_vlm(
+    dataset: fo.Dataset,
+    model_name: str,
+    plugin_source: str,
+    pass_threshold: float,
+    review_threshold: float,
+) -> None:
+    pass  # implemented in Task 6
+
+
+def _write_report(dataset: fo.Dataset, output_path: Path, dataset_name: str) -> None:
+    pass  # implemented in Task 7
+
+
 def main() -> None:
     args = _parse_args()
-    print(f"[crop_validate] Starting — output dir: {args.output_dir}")
+    output_dir = Path(args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    dataset = _build_dataset(args)
+
+    if not args.no_vlm:
+        _apply_vlm(dataset, args.model, args.plugin_source, args.pass_threshold, args.review_threshold)
+
+    report_path = output_dir / "report.md"
+    _write_report(dataset, report_path, dataset.name)
+    print(f"[crop_validate] Report written: {report_path}")
+
+    if not args.persist_dataset:
+        dataset.delete()
+        print(f"[crop_validate] Dataset '{dataset.name}' deleted (use --persist-dataset to keep)")
+    else:
+        print(f"[crop_validate] Dataset '{dataset.name}' persisted in FiftyOne")
 
 
 def _parse_args() -> argparse.Namespace:
