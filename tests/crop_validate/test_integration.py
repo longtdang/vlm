@@ -28,7 +28,7 @@ def datumaro_fixture(tmp_path: Path) -> tuple[Path, Path]:
                         "type": "bbox",
                         "label_id": 0,
                         "bbox": [20.0, 15.0, 80.0, 60.0],
-                        "attributes": {},
+                        "attributes": {"clamp-type": "2-arm", "roll-count": 1.0},
                     },
                     {
                         "id": 2,
@@ -95,6 +95,15 @@ def test_no_vlm_builds_crops_and_report(
             assert sample.get_field("source_image") == "frame_001.jpg"
             assert sample.get_field("annotation_label") is not None
             assert sample.get_field("annotation_type") in ("detection", "segmentation", "skeleton")
+            # annotation_attributes must always be a dict (may be empty for non-bbox types)
+            attrs = sample.get_field("annotation_attributes")
+            assert isinstance(attrs, dict)
+
+        # Detection sample carries the clamp-type and roll-count attributes
+        for s in dataset.match(fo.ViewField("annotation_label") == "forklift-with-roll").iter_samples():
+            attrs = s.get_field("annotation_attributes")
+            assert attrs.get("clamp-type") == "2-arm"
+            assert attrs.get("roll-count") == 1.0
 
         # Detection sample has detections field
         det_samples = dataset.match(fo.ViewField("annotation_type") == "detection")
