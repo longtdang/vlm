@@ -193,6 +193,75 @@ def _ep_to_verdict(ep: float | None, pass_threshold: float, review_threshold: fl
     return "FAIL"
 
 
+def _to_fo_sample(
+    *,
+    crop_overlay_path: Path,
+    crop_plan: CropPlan,
+    crop_space_ann: dict[str, Any],
+    label: str,
+    ann_type: str,
+    source_image: str,
+    ann_id: str,
+    label_id: int | None,
+    contract: SkeletonContract | None,
+) -> fo.Sample:
+    """Build a FiftyOne Sample for one annotation crop.
+
+    All annotation coordinates are normalized by crop dimensions (output_size).
+    The sample filepath is the annotated overlay image.
+    """
+    sample = fo.Sample(filepath=str(crop_overlay_path))
+    sample["source_image"] = source_image
+    sample["source_ann_id"] = ann_id
+    sample["annotation_label"] = label
+    sample["annotation_type"] = ann_type
+
+    W, H = crop_plan.output_size  # crop pixel dimensions
+
+    if ann_type == "detection":
+        bbox = crop_space_ann.get("bbox")
+        if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
+            bx, by, bw, bh = float(bbox[0]), float(bbox[1]), float(bbox[2]), float(bbox[3])
+            fo_bbox = [bx / W, by / H, bw / W, bh / H]
+            sample["detections"] = fo.Detections(
+                detections=[fo.Detection(label=label, bounding_box=fo_bbox)]
+            )
+
+    elif ann_type == "segmentation":
+        polygon_points = crop_space_ann.get("polygon_points")
+        if isinstance(polygon_points, list) and len(polygon_points) >= 2:
+            fo_pts = [[[px / W, py / H] for px, py in polygon_points]]
+            sample["segmentations"] = fo.Polylines(
+                polylines=[
+                    fo.Polyline(label=label, points=fo_pts, filled=True, closed=True)
+                ]
+            )
+
+    elif ann_type == "skeleton":
+        keypoints = crop_space_ann.get("keypoints") or []
+        visibility = crop_space_ann.get("visibility") or []
+        # Use the label name (slugified) as the field name so each skeleton type
+        # (roll-keypoints, clamp-2-arm, clamp-3-arm) gets its own field with a
+        # consistent keypoint count — required by FiftyOne's schema enforcement.
+        field_name = _to_field_name(label)
+        fo_points = []
+        for idx, (kx, ky) in enumerate(keypoints):
+            vis = visibility[idx] if idx < len(visibility) else 2
+            if vis == 0:
+                fo_points.append([math.nan, math.nan])
+            else:
+                fo_points.append([kx / W, ky / H])
+        kp = fo.Keypoint(points=fo_points)
+        if isinstance(visibility, list):
+            kp["visibility"] = list(visibility)
+        if contract is not None:
+            kp["skeleton_labels"] = contract.labels
+            kp["skeleton_edges"] = contract.edges
+        sample[field_name] = fo.Keypoints(keypoints=[kp])
+
+    return sample
+
+
 def main() -> None:
     args = _parse_args()
     print(f"[crop_validate] Starting — output dir: {args.output_dir}")
