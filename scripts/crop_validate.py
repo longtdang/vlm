@@ -127,7 +127,7 @@ def _label_lookup(data: dict[str, Any]) -> dict[int, str]:
 
 
 def _safe_token(value: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", value).strip("._")
+    cleaned = re.sub(r"[^A-Za-z0-9._]+", "_", value).strip("._")
     return cleaned or "unknown"
 
 

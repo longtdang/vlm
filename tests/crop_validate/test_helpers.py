@@ -109,6 +109,9 @@ class TestSafeToken:
     def test_special_chars_replaced(self) -> None:
         assert _safe_token("frame/001:test") == "frame_001_test"
 
+    def test_dash_becomes_underscore(self) -> None:
+        assert _safe_token("frame-001") == "frame_001"
+
     def test_empty_becomes_unknown(self) -> None:
         assert _safe_token("") == "unknown"
 
